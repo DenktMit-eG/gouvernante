@@ -44,7 +44,7 @@ gouvernante/
 ├── Makefile                 # Build, test, lint, and demo targets
 ├── mkdocs.yml               # MkDocs site configuration
 ├── go.mod                   # Go module definition
-└── docker-compose.yml       # Local docs preview server
+└── docker-compose.docs.yml       # Local docs preview server
 ```
 
 ---
@@ -109,12 +109,12 @@ Documentation is built with [MkDocs Material](https://squidfunk.github.io/mkdocs
 |----------------|---------|
 | `mkdocs.yml` | Site name, navigation tree, theme settings. |
 | `docs/` | Markdown source files organized by section. |
-| `docker-compose.yml` | Runs the MkDocs dev server on `localhost:8000` with live reload. |
+| `docker-compose.docs.yml` | Runs the MkDocs dev server on `localhost:8000` with live reload. |
 
 To preview documentation locally:
 
 ```bash
-docker compose up
+docker compose -f docker-compose.docs.yml up
 ```
 
 ---

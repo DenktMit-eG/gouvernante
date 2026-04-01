@@ -3,11 +3,11 @@
   "rules": [
     {
       "id": "SSC-2025-001",
-      "title": "Axios compromised releases with RAT dropper",
+      "title": "Axios compromised npm releases with embedded RAT",
       "kind": "compromised-release",
       "ecosystem": "npm",
       "severity": "critical",
-      "summary": "Malicious Axios releases delivered a RAT via an auxiliary dropper package (plain-crypto-js). Compromised versions contained obfuscated postinstall scripts that downloaded platform-specific RAT binaries.",
+      "summary": "Compromised axios versions 1.14.1 and 0.30.4 contained an obfuscated dropper (setup.js in plain-crypto-js) that downloaded and executed a platform-specific remote access trojan from sfrclak.com. The dropper self-deletes and replaces its package.json with a clean stub after execution.",
       "aliases": [
         {
           "type": "article",
@@ -18,19 +18,14 @@
         {
           "type": "article",
           "url": "https://www.aikido.dev/blog/axios-npm-compromised-maintainer-hijacked-rat"
-        },
-        {
-          "type": "advisory",
-          "url": "https://socket.dev/blog/axios-compromised"
         }
       ],
       "package_rules": [
         {
           "package_name": "axios",
           "affected_versions": [
-            "=1.7.8",
-            "=1.7.9",
-            "=1.8.1"
+            "=1.14.1",
+            "=0.30.4"
           ],
           "lockfile_ecosystems": ["npm", "pnpm", "yarn", "bun"]
         }
@@ -38,10 +33,54 @@
       "dropper_packages": [
         {
           "package_name": "plain-crypto-js",
-          "notes": "Presence of this package indicates the dropper executed."
+          "notes": "Dropper published as v4.2.1 (v4.2.0 is a decoy). Contains setup.js which downloads the RAT from sfrclak.com:8000. The dropper self-deletes and replaces its package.json with a clean stub, but the directory presence confirms it ran."
         }
       ],
       "host_indicators": [
+        {
+          "type": "file",
+          "path": "/Library/Caches",
+          "file_name": "com.apple.act.mond",
+          "oses": ["macos"],
+          "hashes": [
+            {
+              "algorithm": "sha256",
+              "value": "92ff08773995ebc8d55ec4b8e1a225d0d1e51efa4ef88b8849d0071230c9645a"
+            }
+          ],
+          "confidence": "high",
+          "notes": "RAT binary for macOS, disguised as a system daemon. Presence confirms active compromise."
+        },
+        {
+          "type": "file",
+          "path": "%PROGRAMDATA%",
+          "file_name": "wt.exe",
+          "oses": ["windows"],
+          "confidence": "high",
+          "notes": "RAT binary for Windows. Presence confirms active compromise."
+        },
+        {
+          "type": "file",
+          "path": "%TEMP%",
+          "file_name": "6202033.vbs",
+          "oses": ["windows"],
+          "confidence": "high",
+          "notes": "VBScript loader used to execute the PowerShell stage. Part of the Windows infection chain."
+        },
+        {
+          "type": "file",
+          "path": "%TEMP%",
+          "file_name": "6202033.ps1",
+          "oses": ["windows"],
+          "hashes": [
+            {
+              "algorithm": "sha256",
+              "value": "617b67a8e1210e4fc87c92d1d1da45a2f311c08d26e89b12307cf583c900d101"
+            }
+          ],
+          "confidence": "high",
+          "notes": "PowerShell payload that downloads and installs the Windows RAT binary."
+        },
         {
           "type": "file",
           "path": "/tmp",
@@ -50,43 +89,42 @@
           "hashes": [
             {
               "algorithm": "sha256",
-              "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              "value": "fcb81618bb15edfdedfb638b4c08a2af9cac9ecfa551af135a8402bf980375cf"
             }
           ],
           "confidence": "high",
-          "notes": "Known Linux RAT artifact path."
+          "notes": "RAT payload for Linux. Presence confirms active compromise."
         },
         {
-          "type": "file",
-          "path": "/Library/Caches",
-          "file_name": "com.apple.act.mond",
-          "oses": ["macos"],
+          "type": "network",
+          "value": "sfrclak.com:8000",
+          "oses": ["linux", "macos", "windows"],
           "confidence": "high",
-          "notes": "Known macOS RAT artifact path."
+          "notes": "C2 server used to download RAT payloads. Endpoint: http://sfrclak.com:8000/6202033"
         },
         {
-          "type": "file",
-          "path": "%PROGRAMDATA%",
-          "file_name": "wt.exe",
-          "oses": ["windows"],
+          "type": "network",
+          "value": "142.11.206.73",
+          "oses": ["linux", "macos", "windows"],
           "confidence": "high",
-          "notes": "Known Windows RAT artifact path."
+          "notes": "C2 server IP address for sfrclak.com."
         }
       ],
       "remediation": {
-        "summary": "Pin to a known-good version, remove dropper packages, clear caches, and investigate any host indicators.",
+        "summary": "Pin axios to a safe version, remove the dropper, regenerate lockfiles, and escalate immediately if host indicators were found.",
         "steps": [
-          "Pin axios to a known-good version (>=1.8.2 or known-safe older release).",
-          "Regenerate lockfiles.",
+          "Pin axios to a known-good version (e.g., 1.14.0 or latest safe release).",
           "Remove plain-crypto-js from node_modules if present.",
-          "Clear npm and pnpm caches.",
-          "Check for host indicator files and investigate immediately if found.",
-          "Rotate all credentials if host indicators are confirmed."
+          "Regenerate lockfiles (rm package-lock.json && npm install).",
+          "Clear npm cache: npm cache clean --force",
+          "If gouvernante reported host indicator findings: STOP. The machine is compromised. Isolate it immediately, rotate ALL credentials, tokens, and SSH keys, and follow your incident response procedure.",
+          "Re-run gouvernante to verify a clean scan (exit code 0).",
+          "Report status (clean or compromised) to your team lead."
         ]
       },
       "metadata": {
         "published_at": "2025-09-15T00:00:00Z",
-        "last_updated_at": "2025-09-16T00:00:00Z"
+        "last_updated_at": "2025-09-15T00:00:00Z"
       }
     }
   ]

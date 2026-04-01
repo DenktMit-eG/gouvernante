@@ -368,6 +368,25 @@ func TestExpandPath_AppData(t *testing.T) {
 	}
 }
 
+func TestExpandPath_Temp(t *testing.T) {
+	t.Setenv("TEMP", "/test/temp")
+	got := expandPath("%TEMP%\\6202033.vbs")
+
+	if got != "/test/temp\\6202033.vbs" {
+		t.Errorf("expandPath(%%TEMP%%\\6202033.vbs) = %q, want /test/temp\\6202033.vbs", got)
+	}
+}
+
+func TestExpandPath_TempDefault(t *testing.T) {
+	t.Setenv("TEMP", "")
+	got := expandPath("%TEMP%\\payload")
+	want := os.TempDir() + "\\payload"
+
+	if got != want {
+		t.Errorf("expandPath(%%TEMP%%) with empty env = %q, want %q", got, want)
+	}
+}
+
 func TestBuildIndicatorPath_PathOnly(t *testing.T) {
 	hi := &rules.HostIndicator{
 		Type: "file",

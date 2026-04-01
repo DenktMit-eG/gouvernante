@@ -1,0 +1,19 @@
+# Documentation preview server for gouvernante.
+#
+# Runs MkDocs Material with live-reload on http://localhost:8000.
+# The docs/ directory and mkdocs.yml are mounted from the project root.
+#
+# Usage:
+#   docker compose -f docker-compose.docs.yml up
+#
+# Stop:
+#   Ctrl+C or: docker compose -f docker-compose.docs.yml down
+
+services:
+  mkdocs:
+    image: squidfunk/mkdocs-material
+    command: serve -a 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/docs

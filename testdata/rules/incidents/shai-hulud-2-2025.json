@@ -3,32 +3,5087 @@
   "rules": [
     {
       "id": "SSC-2025-002",
-      "title": "shai-hulud-2 mass npm typosquat campaign",
-      "kind": "malicious-package",
+      "title": "Shai-Hulud: self-propagating npm supply chain attack via compromised maintainer tokens",
+      "kind": "compromised-release",
       "ecosystem": "npm",
       "severity": "critical",
-      "summary": "Mass typosquat campaign publishing ~800 malicious packages to npm. Packages contained install-time exfiltration of environment variables and credentials via postinstall scripts.",
+      "summary": "First known self-propagating npm supply chain attack. Malicious postinstall scripts harvested npm tokens, environment variables, and cloud credentials using TruffleHog, then used stolen tokens to publish malicious versions of additional packages. Exfiltrated data was pushed to public GitHub repos named Shai-Hulud.",
       "aliases": [
         {
           "type": "article",
-          "value": "Wiz shai-hulud-2 npm attack analysis"
+          "value": "Wiz Research: Shai-Hulud npm supply chain attack analysis"
         }
       ],
       "references": [
         {
           "type": "article",
-          "url": "https://www.wiz.io/blog/shai-hulud-npm-attack"
-        },
-        {
-          "type": "repository",
-          "url": "https://github.com/nicolo-ribaudo/tc39-proposal-signals/issues/1"
+          "url": "https://www.wiz.io/blog/shai-hulud-npm-supply-chain-attack"
         }
       ],
       "package_rules": [
         {
-          "package_name": "example-shai-hulud-placeholder",
-          "affected_versions": ["*"],
-          "notes": "Full list of ~798 packages should be imported from Wiz CSV feed via the csv-import helper. This is a placeholder entry."
+          "package_name": "02-echo",
+          "affected_versions": [
+            "=0.0.7"
+          ]
+        },
+        {
+          "package_name": "@accordproject/concerto-analysis",
+          "affected_versions": [
+            "=3.24.1"
+          ]
+        },
+        {
+          "package_name": "@accordproject/concerto-linter",
+          "affected_versions": [
+            "=3.24.1"
+          ]
+        },
+        {
+          "package_name": "@accordproject/concerto-linter-default-ruleset",
+          "affected_versions": [
+            "=3.24.1"
+          ]
+        },
+        {
+          "package_name": "@accordproject/concerto-metamodel",
+          "affected_versions": [
+            "=3.12.5"
+          ]
+        },
+        {
+          "package_name": "@accordproject/concerto-types",
+          "affected_versions": [
+            "=3.24.1"
+          ]
+        },
+        {
+          "package_name": "@accordproject/markdown-it-cicero",
+          "affected_versions": [
+            "=0.16.26"
+          ]
+        },
+        {
+          "package_name": "@accordproject/template-engine",
+          "affected_versions": [
+            "=2.7.2"
+          ]
+        },
+        {
+          "package_name": "@actbase/css-to-react-native-transform",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@actbase/native",
+          "affected_versions": [
+            "=0.1.32"
+          ]
+        },
+        {
+          "package_name": "@actbase/node-server",
+          "affected_versions": [
+            "=1.1.19"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-absolute",
+          "affected_versions": [
+            "=0.8.3"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-daum-postcode",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-kakaosdk",
+          "affected_versions": [
+            "=0.9.27"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-actionsheet",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-devtools",
+          "affected_versions": [
+            "=0.1.3"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-fast-image",
+          "affected_versions": [
+            "=8.5.13"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-kakao-channel",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-kakao-navi",
+          "affected_versions": [
+            "=2.0.4"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-less-transformer",
+          "affected_versions": [
+            "=1.0.6"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-naver-login",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-simple-video",
+          "affected_versions": [
+            "=1.0.13"
+          ]
+        },
+        {
+          "package_name": "@actbase/react-native-tiktok",
+          "affected_versions": [
+            "=1.1.3"
+          ]
+        },
+        {
+          "package_name": "@afetcan/api",
+          "affected_versions": [
+            "=0.0.13"
+          ]
+        },
+        {
+          "package_name": "@afetcan/storage",
+          "affected_versions": [
+            "=0.0.27"
+          ]
+        },
+        {
+          "package_name": "@alaan/s2s-auth",
+          "affected_versions": [
+            "=2.0.3"
+          ]
+        },
+        {
+          "package_name": "@alexadark/amadeus-api",
+          "affected_versions": [
+            "=1.0.4"
+          ]
+        },
+        {
+          "package_name": "@alexadark/gatsby-theme-events",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@alexadark/gatsby-theme-wordpress-blog",
+          "affected_versions": [
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "@alexadark/reusable-functions",
+          "affected_versions": [
+            "=1.5.1"
+          ]
+        },
+        {
+          "package_name": "@alexcolls/nuxt-socket.io",
+          "affected_versions": [
+            "=0.0.7",
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@alexcolls/nuxt-ux",
+          "affected_versions": [
+            "=0.6.1",
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@antstackio/eslint-config-antstack",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "@antstackio/express-graphql-proxy",
+          "affected_versions": [
+            "=0.2.8"
+          ]
+        },
+        {
+          "package_name": "@antstackio/graphql-body-parser",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "@antstackio/json-to-graphql",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@antstackio/shelbysam",
+          "affected_versions": [
+            "=1.1.7"
+          ]
+        },
+        {
+          "package_name": "@aryanhussain/my-angular-lib",
+          "affected_versions": [
+            "=0.0.23"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/avro-schema-parser",
+          "affected_versions": [
+            "=3.0.25",
+            "=3.0.26"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/bundler",
+          "affected_versions": [
+            "=0.6.5",
+            "=0.6.6"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/cli",
+          "affected_versions": [
+            "=4.1.3",
+            "=4.1.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/converter",
+          "affected_versions": [
+            "=1.6.3",
+            "=1.6.4"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/diff",
+          "affected_versions": [
+            "=0.5.1",
+            "=0.5.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/dotnet-rabbitmq-template",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/edavisualiser",
+          "affected_versions": [
+            "=1.2.2",
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/generator",
+          "affected_versions": [
+            "=2.8.5",
+            "=2.8.6"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/generator-components",
+          "affected_versions": [
+            "=0.3.2",
+            "=0.3.3"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/generator-helpers",
+          "affected_versions": [
+            "=0.2.1",
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/generator-react-sdk",
+          "affected_versions": [
+            "=1.1.5",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/go-watermill-template",
+          "affected_versions": [
+            "=0.2.77",
+            "=0.2.76"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/html-template",
+          "affected_versions": [
+            "=3.3.2",
+            "=3.3.3"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/java-spring-cloud-stream-template",
+          "affected_versions": [
+            "=0.13.5",
+            "=0.13.6"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/java-spring-template",
+          "affected_versions": [
+            "=1.6.2",
+            "=1.6.1"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/java-template",
+          "affected_versions": [
+            "=0.3.6",
+            "=0.3.5"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/keeper",
+          "affected_versions": [
+            "=0.0.2",
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/markdown-template",
+          "affected_versions": [
+            "=1.6.8",
+            "=1.6.9"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/modelina",
+          "affected_versions": [
+            "=5.10.3",
+            "=5.10.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/modelina-cli",
+          "affected_versions": [
+            "=5.10.3",
+            "=5.10.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/multi-parser",
+          "affected_versions": [
+            "=2.2.1",
+            "=2.2.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/nodejs-template",
+          "affected_versions": [
+            "=3.0.6",
+            "=3.0.5"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/nodejs-ws-template",
+          "affected_versions": [
+            "=0.10.1",
+            "=0.10.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/nunjucks-filters",
+          "affected_versions": [
+            "=2.1.1",
+            "=2.1.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/openapi-schema-parser",
+          "affected_versions": [
+            "=3.0.25",
+            "=3.0.26"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/optimizer",
+          "affected_versions": [
+            "=1.0.6",
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/parser",
+          "affected_versions": [
+            "=3.4.1",
+            "=3.4.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/php-template",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/problem",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/protobuf-schema-parser",
+          "affected_versions": [
+            "=3.5.2",
+            "=3.6.1",
+            "=3.5.3"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/python-paho-template",
+          "affected_versions": [
+            "=0.2.15",
+            "=0.2.14"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/react-component",
+          "affected_versions": [
+            "=2.6.7",
+            "=2.6.6"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/server-api",
+          "affected_versions": [
+            "=0.16.24",
+            "=0.16.25"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/specs",
+          "affected_versions": [
+            "=6.9.1",
+            "=6.10.1",
+            "=6.8.3",
+            "=6.8.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/studio",
+          "affected_versions": [
+            "=1.0.3",
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@asyncapi/web-component",
+          "affected_versions": [
+            "=2.6.7",
+            "=2.6.6"
+          ]
+        },
+        {
+          "package_name": "@bdkinc/knex-ibmi",
+          "affected_versions": [
+            "=0.5.7"
+          ]
+        },
+        {
+          "package_name": "@browserbasehq/bb9",
+          "affected_versions": [
+            "=1.2.21"
+          ]
+        },
+        {
+          "package_name": "@browserbasehq/director-ai",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@browserbasehq/mcp",
+          "affected_versions": [
+            "=2.1.1"
+          ]
+        },
+        {
+          "package_name": "@browserbasehq/mcp-server-browserbase",
+          "affected_versions": [
+            "=2.4.2"
+          ]
+        },
+        {
+          "package_name": "@browserbasehq/sdk-functions",
+          "affected_versions": [
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "@browserbasehq/stagehand",
+          "affected_versions": [
+            "=3.0.4"
+          ]
+        },
+        {
+          "package_name": "@browserbasehq/stagehand-docs",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@caretive/caret-cli",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@chtijs/eslint-config",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@clausehq/flows-step-httprequest",
+          "affected_versions": [
+            "=0.1.14"
+          ]
+        },
+        {
+          "package_name": "@clausehq/flows-step-jsontoxml",
+          "affected_versions": [
+            "=0.1.14"
+          ]
+        },
+        {
+          "package_name": "@clausehq/flows-step-mqtt",
+          "affected_versions": [
+            "=0.1.14"
+          ]
+        },
+        {
+          "package_name": "@clausehq/flows-step-sendgridemail",
+          "affected_versions": [
+            "=0.1.14"
+          ]
+        },
+        {
+          "package_name": "@clausehq/flows-step-taskscreateurl",
+          "affected_versions": [
+            "=0.1.14"
+          ]
+        },
+        {
+          "package_name": "@cllbk/ghl",
+          "affected_versions": [
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "@commute/bloom",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@commute/market-data",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@commute/market-data-chartjs",
+          "affected_versions": [
+            "=2.3.1"
+          ]
+        },
+        {
+          "package_name": "@dev-blinq/ai-qa-logic",
+          "affected_versions": [
+            "=1.0.19"
+          ]
+        },
+        {
+          "package_name": "@dev-blinq/blinqioclient",
+          "affected_versions": [
+            "=1.0.21"
+          ]
+        },
+        {
+          "package_name": "@dev-blinq/cucumber-js",
+          "affected_versions": [
+            "=1.0.131"
+          ]
+        },
+        {
+          "package_name": "@dev-blinq/cucumber_client",
+          "affected_versions": [
+            "=1.0.738"
+          ]
+        },
+        {
+          "package_name": "@dev-blinq/ui-systems",
+          "affected_versions": [
+            "=1.0.93"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/address-encoder",
+          "affected_versions": [
+            "=1.1.5"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/blacklist",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/buffer",
+          "affected_versions": [
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ccip-read-cf-worker",
+          "affected_versions": [
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ccip-read-dns-gateway",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ccip-read-router",
+          "affected_versions": [
+            "=0.0.7"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ccip-read-worker-viem",
+          "affected_versions": [
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/content-hash",
+          "affected_versions": [
+            "=3.0.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/curvearithmetics",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/cypress-metamask",
+          "affected_versions": [
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/dnsprovejs",
+          "affected_versions": [
+            "=0.5.3"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/dnssec-oracle-anchors",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/dnssecoraclejs",
+          "affected_versions": [
+            "=0.2.9"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/durin",
+          "affected_versions": [
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/durin-middleware",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ens-archived-contracts",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ens-avatar",
+          "affected_versions": [
+            "=1.0.4"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ens-contracts",
+          "affected_versions": [
+            "=1.6.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ens-test-env",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ens-validation",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ensjs",
+          "affected_versions": [
+            "=4.0.3"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ensjs-react",
+          "affected_versions": [
+            "=0.0.5"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/eth-ens-namehash",
+          "affected_versions": [
+            "=2.0.16"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/hackathon-registrar",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/hardhat-chai-matchers-viem",
+          "affected_versions": [
+            "=0.1.15"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/hardhat-toolbox-viem-extended",
+          "affected_versions": [
+            "=0.0.6"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/mock",
+          "affected_versions": [
+            "=2.1.52"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/name-wrapper",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/offchain-resolver-contracts",
+          "affected_versions": [
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/op-resolver-contracts",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/react-ens-address",
+          "affected_versions": [
+            "=0.0.32"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/renewal",
+          "affected_versions": [
+            "=0.0.13"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/renewal-widget",
+          "affected_versions": [
+            "=0.1.10"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/reverse-records",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/server-analytics",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/solsha1",
+          "affected_versions": [
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/subdomain-registrar",
+          "affected_versions": [
+            "=0.2.4"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/test-utils",
+          "affected_versions": [
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/thorin",
+          "affected_versions": [
+            "=0.6.51"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/ui",
+          "affected_versions": [
+            "=3.4.6"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/unicode-confusables",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/unruggable-gateways",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/vite-plugin-i18next-loader",
+          "affected_versions": [
+            "=4.0.4"
+          ]
+        },
+        {
+          "package_name": "@ensdomains/web3modal",
+          "affected_versions": [
+            "=1.10.2"
+          ]
+        },
+        {
+          "package_name": "@everreal/react-charts",
+          "affected_versions": [
+            "=2.0.2",
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "@everreal/validate-esmoduleinterop-imports",
+          "affected_versions": [
+            "=1.4.5",
+            "=1.4.4"
+          ]
+        },
+        {
+          "package_name": "@everreal/web-analytics",
+          "affected_versions": [
+            "=0.0.1",
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@faq-component/core",
+          "affected_versions": [
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "@faq-component/react",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@fishingbooker/browser-sync-plugin",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "@fishingbooker/react-loader",
+          "affected_versions": [
+            "=1.0.7"
+          ]
+        },
+        {
+          "package_name": "@fishingbooker/react-pagination",
+          "affected_versions": [
+            "=2.0.6"
+          ]
+        },
+        {
+          "package_name": "@fishingbooker/react-raty",
+          "affected_versions": [
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "@fishingbooker/react-swiper",
+          "affected_versions": [
+            "=0.1.5"
+          ]
+        },
+        {
+          "package_name": "@hapheus/n8n-nodes-pgp",
+          "affected_versions": [
+            "=1.5.1"
+          ]
+        },
+        {
+          "package_name": "@hover-design/core",
+          "affected_versions": [
+            "=0.0.1"
+          ]
+        },
+        {
+          "package_name": "@hover-design/react",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "@huntersofbook/auth-vue",
+          "affected_versions": [
+            "=0.4.2"
+          ]
+        },
+        {
+          "package_name": "@huntersofbook/core",
+          "affected_versions": [
+            "=0.5.1"
+          ]
+        },
+        {
+          "package_name": "@huntersofbook/core-nuxt",
+          "affected_versions": [
+            "=0.4.2"
+          ]
+        },
+        {
+          "package_name": "@huntersofbook/form-naiveui",
+          "affected_versions": [
+            "=0.5.1"
+          ]
+        },
+        {
+          "package_name": "@huntersofbook/i18n",
+          "affected_versions": [
+            "=0.8.2"
+          ]
+        },
+        {
+          "package_name": "@huntersofbook/ui",
+          "affected_versions": [
+            "=0.5.1"
+          ]
+        },
+        {
+          "package_name": "@hyperlook/telemetry-sdk",
+          "affected_versions": [
+            "=1.0.19"
+          ]
+        },
+        {
+          "package_name": "@ifelsedeveloper/protocol-contracts-svm-idl",
+          "affected_versions": [
+            "=0.1.2",
+            "=0.1.3"
+          ]
+        },
+        {
+          "package_name": "@ifings/design-system",
+          "affected_versions": [
+            "=4.9.2"
+          ]
+        },
+        {
+          "package_name": "@ifings/metatron3",
+          "affected_versions": [
+            "=0.1.5"
+          ]
+        },
+        {
+          "package_name": "@jayeshsadhwani/telemetry-sdk",
+          "affected_versions": [
+            "=1.0.14"
+          ]
+        },
+        {
+          "package_name": "@kvytech/cli",
+          "affected_versions": [
+            "=0.0.7"
+          ]
+        },
+        {
+          "package_name": "@kvytech/components",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@kvytech/habbit-e2e-test",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@kvytech/medusa-plugin-announcement",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@kvytech/medusa-plugin-management",
+          "affected_versions": [
+            "=0.0.5"
+          ]
+        },
+        {
+          "package_name": "@kvytech/medusa-plugin-newsletter",
+          "affected_versions": [
+            "=0.0.5"
+          ]
+        },
+        {
+          "package_name": "@kvytech/medusa-plugin-product-reviews",
+          "affected_versions": [
+            "=0.0.9"
+          ]
+        },
+        {
+          "package_name": "@kvytech/medusa-plugin-promotion",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@kvytech/web",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@lessondesk/api-client",
+          "affected_versions": [
+            "=9.12.2",
+            "=9.12.3"
+          ]
+        },
+        {
+          "package_name": "@lessondesk/babel-preset",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@lessondesk/electron-group-api-client",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@lessondesk/eslint-config",
+          "affected_versions": [
+            "=1.4.2"
+          ]
+        },
+        {
+          "package_name": "@lessondesk/material-icons",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@lessondesk/react-table-context",
+          "affected_versions": [
+            "=2.0.4"
+          ]
+        },
+        {
+          "package_name": "@lessondesk/schoolbus",
+          "affected_versions": [
+            "=5.2.2",
+            "=5.2.3"
+          ]
+        },
+        {
+          "package_name": "@livecms/live-edit",
+          "affected_versions": [
+            "=0.0.32"
+          ]
+        },
+        {
+          "package_name": "@livecms/nuxt-live-edit",
+          "affected_versions": [
+            "=1.9.2"
+          ]
+        },
+        {
+          "package_name": "@lokeswari-satyanarayanan/rn-zustand-expo-template",
+          "affected_versions": [
+            "=1.0.9"
+          ]
+        },
+        {
+          "package_name": "@louisle2/core",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@louisle2/cortex-js",
+          "affected_versions": [
+            "=0.1.6"
+          ]
+        },
+        {
+          "package_name": "@lpdjs/firestore-repo-service",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@lui-ui/lui-nuxt",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "@lui-ui/lui-tailwindcss",
+          "affected_versions": [
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "@lui-ui/lui-vue",
+          "affected_versions": [
+            "=1.0.13"
+          ]
+        },
+        {
+          "package_name": "@markvivanco/app-version-checker",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@mcp-use/cli",
+          "affected_versions": [
+            "=2.2.7",
+            "=2.2.6"
+          ]
+        },
+        {
+          "package_name": "@mcp-use/inspector",
+          "affected_versions": [
+            "=0.6.3",
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@mcp-use/mcp-use",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@micado-digital/stadtmarketing-kufstein-external",
+          "affected_versions": [
+            "=1.9.1"
+          ]
+        },
+        {
+          "package_name": "@mizzle-dev/orm",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@mparpaillon/connector-parse",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@mparpaillon/imagesloaded",
+          "affected_versions": [
+            "=4.1.2"
+          ]
+        },
+        {
+          "package_name": "@mparpaillon/page",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@ntnx/passport-wso2",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "@ntnx/t",
+          "affected_versions": [
+            "=0.0.101"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/accordion",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/alert-dialog",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/arrow",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/aspect-ratio",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/avatar",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/checkbox",
+          "affected_versions": [
+            "=0.6.3"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/collapsible",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/collection",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/dialog",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/direction",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/dismissable-layer",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/focus-guards",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/focus-scope",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/hover-card",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/label",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/menu",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/motion",
+          "affected_versions": [
+            "=0.4.4"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/motion-nuxt",
+          "affected_versions": [
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/popover",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/popper",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/portal",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/presence",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/primitive",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/primitives",
+          "affected_versions": [
+            "=0.7.9"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/primitives-nuxt",
+          "affected_versions": [
+            "=0.3.1"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/progress",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/provide",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/radio-group",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/roving-focus",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/scroll-area",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/separator",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/slider",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/slot",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/switch",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/tabs",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/toast",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/toggle",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/toggle-group",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/toolbar",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/tooltip",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/use-composable",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/utils",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@oku-ui/visually-hidden",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@orbitgtbelgium/mapbox-gl-draw-cut-polygon-mode",
+          "affected_versions": [
+            "=2.0.5"
+          ]
+        },
+        {
+          "package_name": "@orbitgtbelgium/mapbox-gl-draw-scale-rotate-mode",
+          "affected_versions": [
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "@orbitgtbelgium/orbit-components",
+          "affected_versions": [
+            "=1.2.9"
+          ]
+        },
+        {
+          "package_name": "@orbitgtbelgium/time-slider",
+          "affected_versions": [
+            "=1.0.187"
+          ]
+        },
+        {
+          "package_name": "@osmanekrem/bmad",
+          "affected_versions": [
+            "=1.0.6"
+          ]
+        },
+        {
+          "package_name": "@osmanekrem/error-handler",
+          "affected_versions": [
+            "=1.2.2"
+          ]
+        },
+        {
+          "package_name": "@pergel/cli",
+          "affected_versions": [
+            "=0.11.1"
+          ]
+        },
+        {
+          "package_name": "@pergel/module-box",
+          "affected_versions": [
+            "=0.6.1"
+          ]
+        },
+        {
+          "package_name": "@pergel/module-graphql",
+          "affected_versions": [
+            "=0.6.1"
+          ]
+        },
+        {
+          "package_name": "@pergel/module-ui",
+          "affected_versions": [
+            "=0.0.9"
+          ]
+        },
+        {
+          "package_name": "@pergel/nuxt",
+          "affected_versions": [
+            "=0.25.5"
+          ]
+        },
+        {
+          "package_name": "@posthog/agent",
+          "affected_versions": [
+            "=1.24.1"
+          ]
+        },
+        {
+          "package_name": "@posthog/ai",
+          "affected_versions": [
+            "=7.1.2"
+          ]
+        },
+        {
+          "package_name": "@posthog/automatic-cohorts-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/bitbucket-release-tracker",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/cli",
+          "affected_versions": [
+            "=0.5.15"
+          ]
+        },
+        {
+          "package_name": "@posthog/clickhouse",
+          "affected_versions": [
+            "=1.7.1"
+          ]
+        },
+        {
+          "package_name": "@posthog/core",
+          "affected_versions": [
+            "=1.5.6"
+          ]
+        },
+        {
+          "package_name": "@posthog/currency-normalization-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/customerio-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/databricks-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/drop-events-on-property-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/event-sequence-timer-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/filter-out-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/first-time-event-tracker",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/geoip-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/github-release-tracking-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/gitub-star-sync-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/heartbeat-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/hedgehog-mode",
+          "affected_versions": [
+            "=0.0.42"
+          ]
+        },
+        {
+          "package_name": "@posthog/icons",
+          "affected_versions": [
+            "=0.36.1"
+          ]
+        },
+        {
+          "package_name": "@posthog/ingestion-alert-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/intercom-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/kinesis-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/laudspeaker-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/lemon-ui",
+          "affected_versions": [
+            "=0.0.1"
+          ]
+        },
+        {
+          "package_name": "@posthog/maxmind-plugin",
+          "affected_versions": [
+            "=0.1.6"
+          ]
+        },
+        {
+          "package_name": "@posthog/migrator3000-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/netdata-event-processing",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/nextjs",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "@posthog/nextjs-config",
+          "affected_versions": [
+            "=1.5.1"
+          ]
+        },
+        {
+          "package_name": "@posthog/nuxt",
+          "affected_versions": [
+            "=1.2.9"
+          ]
+        },
+        {
+          "package_name": "@posthog/pagerduty-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/piscina",
+          "affected_versions": [
+            "=3.2.1"
+          ]
+        },
+        {
+          "package_name": "@posthog/plugin-contrib",
+          "affected_versions": [
+            "=0.0.6"
+          ]
+        },
+        {
+          "package_name": "@posthog/plugin-server",
+          "affected_versions": [
+            "=1.10.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/plugin-unduplicates",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/postgres-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/react-rrweb-player",
+          "affected_versions": [
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "@posthog/rrdom",
+          "affected_versions": [
+            "=0.0.31"
+          ]
+        },
+        {
+          "package_name": "@posthog/rrweb",
+          "affected_versions": [
+            "=0.0.31"
+          ]
+        },
+        {
+          "package_name": "@posthog/rrweb-player",
+          "affected_versions": [
+            "=0.0.31"
+          ]
+        },
+        {
+          "package_name": "@posthog/rrweb-record",
+          "affected_versions": [
+            "=0.0.31"
+          ]
+        },
+        {
+          "package_name": "@posthog/rrweb-replay",
+          "affected_versions": [
+            "=0.0.19"
+          ]
+        },
+        {
+          "package_name": "@posthog/rrweb-snapshot",
+          "affected_versions": [
+            "=0.0.31"
+          ]
+        },
+        {
+          "package_name": "@posthog/rrweb-utils",
+          "affected_versions": [
+            "=0.0.31"
+          ]
+        },
+        {
+          "package_name": "@posthog/sendgrid-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/siphash",
+          "affected_versions": [
+            "=1.1.2"
+          ]
+        },
+        {
+          "package_name": "@posthog/snowflake-export-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/taxonomy-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/twilio-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/twitter-followers-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/url-normalizer-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/variance-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@posthog/web-dev-server",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "@posthog/wizard",
+          "affected_versions": [
+            "=1.18.1"
+          ]
+        },
+        {
+          "package_name": "@posthog/zendesk-plugin",
+          "affected_versions": [
+            "=0.0.8"
+          ]
+        },
+        {
+          "package_name": "@postman/aether-icons",
+          "affected_versions": [
+            "=2.23.2",
+            "=2.23.3",
+            "=2.23.4"
+          ]
+        },
+        {
+          "package_name": "@postman/csv-parse",
+          "affected_versions": [
+            "=4.0.3",
+            "=4.0.5",
+            "=4.0.4"
+          ]
+        },
+        {
+          "package_name": "@postman/final-node-keytar",
+          "affected_versions": [
+            "=7.9.3",
+            "=7.9.1",
+            "=7.9.2"
+          ]
+        },
+        {
+          "package_name": "@postman/mcp-ui-client",
+          "affected_versions": [
+            "=5.5.2",
+            "=5.5.3",
+            "=5.5.1"
+          ]
+        },
+        {
+          "package_name": "@postman/node-keytar",
+          "affected_versions": [
+            "=7.9.4",
+            "=7.9.5",
+            "=7.9.6"
+          ]
+        },
+        {
+          "package_name": "@postman/pm-bin-linux-x64",
+          "affected_versions": [
+            "=1.24.3",
+            "=1.24.5",
+            "=1.24.4"
+          ]
+        },
+        {
+          "package_name": "@postman/pm-bin-macos-arm64",
+          "affected_versions": [
+            "=1.24.3",
+            "=1.24.5",
+            "=1.24.4"
+          ]
+        },
+        {
+          "package_name": "@postman/pm-bin-macos-x64",
+          "affected_versions": [
+            "=1.24.3",
+            "=1.24.5",
+            "=1.24.4"
+          ]
+        },
+        {
+          "package_name": "@postman/pm-bin-windows-x64",
+          "affected_versions": [
+            "=1.24.3",
+            "=1.24.5",
+            "=1.24.4"
+          ]
+        },
+        {
+          "package_name": "@postman/postman-collection-fork",
+          "affected_versions": [
+            "=4.3.3",
+            "=4.3.5",
+            "=4.3.4"
+          ]
+        },
+        {
+          "package_name": "@postman/postman-mcp-cli",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.5",
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@postman/postman-mcp-server",
+          "affected_versions": [
+            "=2.4.12",
+            "=2.4.10",
+            "=2.4.11"
+          ]
+        },
+        {
+          "package_name": "@postman/pretty-ms",
+          "affected_versions": [
+            "=6.1.2",
+            "=6.1.3",
+            "=6.1.1"
+          ]
+        },
+        {
+          "package_name": "@postman/secret-scanner-wasm",
+          "affected_versions": [
+            "=2.1.4",
+            "=2.1.3",
+            "=2.1.2"
+          ]
+        },
+        {
+          "package_name": "@postman/tunnel-agent",
+          "affected_versions": [
+            "=0.6.5",
+            "=0.6.7",
+            "=0.6.6"
+          ]
+        },
+        {
+          "package_name": "@postman/wdio-allure-reporter",
+          "affected_versions": [
+            "=0.0.7",
+            "=0.0.8",
+            "=0.0.9"
+          ]
+        },
+        {
+          "package_name": "@postman/wdio-junit-reporter",
+          "affected_versions": [
+            "=0.0.4",
+            "=0.0.5",
+            "=0.0.6"
+          ]
+        },
+        {
+          "package_name": "@pradhumngautam/common-app",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@productdevbook/animejs-vue",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "@productdevbook/auth",
+          "affected_versions": [
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "@productdevbook/chatwoot",
+          "affected_versions": [
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "@productdevbook/motion",
+          "affected_versions": [
+            "=1.0.4"
+          ]
+        },
+        {
+          "package_name": "@productdevbook/ts-i18n",
+          "affected_versions": [
+            "=1.4.2"
+          ]
+        },
+        {
+          "package_name": "@pruthvi21/use-debounce",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-document-translator",
+          "affected_versions": [
+            "=1.4.2511142126"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-git-clean-markdown",
+          "affected_versions": [
+            "=1.4.2511142126"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-markdown",
+          "affected_versions": [
+            "=1.4.2511142126"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-markdown-compose",
+          "affected_versions": [
+            "=1.4.2506300029"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-markdown-image",
+          "affected_versions": [
+            "=1.4.2511142126"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-markdown-print",
+          "affected_versions": [
+            "=1.4.2511142126"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-markdown-translator",
+          "affected_versions": [
+            "=1.4.2509202331"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-remove-image-background",
+          "affected_versions": [
+            "=1.4.2511142126"
+          ]
+        },
+        {
+          "package_name": "@quick-start-soft/quick-task-refine",
+          "affected_versions": [
+            "=1.4.2511142126"
+          ]
+        },
+        {
+          "package_name": "@relyt/claude-context-core",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "@relyt/claude-context-mcp",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "@relyt/mcp-server-relytone",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "@sameepsi/sor",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@sameepsi/sor2",
+          "affected_versions": [
+            "=2.0.2"
+          ]
+        },
+        {
+          "package_name": "@seezo/sdr-mcp-server",
+          "affected_versions": [
+            "=0.0.5"
+          ]
+        },
+        {
+          "package_name": "@seung-ju/next",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@seung-ju/openapi-generator",
+          "affected_versions": [
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "@seung-ju/react-hooks",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "@seung-ju/react-native-action-sheet",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "@silgi/better-auth",
+          "affected_versions": [
+            "=0.8.1"
+          ]
+        },
+        {
+          "package_name": "@silgi/drizzle",
+          "affected_versions": [
+            "=0.8.4"
+          ]
+        },
+        {
+          "package_name": "@silgi/ecosystem",
+          "affected_versions": [
+            "=0.7.6"
+          ]
+        },
+        {
+          "package_name": "@silgi/graphql",
+          "affected_versions": [
+            "=0.7.15"
+          ]
+        },
+        {
+          "package_name": "@silgi/module-builder",
+          "affected_versions": [
+            "=0.8.8"
+          ]
+        },
+        {
+          "package_name": "@silgi/openapi",
+          "affected_versions": [
+            "=0.7.4"
+          ]
+        },
+        {
+          "package_name": "@silgi/permission",
+          "affected_versions": [
+            "=0.6.8"
+          ]
+        },
+        {
+          "package_name": "@silgi/ratelimit",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "@silgi/scalar",
+          "affected_versions": [
+            "=0.6.2"
+          ]
+        },
+        {
+          "package_name": "@silgi/yoga",
+          "affected_versions": [
+            "=0.7.1"
+          ]
+        },
+        {
+          "package_name": "@sme-ui/aoma-vevasound-metadata-lib",
+          "affected_versions": [
+            "=0.1.3"
+          ]
+        },
+        {
+          "package_name": "@strapbuild/react-native-date-time-picker",
+          "affected_versions": [
+            "=2.0.4"
+          ]
+        },
+        {
+          "package_name": "@strapbuild/react-native-perspective-image-cropper",
+          "affected_versions": [
+            "=0.4.15"
+          ]
+        },
+        {
+          "package_name": "@strapbuild/react-native-perspective-image-cropper-2",
+          "affected_versions": [
+            "=0.4.7"
+          ]
+        },
+        {
+          "package_name": "@strapbuild/react-native-perspective-image-cropper-poojan31",
+          "affected_versions": [
+            "=0.4.6"
+          ]
+        },
+        {
+          "package_name": "@suraj_h/medium-common",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "@thedelta/eslint-config",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@tiaanduplessis/json",
+          "affected_versions": [
+            "=2.0.2",
+            "=2.0.3"
+          ]
+        },
+        {
+          "package_name": "@tiaanduplessis/react-progressbar",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "@trackstar/angular-trackstar-link",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@trackstar/react-trackstar-link",
+          "affected_versions": [
+            "=2.0.21"
+          ]
+        },
+        {
+          "package_name": "@trackstar/react-trackstar-link-upgrade",
+          "affected_versions": [
+            "=1.1.10"
+          ]
+        },
+        {
+          "package_name": "@trackstar/test-angular-package",
+          "affected_versions": [
+            "=0.0.9"
+          ]
+        },
+        {
+          "package_name": "@trackstar/test-package",
+          "affected_versions": [
+            "=1.1.5"
+          ]
+        },
+        {
+          "package_name": "@trefox/sleekshop-js",
+          "affected_versions": [
+            "=0.1.6"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix",
+          "affected_versions": [
+            "=7.0.1"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-acl",
+          "affected_versions": [
+            "=4.0.2"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-elasticsearch",
+          "affected_versions": [
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-mongoose",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-orientdb",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-postgres",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-pubsub",
+          "affected_versions": [
+            "=4.0.3"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-redis",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-soap",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "@trigo/atrix-swagger",
+          "affected_versions": [
+            "=3.0.1"
+          ]
+        },
+        {
+          "package_name": "@trigo/bool-expressions",
+          "affected_versions": [
+            "=4.1.3"
+          ]
+        },
+        {
+          "package_name": "@trigo/eslint-config-trigo",
+          "affected_versions": [
+            "=3.3.1"
+          ]
+        },
+        {
+          "package_name": "@trigo/fsm",
+          "affected_versions": [
+            "=3.4.2"
+          ]
+        },
+        {
+          "package_name": "@trigo/hapi-auth-signedlink",
+          "affected_versions": [
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "@trigo/jsdt",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "@trigo/keycloak-api",
+          "affected_versions": [
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "@trigo/node-soap",
+          "affected_versions": [
+            "=0.5.4"
+          ]
+        },
+        {
+          "package_name": "@trigo/pathfinder-ui-css",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "@trigo/trigo-hapijs",
+          "affected_versions": [
+            "=5.0.1"
+          ]
+        },
+        {
+          "package_name": "@trpc-rate-limiter/cloudflare",
+          "affected_versions": [
+            "=0.1.4"
+          ]
+        },
+        {
+          "package_name": "@trpc-rate-limiter/hono",
+          "affected_versions": [
+            "=0.1.4"
+          ]
+        },
+        {
+          "package_name": "@varsityvibe/api-client",
+          "affected_versions": [
+            "=1.3.36",
+            "=1.3.37"
+          ]
+        },
+        {
+          "package_name": "@varsityvibe/utils",
+          "affected_versions": [
+            "=5.0.6"
+          ]
+        },
+        {
+          "package_name": "@varsityvibe/validation-schemas",
+          "affected_versions": [
+            "=0.6.7",
+            "=0.6.8"
+          ]
+        },
+        {
+          "package_name": "@viapip/eslint-config",
+          "affected_versions": [
+            "=0.2.4"
+          ]
+        },
+        {
+          "package_name": "@vishadtyagi/full-year-calendar",
+          "affected_versions": [
+            "=0.1.11"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/alexa-types",
+          "affected_versions": [
+            "=2.15.60",
+            "=2.15.61"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/anthropic",
+          "affected_versions": [
+            "=0.4.4",
+            "=0.4.5"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/api-sdk",
+          "affected_versions": [
+            "=3.28.59",
+            "=3.28.58"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/backend-utils",
+          "affected_versions": [
+            "=5.0.1",
+            "=5.0.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/base-types",
+          "affected_versions": [
+            "=2.136.3",
+            "=2.136.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/body-parser",
+          "affected_versions": [
+            "=1.21.3",
+            "=1.21.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/chat-types",
+          "affected_versions": [
+            "=2.14.59",
+            "=2.14.58"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/circleci-config-sdk-orb-import",
+          "affected_versions": [
+            "=0.2.1",
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/commitlint-config",
+          "affected_versions": [
+            "=2.6.2",
+            "=2.6.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/common",
+          "affected_versions": [
+            "=8.9.1",
+            "=8.9.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/default-prompt-wrappers",
+          "affected_versions": [
+            "=1.7.4",
+            "=1.7.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/dependency-cruiser-config",
+          "affected_versions": [
+            "=1.8.11",
+            "=1.8.12"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/dtos-interact",
+          "affected_versions": [
+            "=1.40.2",
+            "=1.40.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/encryption",
+          "affected_versions": [
+            "=0.3.2",
+            "=0.3.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/eslint-config",
+          "affected_versions": [
+            "=7.16.4",
+            "=7.16.5"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/eslint-plugin",
+          "affected_versions": [
+            "=1.6.2",
+            "=1.6.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/exception",
+          "affected_versions": [
+            "=1.10.1",
+            "=1.10.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/fetch",
+          "affected_versions": [
+            "=1.11.1",
+            "=1.11.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/general-types",
+          "affected_versions": [
+            "=3.2.22",
+            "=3.2.23"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/git-branch-check",
+          "affected_versions": [
+            "=1.4.3",
+            "=1.4.4"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/google-dfes-types",
+          "affected_versions": [
+            "=2.17.12",
+            "=2.17.13"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/google-types",
+          "affected_versions": [
+            "=2.21.12",
+            "=2.21.13"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/husky-config",
+          "affected_versions": [
+            "=1.3.2",
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/logger",
+          "affected_versions": [
+            "=2.4.3",
+            "=2.4.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/metrics",
+          "affected_versions": [
+            "=1.5.2",
+            "=1.5.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/natural-language-commander",
+          "affected_versions": [
+            "=0.5.2",
+            "=0.5.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/nestjs-common",
+          "affected_versions": [
+            "=2.75.3",
+            "=2.75.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/nestjs-mongodb",
+          "affected_versions": [
+            "=1.3.2",
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/nestjs-rate-limit",
+          "affected_versions": [
+            "=1.3.2",
+            "=1.3.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/nestjs-redis",
+          "affected_versions": [
+            "=1.3.2",
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/nestjs-timeout",
+          "affected_versions": [
+            "=1.3.2",
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/npm-package-json-lint-config",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/openai",
+          "affected_versions": [
+            "=3.2.3",
+            "=3.2.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/pino",
+          "affected_versions": [
+            "=6.11.4",
+            "=6.11.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/pino-pretty",
+          "affected_versions": [
+            "=4.4.1",
+            "=4.4.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/prettier-config",
+          "affected_versions": [
+            "=1.10.1",
+            "=1.10.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/react-chat",
+          "affected_versions": [
+            "=1.65.3",
+            "=1.65.4"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/runtime",
+          "affected_versions": [
+            "=1.29.2",
+            "=1.29.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/runtime-client-js",
+          "affected_versions": [
+            "=1.17.2",
+            "=1.17.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/sdk-runtime",
+          "affected_versions": [
+            "=1.43.2",
+            "=1.43.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/secrets-provider",
+          "affected_versions": [
+            "=1.9.2",
+            "=1.9.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/semantic-release-config",
+          "affected_versions": [
+            "=1.4.2",
+            "=1.4.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/serverless-plugin-typescript",
+          "affected_versions": [
+            "=2.1.8",
+            "=2.1.7"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/slate-serializer",
+          "affected_versions": [
+            "=1.7.4",
+            "=1.7.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/stitches-react",
+          "affected_versions": [
+            "=2.3.3",
+            "=2.3.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/storybook-config",
+          "affected_versions": [
+            "=1.2.3",
+            "=1.2.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/stylelint-config",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/test-common",
+          "affected_versions": [
+            "=2.1.1",
+            "=2.1.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/tsconfig",
+          "affected_versions": [
+            "=1.12.1",
+            "=1.12.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/tsconfig-paths",
+          "affected_versions": [
+            "=1.1.5",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/utils-designer",
+          "affected_versions": [
+            "=1.74.20",
+            "=1.74.19"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/verror",
+          "affected_versions": [
+            "=1.1.5",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/vite-config",
+          "affected_versions": [
+            "=2.6.2",
+            "=2.6.3"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/vitest-config",
+          "affected_versions": [
+            "=1.10.3",
+            "=1.10.2"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/voice-types",
+          "affected_versions": [
+            "=2.10.58",
+            "=2.10.59"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/voiceflow-types",
+          "affected_versions": [
+            "=3.32.45",
+            "=3.32.46"
+          ]
+        },
+        {
+          "package_name": "@voiceflow/widget",
+          "affected_versions": [
+            "=1.7.18",
+            "=1.7.19"
+          ]
+        },
+        {
+          "package_name": "@vucod/email",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "@zapier/ai-actions",
+          "affected_versions": [
+            "=0.1.18",
+            "=0.1.19",
+            "=0.1.20"
+          ]
+        },
+        {
+          "package_name": "@zapier/ai-actions-react",
+          "affected_versions": [
+            "=0.1.13",
+            "=0.1.12",
+            "=0.1.14"
+          ]
+        },
+        {
+          "package_name": "@zapier/babel-preset-zapier",
+          "affected_versions": [
+            "=6.4.2",
+            "=6.4.1",
+            "=6.4.3"
+          ]
+        },
+        {
+          "package_name": "@zapier/browserslist-config-zapier",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.5",
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "@zapier/eslint-plugin-zapier",
+          "affected_versions": [
+            "=11.0.5",
+            "=11.0.3",
+            "=11.0.4"
+          ]
+        },
+        {
+          "package_name": "@zapier/mcp-integration",
+          "affected_versions": [
+            "=3.0.3",
+            "=3.0.1",
+            "=3.0.2"
+          ]
+        },
+        {
+          "package_name": "@zapier/secret-scrubber",
+          "affected_versions": [
+            "=1.1.5",
+            "=1.1.3",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "@zapier/spectral-api-ruleset",
+          "affected_versions": [
+            "=1.9.3",
+            "=1.9.2",
+            "=1.9.1"
+          ]
+        },
+        {
+          "package_name": "@zapier/stubtree",
+          "affected_versions": [
+            "=0.1.4",
+            "=0.1.3",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "@zapier/zapier-sdk",
+          "affected_versions": [
+            "=0.15.7",
+            "=0.15.6",
+            "=0.15.5"
+          ]
+        },
+        {
+          "package_name": "ai-crowl-shield",
+          "affected_versions": [
+            "=1.0.7"
+          ]
+        },
+        {
+          "package_name": "arc-cli-fc",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "asciitranslator",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "asyncapi-preview",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "atrix",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "atrix-mongoose",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "automation_model",
+          "affected_versions": [
+            "=1.0.491"
+          ]
+        },
+        {
+          "package_name": "avvvatars-vue",
+          "affected_versions": [
+            "=1.1.2"
+          ]
+        },
+        {
+          "package_name": "axios-builder",
+          "affected_versions": [
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "axios-cancelable",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "axios-timed",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "babel-preset-kinvey-flex-service",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "barebones-css",
+          "affected_versions": [
+            "=1.1.3",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "benmostyn-frame-print",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "best_gpio_controller",
+          "affected_versions": [
+            "=1.0.10"
+          ]
+        },
+        {
+          "package_name": "better-auth-nuxt",
+          "affected_versions": [
+            "=0.0.10"
+          ]
+        },
+        {
+          "package_name": "better-queue-nedb",
+          "affected_versions": [
+            "=0.1.5"
+          ]
+        },
+        {
+          "package_name": "bidirectional-adapter",
+          "affected_versions": [
+            "=1.2.3",
+            "=1.2.2",
+            "=1.2.5",
+            "=1.2.4"
+          ]
+        },
+        {
+          "package_name": "blinqio-executions-cli",
+          "affected_versions": [
+            "=1.0.41"
+          ]
+        },
+        {
+          "package_name": "blob-to-base64",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "bool-expressions",
+          "affected_versions": [
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "buffered-interpolation-babylon6",
+          "affected_versions": [
+            "=0.2.8"
+          ]
+        },
+        {
+          "package_name": "bun-plugin-httpfile",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "bytecode-checker-cli",
+          "affected_versions": [
+            "=1.0.10",
+            "=1.0.9",
+            "=1.0.8",
+            "=1.0.11"
+          ]
+        },
+        {
+          "package_name": "bytes-to-x",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "calc-loan-interest",
+          "affected_versions": [
+            "=1.0.4"
+          ]
+        },
+        {
+          "package_name": "capacitor-plugin-apptrackingios",
+          "affected_versions": [
+            "=0.0.21"
+          ]
+        },
+        {
+          "package_name": "capacitor-plugin-purchase",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "capacitor-plugin-scgssigninwithgoogle",
+          "affected_versions": [
+            "=0.0.5"
+          ]
+        },
+        {
+          "package_name": "capacitor-purchase-history",
+          "affected_versions": [
+            "=0.0.10"
+          ]
+        },
+        {
+          "package_name": "capacitor-voice-recorder-wav",
+          "affected_versions": [
+            "=6.0.3"
+          ]
+        },
+        {
+          "package_name": "ceviz",
+          "affected_versions": [
+            "=0.0.5"
+          ]
+        },
+        {
+          "package_name": "chrome-extension-downloads",
+          "affected_versions": [
+            "=0.0.3",
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "claude-token-updater",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "coinmarketcap-api",
+          "affected_versions": [
+            "=3.1.3",
+            "=3.1.2"
+          ]
+        },
+        {
+          "package_name": "colors-regex",
+          "affected_versions": [
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "command-irail",
+          "affected_versions": [
+            "=0.5.4"
+          ]
+        },
+        {
+          "package_name": "compare-obj",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "composite-reducer",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.5",
+            "=1.0.2",
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "count-it-down",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "cpu-instructions",
+          "affected_versions": [
+            "=0.0.14"
+          ]
+        },
+        {
+          "package_name": "create-director-app",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "create-glee-app",
+          "affected_versions": [
+            "=0.2.3",
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "create-hardhat3-app",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.3",
+            "=1.1.1",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "create-kinvey-flex-service",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "create-mcp-use-app",
+          "affected_versions": [
+            "=0.5.4",
+            "=0.5.3"
+          ]
+        },
+        {
+          "package_name": "create-silgi",
+          "affected_versions": [
+            "=0.3.1"
+          ]
+        },
+        {
+          "package_name": "crypto-addr-codec",
+          "affected_versions": [
+            "=0.1.9"
+          ]
+        },
+        {
+          "package_name": "css-dedoupe",
+          "affected_versions": [
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "csv-tool-cli",
+          "affected_versions": [
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "dashboard-empty-state",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "designstudiouiux",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "devstart-cli",
+          "affected_versions": [
+            "=1.0.6"
+          ]
+        },
+        {
+          "package_name": "dialogflow-es",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.3",
+            "=1.1.1",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "discord-bot-server",
+          "affected_versions": [
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "docusaurus-plugin-vanilla-extract",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "dont-go",
+          "affected_versions": [
+            "=1.1.2"
+          ]
+        },
+        {
+          "package_name": "dotnet-template",
+          "affected_versions": [
+            "=0.0.3",
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "drop-events-on-property-plugin",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "easypanel-sdk",
+          "affected_versions": [
+            "=0.3.2"
+          ]
+        },
+        {
+          "package_name": "electron-volt",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "email-deliverability-tester",
+          "affected_versions": [
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "enforce-branch-name",
+          "affected_versions": [
+            "=1.1.3"
+          ]
+        },
+        {
+          "package_name": "esbuild-plugin-brotli",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "esbuild-plugin-eta",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "esbuild-plugin-httpfile",
+          "affected_versions": [
+            "=0.4.1"
+          ]
+        },
+        {
+          "package_name": "eslint-config-kinvey-flex-service",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "eslint-config-nitpicky",
+          "affected_versions": [
+            "=4.0.1"
+          ]
+        },
+        {
+          "package_name": "eslint-config-trigo",
+          "affected_versions": [
+            "=22.0.2"
+          ]
+        },
+        {
+          "package_name": "eslint-config-zeallat-base",
+          "affected_versions": [
+            "=1.0.4"
+          ]
+        },
+        {
+          "package_name": "ethereum-ens",
+          "affected_versions": [
+            "=0.8.1"
+          ]
+        },
+        {
+          "package_name": "evm-checkcode-cli",
+          "affected_versions": [
+            "=1.0.14",
+            "=1.0.12",
+            "=1.0.15",
+            "=1.0.13"
+          ]
+        },
+        {
+          "package_name": "exact-ticker",
+          "affected_versions": [
+            "=0.3.5"
+          ]
+        },
+        {
+          "package_name": "expo-audio-session",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "expo-router-on-rails",
+          "affected_versions": [
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "express-starter-template",
+          "affected_versions": [
+            "=1.0.10"
+          ]
+        },
+        {
+          "package_name": "expressos",
+          "affected_versions": [
+            "=1.1.3"
+          ]
+        },
+        {
+          "package_name": "fat-fingered",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "feature-flip",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "firestore-search-engine",
+          "affected_versions": [
+            "=1.2.3"
+          ]
+        },
+        {
+          "package_name": "fittxt",
+          "affected_versions": [
+            "=1.0.3",
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "flapstacks",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "flatten-unflatten",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "formik-error-focus",
+          "affected_versions": [
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "formik-store",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "frontity-starter-theme",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "fuzzy-finder",
+          "affected_versions": [
+            "=1.0.6",
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "gate-evm-check-code2",
+          "affected_versions": [
+            "=2.0.6",
+            "=2.0.5",
+            "=2.0.4",
+            "=2.0.3"
+          ]
+        },
+        {
+          "package_name": "gate-evm-tools-test",
+          "affected_versions": [
+            "=1.0.6",
+            "=1.0.5",
+            "=1.0.8",
+            "=1.0.7"
+          ]
+        },
+        {
+          "package_name": "gatsby-plugin-antd",
+          "affected_versions": [
+            "=2.2.1"
+          ]
+        },
+        {
+          "package_name": "gatsby-plugin-cname",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "generator-meteor-stock",
+          "affected_versions": [
+            "=0.1.6"
+          ]
+        },
+        {
+          "package_name": "generator-ng-itobuz",
+          "affected_versions": [
+            "=0.0.15"
+          ]
+        },
+        {
+          "package_name": "get-them-args",
+          "affected_versions": [
+            "=1.3.3"
+          ]
+        },
+        {
+          "package_name": "github-action-for-generator",
+          "affected_versions": [
+            "=2.1.27",
+            "=2.1.28"
+          ]
+        },
+        {
+          "package_name": "gitsafe",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "go-template",
+          "affected_versions": [
+            "=0.1.9",
+            "=0.1.8"
+          ]
+        },
+        {
+          "package_name": "gulp-inject-envs",
+          "affected_versions": [
+            "=1.2.2",
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "haufe-axera-api-client",
+          "affected_versions": [
+            "=0.0.1",
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "hope-mapboxdraw",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "hopedraw",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "hover-design-prototype",
+          "affected_versions": [
+            "=0.0.5"
+          ]
+        },
+        {
+          "package_name": "httpness",
+          "affected_versions": [
+            "=1.0.3",
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "hyper-fullfacing",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "hyperterm-hipster",
+          "affected_versions": [
+            "=1.0.7"
+          ]
+        },
+        {
+          "package_name": "ids-css",
+          "affected_versions": [
+            "=1.5.1"
+          ]
+        },
+        {
+          "package_name": "ids-enterprise-mcp-server",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "ids-enterprise-ng",
+          "affected_versions": [
+            "=20.1.6"
+          ]
+        },
+        {
+          "package_name": "ids-enterprise-typings",
+          "affected_versions": [
+            "=20.1.6"
+          ]
+        },
+        {
+          "package_name": "image-to-uri",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "insomnia-plugin-random-pick",
+          "affected_versions": [
+            "=1.0.4"
+          ]
+        },
+        {
+          "package_name": "invo",
+          "affected_versions": [
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "iron-shield-miniapp",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "ito-button",
+          "affected_versions": [
+            "=8.0.3"
+          ]
+        },
+        {
+          "package_name": "itobuz-angular",
+          "affected_versions": [
+            "=0.0.1"
+          ]
+        },
+        {
+          "package_name": "itobuz-angular-auth",
+          "affected_versions": [
+            "=8.0.11"
+          ]
+        },
+        {
+          "package_name": "itobuz-angular-button",
+          "affected_versions": [
+            "=8.0.11"
+          ]
+        },
+        {
+          "package_name": "jacob-zuma",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "jaetut-varit-test",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "jan-browser",
+          "affected_versions": [
+            "=0.13.1"
+          ]
+        },
+        {
+          "package_name": "jquery-bindings",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.3"
+          ]
+        },
+        {
+          "package_name": "jsonsurge",
+          "affected_versions": [
+            "=1.0.7"
+          ]
+        },
+        {
+          "package_name": "just-toasty",
+          "affected_versions": [
+            "=1.7.1"
+          ]
+        },
+        {
+          "package_name": "kill-port",
+          "affected_versions": [
+            "=2.0.2",
+            "=2.0.3"
+          ]
+        },
+        {
+          "package_name": "kinetix-default-token-list",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "kinvey-cli-wrapper",
+          "affected_versions": [
+            "=0.3.1"
+          ]
+        },
+        {
+          "package_name": "kinvey-flex-scripts",
+          "affected_versions": [
+            "=0.5.1"
+          ]
+        },
+        {
+          "package_name": "kns-error-code",
+          "affected_versions": [
+            "=1.0.8"
+          ]
+        },
+        {
+          "package_name": "korea-administrative-area-geo-json-util",
+          "affected_versions": [
+            "=1.0.7"
+          ]
+        },
+        {
+          "package_name": "kwami",
+          "affected_versions": [
+            "=1.5.9",
+            "=1.5.10"
+          ]
+        },
+        {
+          "package_name": "lang-codes",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "license-o-matic",
+          "affected_versions": [
+            "=1.2.2",
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "lint-staged-imagemin",
+          "affected_versions": [
+            "=1.3.2",
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "lite-serper-mcp-server",
+          "affected_versions": [
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "lui-vue-test",
+          "affected_versions": [
+            "=0.70.9"
+          ]
+        },
+        {
+          "package_name": "luno-api",
+          "affected_versions": [
+            "=1.2.3"
+          ]
+        },
+        {
+          "package_name": "m25-transaction-utils",
+          "affected_versions": [
+            "=1.1.16"
+          ]
+        },
+        {
+          "package_name": "manual-billing-system-miniapp-api",
+          "affected_versions": [
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "mcp-use",
+          "affected_versions": [
+            "=1.4.2",
+            "=1.4.3"
+          ]
+        },
+        {
+          "package_name": "medusa-plugin-announcement",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "medusa-plugin-logs",
+          "affected_versions": [
+            "=0.0.17"
+          ]
+        },
+        {
+          "package_name": "medusa-plugin-momo",
+          "affected_versions": [
+            "=0.0.68"
+          ]
+        },
+        {
+          "package_name": "medusa-plugin-product-reviews-kvy",
+          "affected_versions": [
+            "=0.0.4"
+          ]
+        },
+        {
+          "package_name": "medusa-plugin-zalopay",
+          "affected_versions": [
+            "=0.0.40"
+          ]
+        },
+        {
+          "package_name": "mod10-check-digit",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "mon-package-react-typescript",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "my-saeed-lib",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "n8n-nodes-tmdb",
+          "affected_versions": [
+            "=0.5.1"
+          ]
+        },
+        {
+          "package_name": "n8n-nodes-vercel-ai-sdk",
+          "affected_versions": [
+            "=0.1.7"
+          ]
+        },
+        {
+          "package_name": "n8n-nodes-viral-app",
+          "affected_versions": [
+            "=0.2.5"
+          ]
+        },
+        {
+          "package_name": "nanoreset",
+          "affected_versions": [
+            "=7.0.2",
+            "=7.0.1"
+          ]
+        },
+        {
+          "package_name": "next-circular-dependency",
+          "affected_versions": [
+            "=1.0.3",
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "next-simple-google-analytics",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "next-styled-nprogress",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "ngx-useful-swiper-prosenjit",
+          "affected_versions": [
+            "=9.0.2"
+          ]
+        },
+        {
+          "package_name": "ngx-wooapi",
+          "affected_versions": [
+            "=12.0.1"
+          ]
+        },
+        {
+          "package_name": "nitro-graphql",
+          "affected_versions": [
+            "=1.5.12"
+          ]
+        },
+        {
+          "package_name": "nitro-kutu",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "nitrodeploy",
+          "affected_versions": [
+            "=1.0.8"
+          ]
+        },
+        {
+          "package_name": "nitroping",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "normal-store",
+          "affected_versions": [
+            "=1.3.2",
+            "=1.3.4",
+            "=1.3.1",
+            "=1.3.3"
+          ]
+        },
+        {
+          "package_name": "nuxt-keycloak",
+          "affected_versions": [
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "obj-to-css",
+          "affected_versions": [
+            "=1.0.3",
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "okta-react-router-6",
+          "affected_versions": [
+            "=5.0.1"
+          ]
+        },
+        {
+          "package_name": "open2internet",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "orbit-boxicons",
+          "affected_versions": [
+            "=2.1.3"
+          ]
+        },
+        {
+          "package_name": "orbit-nebula-draw-tools",
+          "affected_versions": [
+            "=1.0.10"
+          ]
+        },
+        {
+          "package_name": "orbit-nebula-editor",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "orbit-soap",
+          "affected_versions": [
+            "=0.43.13"
+          ]
+        },
+        {
+          "package_name": "orchestrix",
+          "affected_versions": [
+            "=12.1.2"
+          ]
+        },
+        {
+          "package_name": "package-tester",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "parcel-plugin-asset-copier",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.3"
+          ]
+        },
+        {
+          "package_name": "pdf-annotation",
+          "affected_versions": [
+            "=0.0.2"
+          ]
+        },
+        {
+          "package_name": "pergel",
+          "affected_versions": [
+            "=0.13.2"
+          ]
+        },
+        {
+          "package_name": "pergeltest",
+          "affected_versions": [
+            "=0.0.25"
+          ]
+        },
+        {
+          "package_name": "piclite",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "pico-uid",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "pkg-readme",
+          "affected_versions": [
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "poper-react-sdk",
+          "affected_versions": [
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "posthog-docusaurus",
+          "affected_versions": [
+            "=2.0.6"
+          ]
+        },
+        {
+          "package_name": "posthog-js",
+          "affected_versions": [
+            "=1.297.3"
+          ]
+        },
+        {
+          "package_name": "posthog-node",
+          "affected_versions": [
+            "=5.13.3",
+            "=5.11.3",
+            "=4.18.1"
+          ]
+        },
+        {
+          "package_name": "posthog-plugin-hello-world",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "posthog-react-native",
+          "affected_versions": [
+            "=4.11.1",
+            "=4.12.5"
+          ]
+        },
+        {
+          "package_name": "posthog-react-native-session-replay",
+          "affected_versions": [
+            "=1.2.2"
+          ]
+        },
+        {
+          "package_name": "prime-one-table",
+          "affected_versions": [
+            "=0.0.19"
+          ]
+        },
+        {
+          "package_name": "prompt-eng",
+          "affected_versions": [
+            "=1.0.50"
+          ]
+        },
+        {
+          "package_name": "prompt-eng-server",
+          "affected_versions": [
+            "=1.0.18"
+          ]
+        },
+        {
+          "package_name": "puny-req",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "quickswap-ads-list",
+          "affected_versions": [
+            "=1.0.33"
+          ]
+        },
+        {
+          "package_name": "quickswap-default-staking-list",
+          "affected_versions": [
+            "=1.0.11"
+          ]
+        },
+        {
+          "package_name": "quickswap-default-staking-list-address",
+          "affected_versions": [
+            "=1.0.55"
+          ]
+        },
+        {
+          "package_name": "quickswap-default-token-list",
+          "affected_versions": [
+            "=1.5.16"
+          ]
+        },
+        {
+          "package_name": "quickswap-router-sdk",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "quickswap-sdk",
+          "affected_versions": [
+            "=3.0.44"
+          ]
+        },
+        {
+          "package_name": "quickswap-smart-order-router",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "quickswap-token-lists",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "quickswap-v2-sdk",
+          "affected_versions": [
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "ra-auth-firebase",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "ra-data-firebase",
+          "affected_versions": [
+            "=1.0.8",
+            "=1.0.7"
+          ]
+        },
+        {
+          "package_name": "react-component-taggers",
+          "affected_versions": [
+            "=0.1.9"
+          ]
+        },
+        {
+          "package_name": "react-data-to-export",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "react-element-prompt-inspector",
+          "affected_versions": [
+            "=0.1.18"
+          ]
+        },
+        {
+          "package_name": "react-favic",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "react-hook-form-persist",
+          "affected_versions": [
+            "=3.0.1",
+            "=3.0.2"
+          ]
+        },
+        {
+          "package_name": "react-jam-icons",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "react-keycloak-context",
+          "affected_versions": [
+            "=1.0.9",
+            "=1.0.8"
+          ]
+        },
+        {
+          "package_name": "react-library-setup",
+          "affected_versions": [
+            "=0.0.6"
+          ]
+        },
+        {
+          "package_name": "react-linear-loader",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "react-micromodal.js",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "react-native-datepicker-modal",
+          "affected_versions": [
+            "=1.3.2",
+            "=1.3.1"
+          ]
+        },
+        {
+          "package_name": "react-native-email",
+          "affected_versions": [
+            "=2.1.1",
+            "=2.1.2"
+          ]
+        },
+        {
+          "package_name": "react-native-fetch",
+          "affected_versions": [
+            "=2.0.2",
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "react-native-get-pixel-dimensions",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "react-native-google-maps-directions",
+          "affected_versions": [
+            "=2.1.2"
+          ]
+        },
+        {
+          "package_name": "react-native-jam-icons",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "react-native-log-level",
+          "affected_versions": [
+            "=1.2.2",
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "react-native-modest-checkbox",
+          "affected_versions": [
+            "=3.3.1"
+          ]
+        },
+        {
+          "package_name": "react-native-modest-storage",
+          "affected_versions": [
+            "=2.1.1"
+          ]
+        },
+        {
+          "package_name": "react-native-phone-call",
+          "affected_versions": [
+            "=1.2.2",
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "react-native-retriable-fetch",
+          "affected_versions": [
+            "=2.0.2",
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "react-native-use-modal",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "react-native-view-finder",
+          "affected_versions": [
+            "=1.2.2",
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "react-native-websocket",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "react-native-worklet-functions",
+          "affected_versions": [
+            "=3.3.3"
+          ]
+        },
+        {
+          "package_name": "react-packery-component",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "react-qr-image",
+          "affected_versions": [
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "react-scrambled-text",
+          "affected_versions": [
+            "=1.0.4"
+          ]
+        },
+        {
+          "package_name": "rediff",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "rediff-viewer",
+          "affected_versions": [
+            "=0.0.7"
+          ]
+        },
+        {
+          "package_name": "redux-forge",
+          "affected_versions": [
+            "=2.5.3"
+          ]
+        },
+        {
+          "package_name": "redux-router-kit",
+          "affected_versions": [
+            "=1.2.3",
+            "=1.2.2",
+            "=1.2.4"
+          ]
+        },
+        {
+          "package_name": "revenuecat",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "rollup-plugin-httpfile",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "sa-company-registration-number-regex",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "sa-id-gen",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "samesame",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "scgs-capacitor-subscribe",
+          "affected_versions": [
+            "=1.0.11"
+          ]
+        },
+        {
+          "package_name": "scgsffcreator",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "schob",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "selenium-session",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "selenium-session-client",
+          "affected_versions": [
+            "=1.0.4"
+          ]
+        },
+        {
+          "package_name": "set-nested-prop",
+          "affected_versions": [
+            "=2.0.2",
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "shelf-jwt-sessions",
+          "affected_versions": [
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "shell-exec",
+          "affected_versions": [
+            "=1.1.3",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "shinhan-limit-scrap",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "silgi",
+          "affected_versions": [
+            "=0.43.30"
+          ]
+        },
+        {
+          "package_name": "simplejsonform",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "skills-use",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "solomon-api-stories",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "solomon-v3-stories",
+          "affected_versions": [
+            "=1.15.6"
+          ]
+        },
+        {
+          "package_name": "solomon-v3-ui-wrapper",
+          "affected_versions": [
+            "=1.6.1"
+          ]
+        },
+        {
+          "package_name": "soneium-acs",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "sort-by-distance",
+          "affected_versions": [
+            "=2.0.1"
+          ]
+        },
+        {
+          "package_name": "south-african-id-info",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "stat-fns",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "stoor",
+          "affected_versions": [
+            "=2.3.2"
+          ]
+        },
+        {
+          "package_name": "sufetch",
+          "affected_versions": [
+            "=0.4.1"
+          ]
+        },
+        {
+          "package_name": "super-commit",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "svelte-autocomplete-select",
+          "affected_versions": [
+            "=1.1.1"
+          ]
+        },
+        {
+          "package_name": "svelte-toasty",
+          "affected_versions": [
+            "=1.1.2",
+            "=1.1.3"
+          ]
+        },
+        {
+          "package_name": "tanstack-shadcn-table",
+          "affected_versions": [
+            "=1.1.5"
+          ]
+        },
+        {
+          "package_name": "tavily-module",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "tcsp",
+          "affected_versions": [
+            "=2.0.2"
+          ]
+        },
+        {
+          "package_name": "tcsp-draw-test",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "tcsp-test-vd",
+          "affected_versions": [
+            "=2.4.4"
+          ]
+        },
+        {
+          "package_name": "template-lib",
+          "affected_versions": [
+            "=1.1.3",
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "template-micro-service",
+          "affected_versions": [
+            "=1.0.3",
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "tenacious-fetch",
+          "affected_versions": [
+            "=2.3.3",
+            "=2.3.2"
+          ]
+        },
+        {
+          "package_name": "test-foundry-app",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.3",
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "test-hardhat-app",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.3",
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "test23112222-api",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "tiaan",
+          "affected_versions": [
+            "=1.0.2"
+          ]
+        },
+        {
+          "package_name": "tiptap-shadcn-vue",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "token.js-fork",
+          "affected_versions": [
+            "=0.7.32"
+          ]
+        },
+        {
+          "package_name": "toonfetch",
+          "affected_versions": [
+            "=0.3.2"
+          ]
+        },
+        {
+          "package_name": "trigo-react-app",
+          "affected_versions": [
+            "=4.1.2"
+          ]
+        },
+        {
+          "package_name": "ts-relay-cursor-paging",
+          "affected_versions": [
+            "=2.1.1"
+          ]
+        },
+        {
+          "package_name": "typeface-antonio-complete",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "typefence",
+          "affected_versions": [
+            "=1.2.3",
+            "=1.2.2"
+          ]
+        },
+        {
+          "package_name": "typeorm-orbit",
+          "affected_versions": [
+            "=0.2.27"
+          ]
+        },
+        {
+          "package_name": "unadapter",
+          "affected_versions": [
+            "=0.1.3"
+          ]
+        },
+        {
+          "package_name": "undefsafe-typed",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "unemail",
+          "affected_versions": [
+            "=0.3.1"
+          ]
+        },
+        {
+          "package_name": "uniswap-router-sdk",
+          "affected_versions": [
+            "=1.6.2"
+          ]
+        },
+        {
+          "package_name": "uniswap-smart-order-router",
+          "affected_versions": [
+            "=3.16.26"
+          ]
+        },
+        {
+          "package_name": "uniswap-test-sdk-core",
+          "affected_versions": [
+            "=4.0.8"
+          ]
+        },
+        {
+          "package_name": "unsearch",
+          "affected_versions": [
+            "=0.0.3"
+          ]
+        },
+        {
+          "package_name": "uplandui",
+          "affected_versions": [
+            "=0.5.4"
+          ]
+        },
+        {
+          "package_name": "upload-to-play-store",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "url-encode-decode",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "use-unsaved-changes",
+          "affected_versions": [
+            "=1.0.9"
+          ]
+        },
+        {
+          "package_name": "v-plausible",
+          "affected_versions": [
+            "=1.2.1"
+          ]
+        },
+        {
+          "package_name": "valid-south-african-id",
+          "affected_versions": [
+            "=1.0.3"
+          ]
+        },
+        {
+          "package_name": "valuedex-sdk",
+          "affected_versions": [
+            "=3.0.5"
+          ]
+        },
+        {
+          "package_name": "vf-oss-template",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.3",
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "victoria-wallet-constants",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "victoria-wallet-core",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "victoria-wallet-type",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "victoria-wallet-utils",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "victoria-wallet-validator",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "victoriaxoaquyet-wallet-core",
+          "affected_versions": [
+            "=0.2.1",
+            "=0.2.2"
+          ]
+        },
+        {
+          "package_name": "vite-plugin-httpfile",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "vue-browserupdate-nuxt",
+          "affected_versions": [
+            "=1.0.5"
+          ]
+        },
+        {
+          "package_name": "wallet-evm",
+          "affected_versions": [
+            "=0.3.2",
+            "=0.3.1"
+          ]
+        },
+        {
+          "package_name": "wallet-type",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2"
+          ]
+        },
+        {
+          "package_name": "web-scraper-mcp",
+          "affected_versions": [
+            "=1.1.4"
+          ]
+        },
+        {
+          "package_name": "web-types-htmx",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "web-types-lit",
+          "affected_versions": [
+            "=0.1.1"
+          ]
+        },
+        {
+          "package_name": "webpack-loader-httpfile",
+          "affected_versions": [
+            "=0.2.1"
+          ]
+        },
+        {
+          "package_name": "wellness-expert-ng-gallery",
+          "affected_versions": [
+            "=5.1.1"
+          ]
+        },
+        {
+          "package_name": "wenk",
+          "affected_versions": [
+            "=1.0.10",
+            "=1.0.9"
+          ]
+        },
+        {
+          "package_name": "zapier-async-storage",
+          "affected_versions": [
+            "=1.0.3",
+            "=1.0.2",
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "zapier-platform-cli",
+          "affected_versions": [
+            "=18.0.4",
+            "=18.0.3",
+            "=18.0.2"
+          ]
+        },
+        {
+          "package_name": "zapier-platform-core",
+          "affected_versions": [
+            "=18.0.4",
+            "=18.0.3",
+            "=18.0.2"
+          ]
+        },
+        {
+          "package_name": "zapier-platform-legacy-scripting-runner",
+          "affected_versions": [
+            "=4.0.3",
+            "=4.0.2",
+            "=4.0.4"
+          ]
+        },
+        {
+          "package_name": "zapier-platform-schema",
+          "affected_versions": [
+            "=18.0.4",
+            "=18.0.3",
+            "=18.0.2"
+          ]
+        },
+        {
+          "package_name": "zapier-scripts",
+          "affected_versions": [
+            "=7.8.4",
+            "=7.8.3"
+          ]
+        },
+        {
+          "package_name": "zuper-cli",
+          "affected_versions": [
+            "=1.0.1"
+          ]
+        },
+        {
+          "package_name": "zuper-sdk",
+          "affected_versions": [
+            "=1.0.57"
+          ]
+        },
+        {
+          "package_name": "zuper-stream",
+          "affected_versions": [
+            "=2.0.9"
+          ]
         }
       ],
       "dropper_packages": [],
@@ -36,26 +5091,67 @@
         {
           "type": "file",
           "path": "/tmp",
-          "file_name": ".env-dump",
-          "oses": ["linux", "macos"],
+          "file_name": "processor.sh",
+          "oses": [
+            "linux",
+            "macos"
+          ],
+          "confidence": "high",
+          "notes": "Shell script that creates shai-hulud branch and uploads malicious GitHub Actions workflow payload."
+        },
+        {
+          "type": "file",
+          "path": "/tmp",
+          "file_name": "migrate-repos.sh",
+          "oses": [
+            "linux",
+            "macos"
+          ],
+          "confidence": "high",
+          "notes": "Shell script that migrates private organizational repos to public personal repos for exfiltration."
+        },
+        {
+          "type": "file",
+          "path": "/tmp",
+          "file_name": "github-migration",
+          "oses": [
+            "linux",
+            "macos"
+          ],
           "confidence": "medium",
-          "notes": "Exfiltrated environment variable dump. Actual exfil was typically to a remote endpoint, but local artifacts may exist."
+          "notes": "Temporary working directory for cloning operations during repo migration."
+        },
+        {
+          "type": "network",
+          "value": "webhook.site/bb8ca5f6-4175-45d2-b042-fc9ebb8170b7",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "high",
+          "notes": "Webhook.site endpoint used for exfiltrating stolen secrets."
         }
       ],
       "remediation": {
-        "summary": "Remove all matched packages immediately. Rotate all environment variables, API keys, and credentials that were present during npm install.",
+        "summary": "Pin affected packages to known-good versions, regenerate lockfiles, rotate ALL npm tokens, GitHub tokens, cloud credentials, and CI/CD secrets that were present in the environment during npm install.",
         "steps": [
-          "Remove all matched packages from dependencies and lockfiles.",
-          "Regenerate lockfiles from scratch.",
-          "Rotate ALL environment variables and secrets that were present during npm install.",
-          "Audit CI/CD pipeline secrets — these are primary targets.",
-          "Check npm audit logs for install timestamps to determine exposure window.",
-          "Report to security team for further investigation."
+          "Pin all affected packages to their last known-good version (the version before the ones listed in this rule).",
+          "Regenerate all lockfiles.",
+          "Rotate ALL npm tokens immediately, the attack propagates via stolen npm tokens.",
+          "Rotate ALL GitHub tokens and SSH keys.",
+          "Rotate ALL cloud credentials (AWS, GCP, Azure) that were accessible via environment variables or IMDS.",
+          "Rotate ALL CI/CD pipeline secrets.",
+          "Check GitHub for unauthorized branches named 'shai-hulud' in your repositories.",
+          "Check for unauthorized public repositories created under compromised GitHub accounts.",
+          "Review GitHub Actions workflow files for unauthorized modifications.",
+          "Re-run gouvernante to verify a clean scan (exit code 0).",
+          "Report status to your security team."
         ]
       },
       "metadata": {
-        "published_at": "2025-09-17T00:00:00Z",
-        "last_updated_at": "2025-09-18T00:00:00Z"
+        "published_at": "2025-09-16T00:00:00Z",
+        "last_updated_at": "2025-09-19T00:00:00Z"
       }
     }
   ]

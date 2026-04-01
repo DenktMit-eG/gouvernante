@@ -3,6 +3,7 @@ site_description: Documentation for gouvernante — npm supply chain scanner
 
 nav:
   - Home: index.md
+  - Roadmap: roadmap.md
   - Getting Started:
       - Prerequisites: getting-started/prerequisites.md
       - Quickstart: getting-started/quickstart.md

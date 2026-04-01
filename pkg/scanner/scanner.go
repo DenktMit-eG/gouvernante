@@ -141,6 +141,15 @@ func expandPath(path string) string {
 		path = strings.ReplaceAll(path, "%APPDATA%", appdata)
 	}
 
+	if strings.Contains(path, "%TEMP%") {
+		tmp := os.Getenv("TEMP")
+		if tmp == "" {
+			tmp = os.TempDir()
+		}
+
+		path = strings.ReplaceAll(path, "%TEMP%", tmp)
+	}
+
 	if strings.HasPrefix(path, "~") {
 		home, err := os.UserHomeDir()
 		if err == nil {
