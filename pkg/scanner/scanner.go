@@ -224,11 +224,7 @@ func FormatReport(result *Result) string {
 	var b strings.Builder
 
 	fmt.Fprintf(&b, "=== Supply Chain Scan Report ===\n\n")
-
-	if len(result.LockfilesUsed) > 0 {
-		fmt.Fprintf(&b, "Lockfiles scanned: %s\n", strings.Join(result.LockfilesUsed, ", "))
-	}
-
+	fmt.Fprintf(&b, "Files scanned: %d\n", len(result.LockfilesUsed))
 	fmt.Fprintf(&b, "Total packages analyzed: %d\n", result.PackagesTotal)
 	fmt.Fprintf(&b, "Findings: %d\n\n", len(result.Findings))
 

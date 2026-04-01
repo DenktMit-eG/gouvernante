@@ -49,7 +49,7 @@ func ExampleFormatReport() {
 	// Output:
 	// === Supply Chain Scan Report ===
 	//
-	// Lockfiles scanned: pnpm-lock.yaml
+	// Files scanned: 1
 	// Total packages analyzed: 150
 	// Findings: 0
 	//
