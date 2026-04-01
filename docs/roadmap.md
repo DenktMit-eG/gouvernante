@@ -22,7 +22,8 @@ tags:
 | Feature | Status | Details |
 |---------|--------|---------|
 | Lockfile scanning (pnpm, npm, yarn) | Done | Parses `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock` |
-| Package version matching (exact, wildcard) | Done | `=1.14.1`, `1.14.1`, `*` |
+| Package version matching (exact, wildcard, semver ranges) | Done | `=1.14.1`, `1.14.1`, `*`, `>=1.0.0 <2.0.0`, `^1.7.0`, `~2.0.0` (via Masterminds/semver v3) |
+| package.json scanning | Done | Extracts `dependencies` and `devDependencies`; pinned versions match directly, range expressions checked against compromised versions |
 | Dropper package detection | Done | Any version of a dropper package is a finding |
 | Host indicator: file existence | Done | Checks `os.Stat()` on expanded paths |
 | node_modules scanning | Done | Checks installed packages in project and global node_modules |
@@ -92,12 +93,6 @@ not yet active in the scanner.
 
 The yarn cache (`~/.yarn/cache`, `~/.cache/yarn`) is not scanned yet.
 Same `bytes.Contains` approach as npm cache would work.
-
-### npm semver range matching
-
-**Current behavior:** Version matching supports exact versions (`=1.14.1`, `1.14.1`) and wildcards (`*`).
-
-**What's needed:** Support npm semver range expressions (`>=1.0.0 <2.0.0`, `^1.7.0`). This would allow rules to cover version ranges without listing every affected version individually.
 
 ### CSV import helper
 

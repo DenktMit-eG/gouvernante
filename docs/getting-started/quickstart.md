@@ -9,7 +9,7 @@ tags:
 !!! tldr "TL;DR"
 
     - gouvernante scans npm lockfiles for known compromised packages.
-    - It checks `pnpm-lock.yaml`, `package-lock.json`, and `yarn.lock`.
+    - It checks `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, and `package.json`.
     - Rules are JSON files — one per incident — stored in a rules directory.
     - Optionally checks the host filesystem for IOC artifacts (RAT binaries, exfil dumps).
 
@@ -48,7 +48,7 @@ flowchart LR
 
 1. **Load rules** from a directory of JSON files.
 2. **Build an index** of compromised package+version pairs.
-3. **Parse lockfiles** in the target directory (pnpm, npm, yarn).
+3. **Parse lockfiles and package.json** in the target directory (pnpm, npm, yarn, package.json).
 4. **Match** every resolved package against the index.
 5. **Optionally check** the host filesystem for IOC artifacts.
 6. **Output** a text or JSON report.
@@ -58,7 +58,7 @@ flowchart LR
 | Concept | Description |
 |---------|-------------|
 | **Rule** | A JSON object describing one supply chain incident — affected packages, dropper packages, host IOCs, and remediation guidance. |
-| **Package rule** | A package name + affected version list within a rule. Versions use npm semver syntax. |
+| **Package rule** | A package name + affected version list within a rule. Versions use npm semver syntax (exact, wildcard, or range expressions like `^1.7.0`, `>=1.0.0 <2.0.0`). |
 | **Dropper package** | An auxiliary package installed by the attack (e.g., `plain-crypto-js` in the axios incident). Any version is suspicious. |
 | **Host indicator** | A filesystem artifact left by the compromise — malware binaries, exfiltration dumps, hidden directories. |
 | **IOC** | Indicator of Compromise. A forensic artifact that indicates a system has been compromised. Host indicators are IOCs. |

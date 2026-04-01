@@ -46,6 +46,7 @@ make build
 | npm v1/v2/v3        | `package-lock.json`   | Supported |
 | pnpm v6/v7/v8/v9    | `pnpm-lock.yaml`      | Supported |
 | Yarn Classic (v1)   | `yarn.lock`           | Supported |
+| package.json        | `package.json`        | Supported |
 
 ## Exit codes
 

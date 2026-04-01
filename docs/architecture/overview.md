@@ -150,8 +150,8 @@ sequenceDiagram
 ```
 
 1. **Load rules.** `rules.LoadDir()` reads all JSON files, unmarshals into `RuleSet` structs, merges all rules.
-2. **Build index.** `rules.BuildPackageIndex()` builds a `map[string]*VersionSet` keyed by package name. Each `VersionSet` holds exact versions or an `AnyVersion` wildcard.
-3. **Parse lockfiles.** `lockfile.DetectAndParse()` probes for known lockfile names, parses each, returns per-lockfile entry lists.
+2. **Build index.** `rules.BuildPackageIndex()` builds a `map[string]*VersionSet` keyed by package name. Each `VersionSet` holds exact versions, semver range constraints, or an `AnyVersion` wildcard.
+3. **Parse lockfiles.** `lockfile.DetectAndParse()` probes for known lockfile names (including `package.json`), parses each, returns per-lockfile entry lists.
 4. **Scan packages.** For each lockfile, `scanner.ScanPackages()` checks every entry against the index. Matches produce `Finding` structs.
 5. **Scan host indicators.** If enabled, scans filesystem locations (node_modules, pnpm store, nvm, npm cache) for IOC artifacts defined in rules.
 6. **Output.** Formatted as text or JSON, written to stdout or file.
@@ -163,8 +163,9 @@ sequenceDiagram
 | Exact | `=1.7.8` | Matches only version 1.7.8 |
 | Bare | `1.7.8` | Same as `=1.7.8` |
 | Wildcard | `*` | Matches any version |
-
-**Planned:** npm semver ranges (`>=1.0.0 <2.0.0`, `^1.7.0`).
+| Semver range | `>=1.0.0 <2.0.0` | Matches versions satisfying the constraint (via Masterminds/semver v3) |
+| Caret | `^1.7.0` | Matches compatible versions (same major) |
+| Tilde | `~1.7.0` | Matches patch-level versions (same major.minor) |
 
 ## Lockfile Parser Design
 
@@ -175,6 +176,7 @@ Each parser uses the simplest approach that handles the format reliably:
 | **pnpm** | `goccy/go-yaml` struct unmarshal + key parsing | v6 (`/pkg/ver`), v7-v8 (`/pkg@ver`), v9 (`pkg@ver`), peer suffixes |
 | **npm** | `encoding/json` unmarshal | v1 (nested deps), v2/v3 (flat packages map) |
 | **yarn** | Line scanner, header parsing | v1 classic |
+| **package.json** | `encoding/json` unmarshal | `dependencies` and `devDependencies` (pinned versions match directly; range expressions checked against compromised versions) |
 
 ---
 

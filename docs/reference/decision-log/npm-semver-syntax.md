@@ -92,9 +92,9 @@ Reasoning:
    the rule file. This keeps the canonical format consistent while supporting
    multiple input sources.
 
-5. **The semver matching logic is implementable in Go.** The scanner implements
-   the subset of npm semver needed for version matching (comparators, ranges,
-   hyphen ranges, tilde, caret) without external dependencies. The full npm
+5. **The semver matching logic is implemented in Go.** The scanner uses
+   [Masterminds/semver v3](https://github.com/Masterminds/semver) for version
+   matching (comparators, ranges, hyphen ranges, tilde, caret). The full npm
    semver spec is well-documented at [node-semver](https://github.com/npm/node-semver).
 
 ---
@@ -111,8 +111,8 @@ Reasoning:
 
 ### Negative
 
-- The Go semver implementation must be maintained in-house (consistent with
-  the minimal-dependency policy in [ADR-003](minimal-dependencies.md)).
+- The Go semver implementation uses [Masterminds/semver v3](https://github.com/Masterminds/semver),
+  a well-maintained external library (added as a vetted dependency).
 - Rules are less portable to non-npm ecosystems. If gouvernante ever expands
   beyond npm, the version syntax may need to be revisited or made
   ecosystem-specific.

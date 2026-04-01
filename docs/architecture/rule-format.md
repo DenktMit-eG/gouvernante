@@ -86,7 +86,11 @@ tags:
 | Bare | `1.7.8` | Same as `=1.7.8`. |
 | Wildcard | `*` | Any version. |
 
-**Planned:** npm semver ranges (`>=1.0.0 <2.0.0`, `^1.7.0`).
+| Range | `>=1.0.0 <2.0.0` | Versions satisfying the semver constraint. |
+| Caret | `^1.7.0` | Compatible versions (same major). |
+| Tilde | `~1.7.0` | Patch-level versions (same major.minor). |
+
+Semver range matching is implemented using [Masterminds/semver v3](https://github.com/Masterminds/semver). `VersionSet.Matches()` checks exact match first, then evaluates semver constraints. `VersionSet.RangeCoversVersion()` checks if a `package.json` range expression could resolve to a compromised version.
 
 ## Dropper Packages
 

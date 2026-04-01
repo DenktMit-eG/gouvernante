@@ -131,7 +131,11 @@ Use this template based on the real axios incident rule:
 | Exact (bare) | `"1.7.8"` | Same as `"=1.7.8"`. |
 | Wildcard | `"*"` | Any version (use for dropper/typosquat packages). |
 
-**Planned but not yet implemented:** npm semver ranges (`">=1.0.0 <2.0.0"`).
+| Range | `">=1.0.0 <2.0.0"` | Versions satisfying the semver constraint. |
+| Caret | `"^1.7.0"` | Compatible versions (same major). |
+| Tilde | `"~1.7.0"` | Patch-level versions (same major.minor). |
+
+Semver range matching is implemented using Masterminds/semver v3. Ranges are evaluated via `VersionSet.Matches()` (exact match first, then semver constraints). When scanning `package.json`, `VersionSet.RangeCoversVersion()` checks whether a dependency range could resolve to a compromised version.
 
 ## Optional Fields
 
