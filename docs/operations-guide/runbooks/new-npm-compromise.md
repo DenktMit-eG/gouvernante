@@ -107,12 +107,12 @@ Create a new rule file. Here is a minimal example based on a hypothetical adviso
         }
       ],
       "remediation": {
-        "recommendation": "Pin example-utils to version 2.3.0 or upgrade to 2.3.3 once published.",
-        "safe_versions": ["2.3.0"]
+        "summary": "Pin example-utils to version 2.3.0 or upgrade to 2.3.3 once published.",
+        "steps": ["Pin example-utils to 2.3.0", "Upgrade to 2.3.3 once published"]
       },
       "metadata": {
-        "author": "security-team",
-        "created": "2026-04-01T12:00:00Z"
+        "published_at": "2026-04-01T12:00:00Z",
+        "last_updated_at": "2026-04-01T12:00:00Z"
       }
     }
   ]

@@ -189,13 +189,14 @@ for the full rationale and policy evolution.
 
 | Target | Command | Description |
 |---|---|---|
-| `make all` | `fmt-check` + `lint` + `test` + `build` | Full pre-push validation. |
+| `make all` | `fmt` + `lint` + `cover` + `build` + `test-integration` | Full pre-push validation. |
 | `make build` | Cross-compile all platforms | Binaries in `dist/binaries/`. |
 | `make test` | `go test -race ./...` | Run tests with race detector. |
 | `make cover` | `go test -race -coverprofile=... ./...` | Generate coverage report. |
 | `make fmt` | `gofumpt -w .` | Format all Go files in place. |
 | `make fmt-check` | `gofumpt -d .` (fail on diff) | Check formatting without writing. |
 | `make lint` | `golangci-lint run ./...` | Run the full linter suite. |
+| `make test-integration` | Docker build + run | End-to-end integration test with planted IOCs. |
 
 Run `make all` before pushing. CI runs the same targets and will reject any
 commit that fails.

@@ -61,7 +61,7 @@ jobs:
 
       - name: Run scan
         run: |
-          gouvernante -rules /tmp/rules -dir . -json -output auto
+          gouvernante -rules /tmp/rules -dir . -recursive -json -output auto
 
       - name: Upload scan report
         if: always()
@@ -89,7 +89,7 @@ supply-chain-scan:
     - chmod +x /usr/local/bin/gouvernante
     - git clone --depth 1 https://github.com/your-org/gouvernante-rules.git /tmp/rules
   script:
-    - gouvernante -rules /tmp/rules -dir . -json -output gouvernante-report.json
+    - gouvernante -rules /tmp/rules -dir . -recursive -json -output gouvernante-report.json
   artifacts:
     when: always
     paths:
@@ -116,7 +116,7 @@ git clone --depth 1 https://github.com/your-org/gouvernante-rules.git "$RULES_DI
   || (cd "$RULES_DIR" && git pull --ff-only)
 
 # 2. Run the scan
-gouvernante -rules "$RULES_DIR" -dir . -json -output "$REPORT_FILE"
+gouvernante -rules "$RULES_DIR" -dir . -recursive -json -output "$REPORT_FILE"
 EXIT_CODE=$?
 
 # 3. Handle results

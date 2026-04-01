@@ -23,6 +23,9 @@ make build
 # Scan a specific lockfile
 ./gouvernante -rules /path/to/rules -lockfile /path/to/pnpm-lock.yaml
 
+# Recursively scan a monorepo for all lockfiles
+./gouvernante -rules /path/to/rules -dir /path/to/monorepo -recursive
+
 # Include host IOC checks
 ./gouvernante -rules /path/to/rules -dir /path/to/project -host
 
@@ -31,6 +34,9 @@ make build
 
 # Write report to file
 ./gouvernante -rules /path/to/rules -dir /path/to/project -output auto
+
+# Enable debug-level trace logging
+./gouvernante -rules /path/to/rules -dir /path/to/project -trace
 ```
 
 ## Supported lockfile formats
@@ -67,7 +73,7 @@ make fmt        # Format code (gofumpt + goimports)
 make lint       # Run golangci-lint with strict config
 make test       # Run tests with race detector
 make cover      # Run tests with coverage report
-make all        # fmt + lint + test + build
+make all        # fmt + lint + cover + build + test-integration
 ```
 
 See [docs/developer-guide/code-style.md](docs/developer-guide/code-style.md) for the full development guide.

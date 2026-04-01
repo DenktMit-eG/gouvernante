@@ -73,10 +73,14 @@ make build
 
 ### Scan a project
 
-Point the scanner at your project directory. It auto-detects lockfiles:
+Point the scanner at your project directory. It auto-detects lockfiles.
+Use `-recursive` to scan an entire project tree (useful for monorepos):
 
 ```bash
 ./gouvernante -rules ./rules -dir /path/to/your/project
+
+# Or recursively scan all nested lockfiles
+./gouvernante -rules ./rules -dir /path/to/your/project -recursive
 ```
 
 ### Read the report
@@ -125,10 +129,26 @@ Findings: 2
 ./gouvernante -rules ./rules -dir /path/to/project -host
 ```
 
+### Scanning a monorepo
+
+Use `-recursive` to walk the entire directory tree and scan every lockfile found:
+
+```bash
+./gouvernante -rules ./rules -dir /path/to/monorepo -recursive
+```
+
 ### JSON output for CI/CD
 
 ```bash
 ./gouvernante -rules ./rules -dir /path/to/project -json
+```
+
+### Enable trace logging
+
+Use `-trace` to log every directory visited (useful for debugging scan scope):
+
+```bash
+./gouvernante -rules ./rules -dir /path/to/project -trace
 ```
 
 ### Exit codes
@@ -138,6 +158,19 @@ Findings: 2
 | `0` | No findings — clean |
 | `1` | Error (bad arguments, parse failure) |
 | `2` | Findings detected — compromised packages or IOCs found |
+
+### CLI flags reference
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `-rules` | string (required) | Directory containing rule JSON files |
+| `-dir` | string (default `"."`) | Directory to scan for lockfiles |
+| `-lockfile` | string | Path to a specific lockfile (overrides `-dir`) |
+| `-recursive` | bool | Scan directory tree for lockfiles |
+| `-host` | bool | Check host indicators + node_modules + pnpm store + nvm + npm cache |
+| `-output` | string | Write report to file (`"auto"` for timestamped) |
+| `-json` | bool | Output findings as JSON |
+| `-trace` | bool | Enable debug-level logging (every directory visited) |
 
 ---
 

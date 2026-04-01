@@ -28,9 +28,11 @@ tags:
 | `-rules` | Yes | — | Path to the rules directory containing JSON rule files. |
 | `-dir` | No | `.` | Directory to scan for lockfiles. |
 | `-lockfile` | No | — | Path to a specific lockfile (skips auto-detection). |
-| `-host` | No | `false` | Enable host filesystem IOC checks. |
+| `-recursive` | No | `false` | Recursively scan subdirectories for lockfiles. |
+| `-host` | No | `false` | Enable host filesystem IOC checks and scan installed packages. |
 | `-output` | No | — | Write output to a file. Use `auto` for a timestamped filename. |
 | `-json` | No | `false` | Emit output as JSON instead of human-readable text. |
+| `-trace` | No | `false` | Enable trace-level debug logging. |
 
 ## Scanning a Directory
 
@@ -65,15 +67,39 @@ gouvernante -rules ./rules -lockfile ./package-lock.json
 
 This is useful when a project has multiple lockfiles and you only care about one, or when the lockfile lives outside the project directory.
 
+## Recursive Scanning
+
+The `-recursive` flag tells gouvernante to walk all subdirectories of the target directory looking for lockfiles. This is useful for monorepos or workspaces with many nested projects:
+
+```bash
+gouvernante -rules ./rules -dir ./monorepo -recursive
+```
+
+Without `-recursive`, only the top-level target directory is checked for lockfiles. With it, every subdirectory is searched.
+
+Combine with other flags as needed:
+
+```bash
+# Recursive scan with host checks and JSON output
+gouvernante -rules ./rules -dir ./monorepo -recursive -host -json -output auto
+```
+
 ## Host Indicator Checks
 
-The `-host` flag enables filesystem IOC checks defined in your rules. These look for artifacts left by known attacks: malware binaries, exfiltration dumps, hidden directories.
+The `-host` flag performs a comprehensive scan of the host filesystem. It goes well beyond checking rule-defined IOC paths:
+
+1. **Host IOC files** — checks paths defined in each rule's `host_indicators` array (e.g., `/tmp/ld.py`, `~/.node_modules/.cache`).
+2. **Project `node_modules`** — scans `node_modules` directories within the target project directories.
+3. **Global `node_modules`** — scans the global `node_modules` directory (determined via `npm config get prefix`).
+4. **pnpm store and cache** — scans the pnpm content-addressable store and cache directories.
+5. **nvm cache and globals** — scans nvm's cached versions and globally installed packages.
+6. **npm cache blobs** — scans the npm cache blob storage.
 
 ```bash
 gouvernante -rules ./rules -dir ./project -host
 ```
 
-Host checks run after lockfile scanning. They inspect paths defined in each rule's `host_indicators` array (e.g., `/tmp/ld.py`, `~/.node_modules/.cache`).
+Host checks run after lockfile scanning.
 
 !!! warning
 

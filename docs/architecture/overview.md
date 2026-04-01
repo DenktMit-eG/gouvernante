@@ -12,7 +12,7 @@ tags:
     - gouvernante is a **single static Go binary** with **zero npm ecosystem dependencies**.
     - It reads lockfiles as plain text, matches against a **JSON rule index**, and optionally checks host IOCs.
     - Rules are data, not code — new incidents are handled by writing a JSON file, not modifying the binary.
-    - The scanner never executes JavaScript, invokes `node`, or touches `node_modules`.
+    - The scanner never executes JavaScript or invokes `node`. It reads `node_modules` to detect compromised packages.
 
 !!! tip "Who is this for?"
 
@@ -58,10 +58,10 @@ flowchart TB
     subgraph Data["Data (read-only)"]
         Rules["Rule JSON files"]
         Lockfiles["Lockfiles (text)"]
+        NodeModules["node_modules/ (READ)"]
     end
 
     subgraph Untrusted["Untrusted (npm ecosystem)"]
-        NodeModules["node_modules/"]
         NPM["npm / pnpm / yarn"]
         Registry["npm registry"]
     end
@@ -74,7 +74,8 @@ flowchart TB
 |----------|----------------|-----|
 | Rule files → scanner | JSON data | Parsed with `encoding/json`, no code execution |
 | Lockfiles → scanner | Text/JSON | Parsed as structured text, never evaluated |
-| npm ecosystem → scanner | **Nothing** | The scanner never invokes `node`, `npm`, or any JavaScript |
+| node_modules → scanner | File metadata and package contents (READ) | Scanned for compromised packages, never executed |
+| npm ecosystem → scanner | **Nothing executed** | The scanner never invokes `node`, `npm`, or any JavaScript |
 | Host indicator checks | `os.Stat()` only | Never reads file contents, never executes files |
 
 The binary has minimal, vetted external dependencies (`goccy/go-yaml` for YAML parsing). The scanning and matching engine uses only the Go standard library. See the [Minimal Dependencies](../reference/decision-log/minimal-dependencies.md) decision record for the full dependency policy.
@@ -141,7 +142,7 @@ sequenceDiagram
         Scan-->>CLI: []Finding
     end
     opt -host flag
-        CLI->>Host: Check filesystem IOCs
+        CLI->>Host: Check filesystem IOCs (node_modules, pnpm store, nvm, npm cache)
         Host-->>CLI: []Finding
     end
     CLI->>Out: Format all findings
@@ -152,7 +153,7 @@ sequenceDiagram
 2. **Build index.** `rules.BuildPackageIndex()` builds a `map[string]*VersionSet` keyed by package name. Each `VersionSet` holds exact versions or an `AnyVersion` wildcard.
 3. **Parse lockfiles.** `lockfile.DetectAndParse()` probes for known lockfile names, parses each, returns per-lockfile entry lists.
 4. **Scan packages.** For each lockfile, `scanner.ScanPackages()` checks every entry against the index. Matches produce `Finding` structs.
-5. **Scan host indicators.** If enabled, checks filesystem for IOC artifacts defined in rules.
+5. **Scan host indicators.** If enabled, scans filesystem locations (node_modules, pnpm store, nvm, npm cache) for IOC artifacts defined in rules.
 6. **Output.** Formatted as text or JSON, written to stdout or file.
 
 ## Version Matching
