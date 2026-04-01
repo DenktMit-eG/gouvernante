@@ -321,6 +321,10 @@ func formatFinding(b *strings.Builder, num int, f *Finding) {
 		fmt.Fprintf(b, "  Type:     %s\n", f.Type)
 		fmt.Fprintf(b, "  Package:  %s@%s\n", f.Package, f.Version)
 		fmt.Fprintf(b, "  Lockfile: %s\n", f.Lockfile)
+
+		if f.Description != "" {
+			fmt.Fprintf(b, "  Note:     %s\n", f.Description)
+		}
 	case "installed_package":
 		b.WriteString("  Type:     installed package\n")
 		fmt.Fprintf(b, "  Package:  %s@%s\n", f.Package, f.Version)
