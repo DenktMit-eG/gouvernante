@@ -58,7 +58,7 @@ func main() {
 
 	header := ""
 	if !cfg.jsonOutput {
-		header = buildReportHeader(len(ruleList), len(idx.Packages), lockfileResults, cfg.hostCheck)
+		header = buildReportHeader(ruleList, len(idx.Packages), lockfileResults, cfg.hostCheck)
 	}
 
 	output := formatOutput(result, cfg.jsonOutput)
@@ -227,12 +227,16 @@ func extractProjectDirs(lockfileResults []lockfile.Result, scanDir string) []str
 	return dirs
 }
 
-func buildReportHeader(ruleCount, indexedPkgs int, lockfileResults []lockfile.Result, hostCheck bool) string {
+func buildReportHeader(ruleList []rules.Rule, indexedPkgs int, lockfileResults []lockfile.Result, hostCheck bool) string {
 	var b strings.Builder
 
 	fmt.Fprintf(&b, "=== Scan Configuration ===\n\n")
-	fmt.Fprintf(&b, "Rules:    %d loaded\n", ruleCount)
-	fmt.Fprintf(&b, "Packages: %d indexed\n", indexedPkgs)
+	fmt.Fprintf(&b, "Rules: %d loaded, %d packages indexed\n\n", len(ruleList), indexedPkgs)
+
+	for i := range ruleList {
+		r := &ruleList[i]
+		fmt.Fprintf(&b, "  %-20s  %-25s  %-10s  %s\n", r.ID, r.Kind, r.Severity, r.Title)
+	}
 
 	totalPkgs := 0
 	for _, lr := range lockfileResults {

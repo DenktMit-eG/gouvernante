@@ -458,6 +458,13 @@ func scanCacheBlobs(dir string, lookups []cacheLookup) ([]Finding, []NodeModules
 	return findings, checks
 }
 
+// versionProximity is the maximum distance (in bytes) between a package name
+// match and a version string for them to be considered related. In npm cache
+// metadata, versions appear near the package name in patterns like
+// "axios/-/axios-1.14.1.tgz" or "axios@1.14.1". 100 bytes covers all known
+// formats while excluding unrelated version strings elsewhere in the blob.
+const versionProximity = 100
+
 func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup) ([]Finding, []NodeModulesCheck) {
 	var findings []Finding
 	var checks []NodeModulesCheck
@@ -465,7 +472,8 @@ func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup)
 	for i := range lookups {
 		l := &lookups[i]
 
-		if !bytes.Contains(data, l.nameBytes) {
+		namePos := bytes.Index(data, l.nameBytes)
+		if namePos < 0 {
 			continue
 		}
 
@@ -481,8 +489,11 @@ func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup)
 			break
 		}
 
+		// Check for version strings near the package name.
+		window := proximityWindow(data, namePos, len(l.nameBytes))
+
 		for _, verBytes := range l.versions {
-			if !bytes.Contains(data, verBytes) {
+			if !bytes.Contains(window, verBytes) {
 				continue
 			}
 
@@ -500,6 +511,19 @@ func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup)
 	}
 
 	return findings, checks
+}
+
+// proximityWindow returns a slice of data starting at the package name match
+// and extending versionProximity bytes beyond the name. This limits version
+// matching to content near the package name, reducing false positives from
+// unrelated version strings elsewhere in the blob.
+func proximityWindow(data []byte, namePos, nameLen int) []byte {
+	end := namePos + nameLen + versionProximity
+	if end > len(data) {
+		end = len(data)
+	}
+
+	return data[namePos:end]
 }
 
 // Helpers.
