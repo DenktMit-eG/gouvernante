@@ -16,6 +16,7 @@ var lockfileFormats = []struct {
 	{"pnpm-lock.yaml", ParsePnpmLock},
 	{"package-lock.json", ParsePackageLockJSON},
 	{"yarn.lock", ParseYarnLock},
+	{"package.json", ParsePackageJSON},
 }
 
 // skipDirs are directories that should not be traversed during recursive scanning.
@@ -168,6 +169,8 @@ func ParseFile(path string) (*Result, error) {
 		parser = ParsePackageLockJSON
 	case "yarn.lock":
 		parser = ParseYarnLock
+	case "package.json":
+		parser = ParsePackageJSON
 	default:
 		return nil, fmt.Errorf("unknown lockfile format: %s", base)
 	}
