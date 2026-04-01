@@ -168,7 +168,7 @@ sequenceDiagram
 
 ## Lockfile Parser Design
 
-All parsers are hand-written to avoid external dependencies:
+Each parser uses the simplest approach that handles the format reliably:
 
 | Parser | Strategy | Formats |
 |--------|----------|---------|
