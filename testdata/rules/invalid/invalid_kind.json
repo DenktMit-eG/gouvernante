@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "X-003",
+      "title": "Invalid kind value",
+      "kind": "unknown-kind",
+      "ecosystem": "npm",
+      "severity": "low",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }]
+    }
+  ]
+}

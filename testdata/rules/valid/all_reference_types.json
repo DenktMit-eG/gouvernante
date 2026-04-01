@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-REF-01",
+      "title": "All reference types",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "references": [
+        { "type": "advisory", "url": "https://example.com/advisory" },
+        { "type": "article", "url": "https://example.com/blog" },
+        { "type": "vendor", "url": "https://example.com/vendor" },
+        { "type": "repository", "url": "https://github.com/org/repo" },
+        { "type": "other", "url": "https://example.com/other" }
+      ],
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }]
+    }
+  ]
+}

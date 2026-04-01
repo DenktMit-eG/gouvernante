@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "X-005",
+      "title": "Invalid ecosystem",
+      "kind": "vulnerability",
+      "ecosystem": "pypi",
+      "severity": "low",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }]
+    }
+  ]
+}

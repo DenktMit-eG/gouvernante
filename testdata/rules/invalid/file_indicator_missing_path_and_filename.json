@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "X-006",
+      "title": "File indicator without path or file_name (violates allOf if/then)",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "host_indicators": [
+        {
+          "type": "file",
+          "oses": ["linux"],
+          "notes": "This file indicator has neither path nor file_name."
+        }
+      ]
+    }
+  ]
+}

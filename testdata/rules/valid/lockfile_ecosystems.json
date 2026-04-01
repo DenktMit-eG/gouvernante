@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-ECO",
+      "title": "All lockfile ecosystem values",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "high",
+      "package_rules": [
+        {
+          "package_name": "pkg-all",
+          "affected_versions": ["1.0.0"],
+          "lockfile_ecosystems": ["npm", "pnpm", "yarn", "bun"]
+        },
+        {
+          "package_name": "pkg-npm-only",
+          "affected_versions": ["2.0.0"],
+          "lockfile_ecosystems": ["npm"]
+        },
+        {
+          "package_name": "pkg-no-ecosystem",
+          "affected_versions": ["3.0.0"]
+        }
+      ]
+    }
+  ]
+}

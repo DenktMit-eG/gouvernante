@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-KIND-01",
+      "title": "Kind: compromised-release",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "package_rules": [{ "package_name": "a", "affected_versions": ["1.0.0"] }]
+    },
+    {
+      "id": "T-KIND-02",
+      "title": "Kind: malicious-package",
+      "kind": "malicious-package",
+      "ecosystem": "npm",
+      "severity": "high",
+      "package_rules": [{ "package_name": "b", "affected_versions": ["*"] }]
+    },
+    {
+      "id": "T-KIND-03",
+      "title": "Kind: vulnerability",
+      "kind": "vulnerability",
+      "ecosystem": "npm",
+      "severity": "medium",
+      "package_rules": [{ "package_name": "c", "affected_versions": ["2.0.0"] }]
+    },
+    {
+      "id": "T-KIND-04",
+      "title": "Kind: dropper",
+      "kind": "dropper",
+      "ecosystem": "npm",
+      "severity": "low",
+      "package_rules": [{ "package_name": "d", "affected_versions": ["0.1.0"] }]
+    },
+    {
+      "id": "T-KIND-05",
+      "title": "Kind: suspicious-artifact",
+      "kind": "suspicious-artifact",
+      "ecosystem": "npm",
+      "severity": "medium",
+      "package_rules": [{ "package_name": "e", "affected_versions": ["3.0.0"] }]
+    }
+  ]
+}

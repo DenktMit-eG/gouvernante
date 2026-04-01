@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-HI-NONFILE",
+      "title": "Non-file indicator types (no path/file_name required)",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "high",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "host_indicators": [
+        {
+          "type": "process",
+          "value": "cryptominer",
+          "oses": ["linux", "macos", "windows"]
+        },
+        {
+          "type": "registry",
+          "value": "HKLM\\Software\\Malware\\Key",
+          "oses": ["windows"]
+        },
+        {
+          "type": "network",
+          "value": "evil.example.com:4444",
+          "oses": ["linux", "macos"]
+        },
+        {
+          "type": "environment",
+          "value": "MALWARE_TOKEN",
+          "oses": ["linux"]
+        }
+      ]
+    }
+  ]
+}

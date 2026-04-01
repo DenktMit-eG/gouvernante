@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "SSC-2025-001",
+      "title": "Axios compromised releases with RAT dropper",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "summary": "Malicious Axios releases delivered a RAT via an auxiliary dropper package (plain-crypto-js). Compromised versions contained obfuscated postinstall scripts that downloaded platform-specific RAT binaries.",
+      "aliases": [
+        {
+          "type": "article",
+          "value": "Aikido axios maintainer hijack report"
+        }
+      ],
+      "references": [
+        {
+          "type": "article",
+          "url": "https://www.aikido.dev/blog/axios-npm-compromised-maintainer-hijacked-rat"
+        },
+        {
+          "type": "advisory",
+          "url": "https://socket.dev/blog/axios-compromised"
+        }
+      ],
+      "package_rules": [
+        {
+          "package_name": "axios",
+          "affected_versions": [
+            "=1.7.8",
+            "=1.7.9",
+            "=1.8.1"
+          ],
+          "lockfile_ecosystems": ["npm", "pnpm", "yarn", "bun"]
+        }
+      ],
+      "dropper_packages": [
+        {
+          "package_name": "plain-crypto-js",
+          "notes": "Presence of this package indicates the dropper executed."
+        }
+      ],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/tmp",
+          "file_name": "ld.py",
+          "oses": ["linux"],
+          "hashes": [
+            {
+              "algorithm": "sha256",
+              "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          ],
+          "confidence": "high",
+          "notes": "Known Linux RAT artifact path."
+        },
+        {
+          "type": "file",
+          "path": "/Library/Caches",
+          "file_name": "com.apple.act.mond",
+          "oses": ["macos"],
+          "confidence": "high",
+          "notes": "Known macOS RAT artifact path."
+        },
+        {
+          "type": "file",
+          "path": "%PROGRAMDATA%",
+          "file_name": "wt.exe",
+          "oses": ["windows"],
+          "confidence": "high",
+          "notes": "Known Windows RAT artifact path."
+        }
+      ],
+      "remediation": {
+        "summary": "Pin to a known-good version, remove dropper packages, clear caches, and investigate any host indicators.",
+        "steps": [
+          "Pin axios to a known-good version (>=1.8.2 or known-safe older release).",
+          "Regenerate lockfiles.",
+          "Remove plain-crypto-js from node_modules if present.",
+          "Clear npm and pnpm caches.",
+          "Check for host indicator files and investigate immediately if found.",
+          "Rotate all credentials if host indicators are confirmed."
+        ]
+      },
+      "metadata": {
+        "published_at": "2025-09-15T00:00:00Z",
+        "last_updated_at": "2025-09-16T00:00:00Z"
+      }
+    }
+  ]
+}

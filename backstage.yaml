@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: gouvernante
+  description: |
+    Static Go binary for detecting npm supply chain compromises. Scans lockfiles
+    against configurable JSON rules and checks host filesystems for known IOCs.
+  annotations:
+    backstage.io/techdocs-ref: dir:./
+  tags:
+    - security
+    - supply-chain
+    - golang
+    - npm
+    - scanner
+spec:
+  type: tool
+  lifecycle: production
+  owner: security-engineering
+  system: supply-chain-security

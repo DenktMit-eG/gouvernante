@@ -1,0 +1,71 @@
+site_name: gouvernante
+site_description: Documentation for gouvernante — npm supply chain scanner
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Prerequisites: getting-started/prerequisites.md
+      - Quickstart: getting-started/quickstart.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Rule Format: architecture/rule-format.md
+  - Developer Guide:
+      - Adding Lockfile Parsers: developer-guide/adding-parsers.md
+      - Writing Rules: developer-guide/writing-rules.md
+      - Testing: developer-guide/testing.md
+      - Code Style & Linting: developer-guide/code-style.md
+  - Operations Guide:
+      - Running Scans: operations-guide/running-scans.md
+      - CI/CD Integration: operations-guide/ci-cd-integration.md
+      - Runbooks:
+          - Overview: operations-guide/runbooks/index.md
+          - New npm Compromise Detected: operations-guide/runbooks/new-npm-compromise.md
+          - False Positive Triage: operations-guide/runbooks/false-positive-triage.md
+  - Reference:
+      - CLI Cheatsheet: reference/cli-cheatsheet.md
+      - Exit Codes: reference/exit-codes.md
+      - Configuration Files: reference/configuration-files.md
+      - Decision Log:
+          - Overview: reference/decision-log/index.md
+          - Go over Node.js: reference/decision-log/go-over-nodejs.md
+          - JSON over CSV: reference/decision-log/json-over-csv.md
+          - Minimal Dependencies: reference/decision-log/minimal-dependencies.md
+          - Custom YAML Parser: reference/decision-log/custom-yaml-parser.md
+          - npm Semver Syntax: reference/decision-log/npm-semver-syntax.md
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep-orange
+      accent: deep-orange
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.tabs
+    - content.code.copy
+    - content.tabs.link
+
+plugins:
+  - search
+  - tags
+
+markdown_extensions:
+  - tables
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true

@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gouvernante/schemas/rule-set.schema.json",
+  "title": "Supply Chain Scanner Rule Set",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "rules"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/rule" }
+    }
+  },
+  "definitions": {
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "kind", "ecosystem", "severity", "package_rules"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": ["compromised-release", "malicious-package", "vulnerability", "dropper", "suspicious-artifact"]
+        },
+        "ecosystem": {
+          "type": "string",
+          "enum": ["npm"]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "summary": { "type": "string" },
+        "aliases": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/alias" }
+        },
+        "references": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/reference" }
+        },
+        "package_rules": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/packageRule" }
+        },
+        "dropper_packages": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/dropperPackage" }
+        },
+        "host_indicators": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/hostIndicator" }
+        },
+        "remediation": { "$ref": "#/definitions/remediation" },
+        "metadata": { "$ref": "#/definitions/metadata" }
+      }
+    },
+    "alias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["cve", "ghsa", "snyk", "article", "internal", "other"]
+        },
+        "value": { "type": "string", "minLength": 1 }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "url"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["advisory", "article", "vendor", "repository", "other"]
+        },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "packageRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package_name", "affected_versions"],
+      "properties": {
+        "package_name": { "type": "string", "minLength": 1 },
+        "affected_versions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "lockfile_ecosystems": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["npm", "pnpm", "yarn", "bun"]
+          },
+          "uniqueItems": true
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "dropperPackage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package_name"],
+      "properties": {
+        "package_name": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      }
+    },
+    "hostIndicator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "oses"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["file", "process", "registry", "network", "environment"]
+        },
+        "path": { "type": "string", "minLength": 1 },
+        "file_name": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 },
+        "oses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["linux", "macos", "windows"]
+          },
+          "uniqueItems": true
+        },
+        "hashes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/fileHash" }
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "notes": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "type": { "const": "file" } },
+            "required": ["type"]
+          },
+          "then": {
+            "anyOf": [
+              { "required": ["path"] },
+              { "required": ["file_name"] }
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": ["hashes"]
+          },
+          "then": {
+            "properties": { "type": { "const": "file" } }
+          }
+        }
+      ]
+    },
+    "fileHash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "value"],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["md5", "sha1", "sha256", "sha512"]
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]+$"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "algorithm": { "const": "md5" } }, "required": ["algorithm"] },
+          "then": { "properties": { "value": { "pattern": "^[A-Fa-f0-9]{32}$" } } }
+        },
+        {
+          "if": { "properties": { "algorithm": { "const": "sha1" } }, "required": ["algorithm"] },
+          "then": { "properties": { "value": { "pattern": "^[A-Fa-f0-9]{40}$" } } }
+        },
+        {
+          "if": { "properties": { "algorithm": { "const": "sha256" } }, "required": ["algorithm"] },
+          "then": { "properties": { "value": { "pattern": "^[A-Fa-f0-9]{64}$" } } }
+        },
+        {
+          "if": { "properties": { "algorithm": { "const": "sha512" } }, "required": ["algorithm"] },
+          "then": { "properties": { "value": { "pattern": "^[A-Fa-f0-9]{128}$" } } }
+        }
+      ]
+    },
+    "remediation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "published_at": { "type": "string", "format": "date-time" },
+        "last_updated_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

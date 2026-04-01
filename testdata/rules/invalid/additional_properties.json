@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "X-013",
+      "title": "Rule with unknown additional property",
+      "kind": "vulnerability",
+      "ecosystem": "npm",
+      "severity": "low",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "unknown_field": "should not be allowed"
+    }
+  ]
+}

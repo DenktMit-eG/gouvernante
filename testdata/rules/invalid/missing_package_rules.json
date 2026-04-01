@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "X-002",
+      "title": "Missing package_rules",
+      "kind": "vulnerability",
+      "ecosystem": "npm",
+      "severity": "low"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "X-015",
+      "title": "Empty affected_versions violates minItems",
+      "kind": "vulnerability",
+      "ecosystem": "npm",
+      "severity": "low",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": [] }]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "v1.0",
+  "rules": [
+    {
+      "id": "X-016",
+      "title": "Schema version does not match semver pattern",
+      "kind": "vulnerability",
+      "ecosystem": "npm",
+      "severity": "low",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }]
+    }
+  ]
+}

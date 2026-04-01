@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-OS",
+      "title": "Host indicators with different OS combinations",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/tmp/linux-only",
+          "oses": ["linux"]
+        },
+        {
+          "type": "file",
+          "path": "/Library/macos-only",
+          "oses": ["macos"]
+        },
+        {
+          "type": "file",
+          "path": "%PROGRAMDATA%\\windows-only",
+          "oses": ["windows"]
+        },
+        {
+          "type": "file",
+          "path": "/tmp/linux-and-macos",
+          "oses": ["linux", "macos"]
+        },
+        {
+          "type": "file",
+          "path": "/tmp/all-platforms",
+          "oses": ["linux", "macos", "windows"]
+        }
+      ]
+    }
+  ]
+}

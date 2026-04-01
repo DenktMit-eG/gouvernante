@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "SSC-2025-002",
+      "title": "shai-hulud-2 mass npm typosquat campaign",
+      "kind": "malicious-package",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "summary": "Mass typosquat campaign publishing ~800 malicious packages to npm. Packages contained install-time exfiltration of environment variables and credentials via postinstall scripts.",
+      "aliases": [
+        {
+          "type": "article",
+          "value": "Wiz shai-hulud-2 npm attack analysis"
+        }
+      ],
+      "references": [
+        {
+          "type": "article",
+          "url": "https://www.wiz.io/blog/shai-hulud-npm-attack"
+        },
+        {
+          "type": "repository",
+          "url": "https://github.com/nicolo-ribaudo/tc39-proposal-signals/issues/1"
+        }
+      ],
+      "package_rules": [
+        {
+          "package_name": "example-shai-hulud-placeholder",
+          "affected_versions": ["*"],
+          "notes": "Full list of ~798 packages should be imported from Wiz CSV feed via the csv-import helper. This is a placeholder entry."
+        }
+      ],
+      "dropper_packages": [],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/tmp",
+          "file_name": ".env-dump",
+          "oses": ["linux", "macos"],
+          "confidence": "medium",
+          "notes": "Exfiltrated environment variable dump. Actual exfil was typically to a remote endpoint, but local artifacts may exist."
+        }
+      ],
+      "remediation": {
+        "summary": "Remove all matched packages immediately. Rotate all environment variables, API keys, and credentials that were present during npm install.",
+        "steps": [
+          "Remove all matched packages from dependencies and lockfiles.",
+          "Regenerate lockfiles from scratch.",
+          "Rotate ALL environment variables and secrets that were present during npm install.",
+          "Audit CI/CD pipeline secrets — these are primary targets.",
+          "Check npm audit logs for install timestamps to determine exposure window.",
+          "Report to security team for further investigation."
+        ]
+      },
+      "metadata": {
+        "published_at": "2025-09-17T00:00:00Z",
+        "last_updated_at": "2025-09-18T00:00:00Z"
+      }
+    }
+  ]
+}

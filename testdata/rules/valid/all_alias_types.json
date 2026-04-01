@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-ALIAS-01",
+      "title": "All alias types",
+      "kind": "vulnerability",
+      "ecosystem": "npm",
+      "severity": "high",
+      "aliases": [
+        { "type": "cve", "value": "CVE-2025-99999" },
+        { "type": "ghsa", "value": "GHSA-xxxx-yyyy-zzzz" },
+        { "type": "snyk", "value": "SNYK-JS-PKG-12345" },
+        { "type": "article", "value": "Aikido blog post" },
+        { "type": "internal", "value": "INC-2025-042" },
+        { "type": "other", "value": "Vendor advisory ref" }
+      ],
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }]
+    }
+  ]
+}

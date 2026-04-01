@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "X-012",
+      "title": "Hash value with non-hex characters",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/tmp/bad",
+          "oses": ["linux"],
+          "hashes": [
+            { "algorithm": "sha256", "value": "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" }
+          ]
+        }
+      ]
+    }
+  ]
+}

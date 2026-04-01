@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-HI-MULTI-HASH",
+      "title": "File indicator with multiple sha256 variants (same algo, different builds)",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/usr/local/bin",
+          "file_name": "rat",
+          "oses": ["linux"],
+          "hashes": [
+            { "algorithm": "sha256", "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+            { "algorithm": "sha256", "value": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+            { "algorithm": "sha256", "value": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" }
+          ]
+        }
+      ]
+    }
+  ]
+}

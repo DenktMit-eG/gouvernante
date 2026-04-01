@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-HI-FILE-PATH",
+      "title": "File indicator with path only (no file_name)",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/tmp/malware.bin",
+          "oses": ["linux"]
+        }
+      ]
+    }
+  ]
+}

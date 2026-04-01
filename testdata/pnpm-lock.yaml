@@ -1,0 +1,30 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  '.':
+    dependencies:
+      axios:
+        specifier: ^1.7.0
+        version: 1.7.9
+      express:
+        specifier: ^4.18.0
+        version: 4.18.2
+      lodash:
+        specifier: ^4.17.0
+        version: 4.17.21
+
+packages:
+  axios@1.7.9:
+    resolution: {integrity: sha512-fake}
+    engines: {node: '>=14'}
+
+  express@4.18.2:
+    resolution: {integrity: sha512-fake}
+    engines: {node: '>= 0.10.0'}
+
+  lodash@4.17.21:
+    resolution: {integrity: sha512-fake}

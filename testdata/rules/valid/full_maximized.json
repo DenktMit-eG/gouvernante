@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-FULL-01",
+      "title": "Fully populated rule exercising every field and construct",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "summary": "A comprehensive test rule that uses every optional field, all enum values for sub-objects, and all conditional paths.",
+      "aliases": [
+        { "type": "cve", "value": "CVE-2025-00001" },
+        { "type": "ghsa", "value": "GHSA-aaaa-bbbb-cccc" },
+        { "type": "snyk", "value": "SNYK-JS-PKG-111111" },
+        { "type": "article", "value": "Blog post by security researcher" },
+        { "type": "internal", "value": "INC-2025-FULL" },
+        { "type": "other", "value": "Vendor private disclosure" }
+      ],
+      "references": [
+        { "type": "advisory", "url": "https://example.com/advisory/1" },
+        { "type": "article", "url": "https://example.com/blog/analysis" },
+        { "type": "vendor", "url": "https://example.com/vendor/notice" },
+        { "type": "repository", "url": "https://github.com/org/repo/issues/1" },
+        { "type": "other", "url": "https://example.com/other-source" }
+      ],
+      "package_rules": [
+        {
+          "package_name": "compromised-pkg",
+          "affected_versions": ["=1.0.0", "=1.0.1", "=1.1.0"],
+          "lockfile_ecosystems": ["npm", "pnpm", "yarn", "bun"],
+          "notes": "All three versions contain obfuscated postinstall dropper."
+        },
+        {
+          "package_name": "@scope/compromised-scoped",
+          "affected_versions": ["=2.0.0"],
+          "lockfile_ecosystems": ["npm", "pnpm"]
+        },
+        {
+          "package_name": "wildcard-all-versions",
+          "affected_versions": ["*"]
+        }
+      ],
+      "dropper_packages": [
+        { "package_name": "crypto-helper-lib", "notes": "Payload delivery via postinstall." },
+        { "package_name": "util-native-bridge" }
+      ],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/tmp",
+          "file_name": "ld.py",
+          "oses": ["linux"],
+          "hashes": [
+            { "algorithm": "md5", "value": "d41d8cd98f00b204e9800998ecf8427e" },
+            { "algorithm": "sha1", "value": "da39a3ee5e6b4b0d3255bfef95601890afd80709" },
+            { "algorithm": "sha256", "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+            { "algorithm": "sha512", "value": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e" }
+          ],
+          "confidence": "high",
+          "notes": "Linux RAT payload."
+        },
+        {
+          "type": "file",
+          "path": "/Library/Caches",
+          "file_name": "com.apple.act.mond",
+          "oses": ["macos"],
+          "confidence": "high",
+          "notes": "macOS RAT disguised as system daemon."
+        },
+        {
+          "type": "file",
+          "path": "%PROGRAMDATA%",
+          "file_name": "wt.exe",
+          "oses": ["windows"],
+          "hashes": [
+            { "algorithm": "sha256", "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+            { "algorithm": "sha256", "value": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
+          ],
+          "confidence": "medium"
+        },
+        {
+          "type": "file",
+          "file_name": "suspicious.dat",
+          "oses": ["linux", "macos", "windows"],
+          "confidence": "low",
+          "notes": "File name only indicator — no fixed path."
+        },
+        {
+          "type": "process",
+          "value": "cryptominer-hidden",
+          "oses": ["linux", "macos"],
+          "confidence": "medium",
+          "notes": "Known mining process name."
+        },
+        {
+          "type": "registry",
+          "value": "HKLM\\Software\\MalwareKey",
+          "oses": ["windows"],
+          "confidence": "high"
+        },
+        {
+          "type": "network",
+          "value": "c2.evil.example.com:8443",
+          "oses": ["linux", "macos", "windows"],
+          "confidence": "high",
+          "notes": "C2 callback domain."
+        },
+        {
+          "type": "environment",
+          "value": "MALWARE_EXFIL_TOKEN",
+          "oses": ["linux"],
+          "confidence": "low"
+        }
+      ],
+      "remediation": {
+        "summary": "Remove compromised versions, remove dropper packages, check for host artifacts, rotate all credentials.",
+        "steps": [
+          "Pin compromised-pkg to version >=1.2.0.",
+          "Remove crypto-helper-lib and util-native-bridge from dependencies.",
+          "Regenerate all lockfiles.",
+          "Clear package manager caches.",
+          "Run gouvernante with -host to check for filesystem IOCs.",
+          "If host indicators found: isolate machine, rotate all credentials, follow IR procedure."
+        ]
+      },
+      "metadata": {
+        "published_at": "2025-09-15T08:00:00Z",
+        "last_updated_at": "2025-09-17T14:30:00Z"
+      }
+    }
+  ]
+}

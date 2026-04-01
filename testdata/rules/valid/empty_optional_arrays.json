@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-EMPTY-ARRAYS",
+      "title": "Explicit empty arrays for all optional array fields",
+      "kind": "vulnerability",
+      "ecosystem": "npm",
+      "severity": "low",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "aliases": [],
+      "references": [],
+      "dropper_packages": [],
+      "host_indicators": []
+    }
+  ]
+}

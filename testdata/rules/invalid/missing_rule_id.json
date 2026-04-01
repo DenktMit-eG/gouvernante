@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "title": "Missing id",
+      "kind": "vulnerability",
+      "ecosystem": "npm",
+      "severity": "low",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }]
+    }
+  ]
+}

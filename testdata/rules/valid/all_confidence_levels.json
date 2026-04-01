@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "T-CONF",
+      "title": "All confidence levels",
+      "kind": "suspicious-artifact",
+      "ecosystem": "npm",
+      "severity": "medium",
+      "package_rules": [{ "package_name": "pkg", "affected_versions": ["1.0.0"] }],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/tmp/low.bin",
+          "oses": ["linux"],
+          "confidence": "low"
+        },
+        {
+          "type": "file",
+          "path": "/tmp/med.bin",
+          "oses": ["linux"],
+          "confidence": "medium"
+        },
+        {
+          "type": "file",
+          "path": "/tmp/high.bin",
+          "oses": ["linux"],
+          "confidence": "high"
+        }
+      ]
+    }
+  ]
+}
