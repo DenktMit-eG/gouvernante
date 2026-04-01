@@ -1,4 +1,4 @@
-.PHONY: all build test lint fmt fmt-check vet staticcheck clean cover demo setup help
+.PHONY: all build test lint fmt fmt-check vet staticcheck clean cover scan demo setup test-integration help
 
 BINARY   := gouvernante
 CMD      := ./cmd/gouvernante/
@@ -25,9 +25,31 @@ GOIMPORTS     := $(call resolve,goimports)
 GOLANGCI_LINT := $(call resolve,golangci-lint)
 STATICCHECK   := $(call resolve,staticcheck)
 
+# Colours (disabled if not a terminal)
+BOLD    := $(shell tput bold 2>/dev/null)
+GREEN   := $(shell tput setaf 2 2>/dev/null)
+CYAN    := $(shell tput setaf 6 2>/dev/null)
+YELLOW  := $(shell tput setaf 3 2>/dev/null)
+RESET   := $(shell tput sgr0 2>/dev/null)
+
+define STEP
+	@echo ""
+	@echo "$(BOLD)$(CYAN)══════════════════════════════════════════════════$(RESET)"
+	@echo "$(BOLD)$(CYAN)  $(1)$(RESET)"
+	@echo "$(BOLD)$(CYAN)══════════════════════════════════════════════════$(RESET)"
+	@echo ""
+endef
+
+define PASS
+	@echo ""
+	@echo "$(BOLD)$(GREEN)  ✔ $(1)$(RESET)"
+	@echo ""
+endef
+
 # --- Default target ---
 
-all: ensure-tools fmt lint test build
+all: ensure-tools fmt lint cover build test-integration
+	$(call PASS,All checks passed.)
 
 # --- Tool management ---
 
@@ -38,7 +60,7 @@ check-go:
 
 ensure-tools: check-go
 ifneq ($(MISSING_TOOLS),)
-	@echo "Missing tools: $(MISSING_TOOLS)"
+	@echo "$(YELLOW)Missing tools: $(MISSING_TOOLS)$(RESET)"
 	@echo ""
 	@read -p "Install them via 'go install'? [y/N] " ans; \
 	if [ "$$ans" = "y" ] || [ "$$ans" = "Y" ]; then \
@@ -50,52 +72,74 @@ ifneq ($(MISSING_TOOLS),)
 endif
 
 setup: check-go
+	$(call STEP,Installing development tools)
 	go install mvdan.cc/gofumpt@latest
 	go install golang.org/x/tools/cmd/goimports@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
-	@echo ""
-	@echo "All tools installed in $$(go env GOPATH)/bin."
-	@echo "Ensure this directory is in your PATH."
+	$(call PASS,All tools installed in $$(go env GOPATH)/bin)
 
 # --- Build ---
 
 build: check-go
+	$(call STEP,Building binaries)
 	@mkdir -p $(DIST)/binaries
 	@$(foreach platform,$(PLATFORMS),\
 		$(eval OS := $(word 1,$(subst /, ,$(platform))))\
 		$(eval ARCH := $(word 2,$(subst /, ,$(platform))))\
 		$(eval EXT := $(if $(filter windows,$(OS)),.exe,))\
-		echo "Building $(OS)/$(ARCH)..." && \
+		echo "  $(OS)/$(ARCH)" && \
 		GOOS=$(OS) GOARCH=$(ARCH) go build -trimpath -ldflags="$(LDFLAGS)" \
 			-o $(DIST)/binaries/$(BINARY)-$(OS)-$(ARCH)$(EXT) $(CMD) && \
 	) true
-	@echo ""
-	@echo "Binaries in $(DIST)/binaries/:"
-	@ls -lh $(DIST)/binaries/
+	$(call PASS,Binaries in $(DIST)/binaries/)
 
 # --- Test ---
 
 test: check-go
+	$(call STEP,Running tests)
 	go test -race -count=1 ./...
+	$(call PASS,All tests passed)
 
 cover: check-go
+	$(call STEP,Running tests with coverage)
 	@mkdir -p $(DIST)/reports
 	go test -race -coverprofile=$(DIST)/reports/coverage.out -covermode=atomic ./...
 	go tool cover -func=$(DIST)/reports/coverage.out
 	go tool cover -html=$(DIST)/reports/coverage.out -o $(DIST)/reports/coverage.html
-	@echo ""
-	@echo "Coverage report: $(DIST)/reports/coverage.html"
+	$(call PASS,Coverage report: $(DIST)/reports/coverage.html)
+
+scan: build
+	$(call STEP,Running scan on test fixtures)
+	@mkdir -p $(DIST)/reports
+	@./$(DIST)/binaries/$(BINARY)-$$(go env GOOS)-$$(go env GOARCH) \
+		-rules ./testdata/rules/incidents \
+		-dir ./testdata \
+		-recursive \
+		-host \
+		-output $(DIST)/reports/scan-report.txt || true
+	@./$(DIST)/binaries/$(BINARY)-$$(go env GOOS)-$$(go env GOARCH) \
+		-rules ./testdata/rules/incidents \
+		-dir ./testdata \
+		-recursive \
+		-host \
+		-json \
+		-output $(DIST)/reports/scan-report.json || true
+	$(call PASS,Scan reports in $(DIST)/reports/)
 
 # --- Formatting ---
 
 fmt: ensure-tools
+	$(call STEP,Formatting code)
 	$(GOFUMPT) -w .
 	$(GOIMPORTS) -w .
+	$(call PASS,Code formatted)
 
 fmt-check: ensure-tools
+	$(call STEP,Checking code format)
 	@test -z "$$($(GOFUMPT) -d .)" || (echo "code is not formatted; run 'make fmt'" && $(GOFUMPT) -d . && exit 1)
 	@test -z "$$($(GOIMPORTS) -d .)" || (echo "imports are not organized; run 'make fmt'" && $(GOIMPORTS) -d . && exit 1)
+	$(call PASS,Format OK)
 
 # --- Linting ---
 
@@ -106,7 +150,17 @@ staticcheck: ensure-tools
 	$(STATICCHECK) ./...
 
 lint: ensure-tools vet
+	$(call STEP,Linting)
 	$(GOLANGCI_LINT) run ./...
+	$(call PASS,Lint clean)
+
+# --- Integration test ---
+
+test-integration:
+	$(call STEP,Running integration tests (Docker))
+	docker build -f Dockerfile.integration -t gouvernante-test .
+	docker run --rm gouvernante-test
+	$(call PASS,Integration tests passed)
 
 # --- Utilities ---
 
@@ -115,6 +169,7 @@ clean:
 	rm -f scan-report-*.txt
 
 demo: build
+	$(call STEP,Running demo scan)
 	./$(DIST)/binaries/$(BINARY)-$$(go env GOOS)-$$(go env GOARCH) -rules ./testdata/rules/incidents -dir ./testdata -host; \
 	EXIT=$$?; \
 	if [ $$EXIT -eq 2 ]; then echo "\nDemo complete: findings detected (expected)."; \
@@ -122,17 +177,19 @@ demo: build
 	else exit $$EXIT; fi
 
 help:
-	@echo "Available targets:"
-	@echo "  all            - Format, lint, test, and build (default)"
-	@echo "  build          - Cross-compile for all platforms (output in dist/binaries/)"
-	@echo "  test           - Run all tests with race detector"
-	@echo "  cover          - Run tests with coverage (output in dist/reports/)"
-	@echo "  fmt            - Format code with gofumpt and goimports"
-	@echo "  fmt-check      - Check formatting without modifying files"
-	@echo "  vet            - Run go vet"
-	@echo "  staticcheck    - Run staticcheck"
-	@echo "  lint           - Run golangci-lint (includes vet)"
-	@echo "  setup          - Install all development tools"
-	@echo "  clean          - Remove all build artifacts"
-	@echo "  demo           - Build and run a demo scan"
-	@echo "  help           - Show this help"
+	@echo "$(BOLD)Available targets:$(RESET)"
+	@echo "  $(CYAN)all$(RESET)              Format, lint, test, build, and integration test (default)"
+	@echo "  $(CYAN)build$(RESET)            Cross-compile for all platforms (output in dist/binaries/)"
+	@echo "  $(CYAN)test$(RESET)             Run all tests with race detector"
+	@echo "  $(CYAN)cover$(RESET)            Run tests with coverage (output in dist/reports/)"
+	@echo "  $(CYAN)fmt$(RESET)              Format code with gofumpt and goimports"
+	@echo "  $(CYAN)fmt-check$(RESET)        Check formatting without modifying files"
+	@echo "  $(CYAN)vet$(RESET)              Run go vet"
+	@echo "  $(CYAN)staticcheck$(RESET)      Run staticcheck"
+	@echo "  $(CYAN)lint$(RESET)             Run golangci-lint (includes vet)"
+	@echo "  $(CYAN)setup$(RESET)            Install all development tools"
+	@echo "  $(CYAN)scan$(RESET)             Run scan on test fixtures (reports in dist/reports/)"
+	@echo "  $(CYAN)test-integration$(RESET) Run Docker integration test (IOCs + node_modules)"
+	@echo "  $(CYAN)clean$(RESET)            Remove all build artifacts"
+	@echo "  $(CYAN)demo$(RESET)             Build and run a demo scan"
+	@echo "  $(CYAN)help$(RESET)             Show this help"

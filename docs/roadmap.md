@@ -25,6 +25,11 @@ tags:
 | Package version matching (exact, wildcard) | Done | `=1.14.1`, `1.14.1`, `*` |
 | Dropper package detection | Done | Any version of a dropper package is a finding |
 | Host indicator: file existence | Done | Checks `os.Stat()` on expanded paths |
+| node_modules scanning | Done | Checks installed packages in project and global node_modules |
+| pnpm store/cache scanning | Done | Scans ~/.local/share/pnpm, ~/.cache/pnpm, $PNPM_HOME, `pnpm store path` |
+| nvm cache and globals | Done | Scans $NVM_DIR cache and per-version global node_modules |
+| npm cache scanning | Done | Scans _cacache blobs for indexed package names and versions |
+| Dynamic npm prefix detection | Done | Uses `npm config get prefix` when npm is available |
 | Host indicator: file hashes (sha256, sha1, md5, sha512) | Schema only | Hashes are stored and validated but not checked against actual files |
 | Host indicator: network | Schema only | C2 domains/IPs stored for analyst reference, not actively checked |
 | Host indicator: process | Schema only | Process names stored, not checked against running processes |
@@ -82,6 +87,11 @@ not yet active in the scanner.
 **Current behavior:** Silently skipped.
 
 **What's needed:** Check if specific environment variables exist (e.g., exfiltration staging tokens). Simple to implement via `os.Getenv()`.
+
+### Yarn cache scanning
+
+The yarn cache (`~/.yarn/cache`, `~/.cache/yarn`) is not scanned yet.
+Same `bytes.Contains` approach as npm cache would work.
 
 ### npm semver range matching
 

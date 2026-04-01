@@ -2,24 +2,40 @@ package lockfile
 
 import (
 	"fmt"
+	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 )
 
+// lockfileFormats maps known lockfile names to their parsers.
+var lockfileFormats = []struct {
+	name   string
+	parser func(string) ([]PackageEntry, error)
+}{
+	{"pnpm-lock.yaml", ParsePnpmLock},
+	{"package-lock.json", ParsePackageLockJSON},
+	{"yarn.lock", ParseYarnLock},
+}
+
+// skipDirs are directories that should not be traversed during recursive scanning.
+var skipDirs = map[string]bool{
+	"node_modules": true,
+	".git":         true,
+	"vendor":       true,
+	"dist":         true,
+	".next":        true,
+	"__pycache__":  true,
+}
+
+// dirProgressInterval controls how often directory count is logged at Info level.
+const dirProgressInterval = 500
+
 // DetectAndParse finds lockfiles in the given directory and parses each one.
 func DetectAndParse(dir string) ([]Result, error) {
-	lockfiles := []struct {
-		name   string
-		parser func(string) ([]PackageEntry, error)
-	}{
-		{"pnpm-lock.yaml", ParsePnpmLock},
-		{"package-lock.json", ParsePackageLockJSON},
-		{"yarn.lock", ParseYarnLock},
-	}
+	results := make([]Result, 0, len(lockfileFormats))
 
-	results := make([]Result, 0, len(lockfiles))
-
-	for _, lf := range lockfiles {
+	for _, lf := range lockfileFormats {
 		path := filepath.Join(dir, lf.name)
 		if _, err := os.Stat(path); err != nil {
 			continue
@@ -34,6 +50,109 @@ func DetectAndParse(dir string) ([]Result, error) {
 	}
 
 	return results, nil
+}
+
+// DetectAndParseRecursive walks the directory tree rooted at root and parses
+// every lockfile found. Directories like node_modules, .git, and vendor are
+// skipped. Each Result.Name is the relative path from root.
+func DetectAndParseRecursive(root string) ([]Result, error) {
+	w := &recursiveWalker{
+		root:    root,
+		parsers: buildParserMap(),
+	}
+
+	err := filepath.WalkDir(root, w.visit)
+	if err != nil {
+		return nil, fmt.Errorf("walk %s: %w", root, err)
+	}
+
+	slog.Info("recursive scan complete",
+		"directories", w.dirCount,
+		"lockfiles", len(w.results))
+
+	return w.results, nil
+}
+
+type recursiveWalker struct {
+	root     string
+	parsers  map[string]func(string) ([]PackageEntry, error)
+	results  []Result
+	dirCount int
+}
+
+func buildParserMap() map[string]func(string) ([]PackageEntry, error) {
+	m := make(map[string]func(string) ([]PackageEntry, error), len(lockfileFormats))
+	for _, lf := range lockfileFormats {
+		m[lf.name] = lf.parser
+	}
+
+	return m
+}
+
+func (w *recursiveWalker) visit(path string, d fs.DirEntry, err error) error {
+	if err != nil {
+		return handleWalkError(path, d, err)
+	}
+
+	if d.IsDir() {
+		return w.visitDir(path, d)
+	}
+
+	return w.visitFile(path, d)
+}
+
+func handleWalkError(path string, d fs.DirEntry, err error) error {
+	if d != nil && d.IsDir() {
+		slog.Warn("skipping unreadable directory", "path", path, "error", err)
+		return fs.SkipDir
+	}
+
+	return nil
+}
+
+func (w *recursiveWalker) visitDir(path string, d fs.DirEntry) error {
+	if skipDirs[d.Name()] {
+		return fs.SkipDir
+	}
+
+	w.dirCount++
+
+	slog.Debug("scanning directory", "path", relPath(w.root, path))
+
+	if w.dirCount%dirProgressInterval == 0 {
+		slog.Info("scan progress", "directories", w.dirCount)
+	}
+
+	return nil
+}
+
+func (w *recursiveWalker) visitFile(path string, d fs.DirEntry) error {
+	parser, ok := w.parsers[d.Name()]
+	if !ok {
+		return nil
+	}
+
+	rel := relPath(w.root, path)
+
+	slog.Debug("found lockfile", "path", rel)
+
+	entries, err := parser(path)
+	if err != nil {
+		return fmt.Errorf("parse %s: %w", path, err)
+	}
+
+	w.results = append(w.results, Result{Name: rel, Entries: entries})
+
+	return nil
+}
+
+func relPath(root, path string) string {
+	rel, err := filepath.Rel(root, path)
+	if err != nil {
+		return path
+	}
+
+	return rel
 }
 
 // ParseFile parses a specific lockfile by path, auto-detecting format from filename.

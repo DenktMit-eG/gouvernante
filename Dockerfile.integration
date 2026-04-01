@@ -1,0 +1,63 @@
+# Integration test container for gouvernante.
+#
+# Plants fake IOC files, compromised node_modules, pnpm store entries,
+# nvm globals, and npm cache blobs, then runs the scanner to verify
+# end-to-end detection.
+#
+# Usage:
+#   docker build -f Dockerfile.test -t gouvernante-test . && docker run --rm gouvernante-test
+
+FROM golang:1.22 AS builder
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -o /gouvernante ./cmd/gouvernante/
+
+FROM alpine:3.20
+
+COPY --from=builder /gouvernante /usr/local/bin/gouvernante
+
+# Copy rules and test lockfile.
+COPY testdata/rules/incidents/ /test/rules/
+COPY testdata/package-lock.json /test/project/package-lock.json
+
+# 1. Plant fake host IOC files (Linux paths from axios rule).
+RUN touch /tmp/ld.py && \
+    touch /tmp/processor.sh
+
+# 2. Plant fake compromised node_modules.
+RUN mkdir -p /test/project/node_modules/axios && \
+    echo '{"name":"axios","version":"0.30.4"}' > /test/project/node_modules/axios/package.json && \
+    mkdir -p /test/project/node_modules/plain-crypto-js && \
+    echo '{"name":"plain-crypto-js","version":"4.2.1"}' > /test/project/node_modules/plain-crypto-js/package.json
+
+# 3. Plant fake pnpm store entry.
+RUN mkdir -p /root/.local/share/pnpm/store/axios/0.30.4 && \
+    echo '{"name":"axios","version":"0.30.4"}' > /root/.local/share/pnpm/store/axios/0.30.4/package.json
+
+# 4. Plant fake nvm global.
+RUN mkdir -p /root/.nvm/versions/node/v20.0.0/lib/node_modules/axios && \
+    echo '{"name":"axios","version":"1.14.1"}' > /root/.nvm/versions/node/v20.0.0/lib/node_modules/axios/package.json
+
+# 5. Plant fake npm cache blob.
+RUN mkdir -p /root/.npm/_cacache/index-v5/ab/cd && \
+    echo '{"key":"make-fetch-happen:request-cache:https://registry.npmjs.org/axios/-/axios-1.14.1.tgz","integrity":"sha512-fake","time":1234}' > /root/.npm/_cacache/index-v5/ab/cd/fake-blob
+
+# Run the scan and capture exit code (exit 2 = findings, which is expected).
+RUN gouvernante -recursive -rules /test/rules -dir /test/project -host -output /tmp/report.txt || true
+
+# Verify results.
+RUN set -e && \
+    echo "--- Checking report for expected findings ---" && \
+    grep -q "axios@0.30.4" /tmp/report.txt || { echo "FAIL: missing lockfile axios finding"; exit 1; } && \
+    grep -q "plain-crypto-js" /tmp/report.txt || { echo "FAIL: missing dropper finding"; exit 1; } && \
+    grep -q "\[FOUND\].*ld.py" /tmp/report.txt || { echo "FAIL: missing host indicator ld.py"; exit 1; } && \
+    grep -q "\[FOUND\].*processor.sh" /tmp/report.txt || { echo "FAIL: missing host indicator processor.sh"; exit 1; } && \
+    grep -q "\[FOUND\].*axios.*0.30.4" /tmp/report.txt || { echo "FAIL: missing node_modules axios"; exit 1; } && \
+    grep -q "\[FOUND\].*plain-crypto-js" /tmp/report.txt || { echo "FAIL: missing node_modules dropper"; exit 1; } && \
+    echo "--- Full report ---" && \
+    cat /tmp/report.txt && \
+    echo "" && \
+    echo "ALL INTEGRATION TESTS PASSED"

@@ -119,7 +119,7 @@ func TestScanHostIndicators_FileExists(t *testing.T) {
 		},
 	}
 
-	findings := ScanHostIndicators(ruleList)
+	findings, _ := ScanHostIndicators(ruleList)
 
 	if len(findings) != 1 {
 		t.Fatalf("expected 1 finding, got %d", len(findings))
@@ -151,7 +151,7 @@ func TestScanHostIndicators_FileDoesNotExist(t *testing.T) {
 		},
 	}
 
-	findings := ScanHostIndicators(ruleList)
+	findings, _ := ScanHostIndicators(ruleList)
 
 	if len(findings) != 0 {
 		t.Errorf("expected 0 findings, got %d", len(findings))
@@ -183,7 +183,7 @@ func TestScanHostIndicators_WrongOS(t *testing.T) {
 		},
 	}
 
-	findings := ScanHostIndicators(ruleList)
+	findings, _ := ScanHostIndicators(ruleList)
 
 	if len(findings) != 0 {
 		t.Errorf("expected 0 findings for wrong OS, got %d", len(findings))
@@ -206,7 +206,7 @@ func TestScanHostIndicators_NonFileType(t *testing.T) {
 		},
 	}
 
-	findings := ScanHostIndicators(ruleList)
+	findings, _ := ScanHostIndicators(ruleList)
 
 	if len(findings) != 0 {
 		t.Errorf("non-file indicators should be skipped, got %d findings", len(findings))
