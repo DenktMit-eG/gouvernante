@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -38,7 +39,6 @@ type cacheLookup struct {
 	name      string
 	nameBytes []byte
 	vs        *rules.VersionSet
-	versions  [][]byte
 }
 
 // Command helpers.
@@ -379,23 +379,13 @@ func ScanNpmCache(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 
 	slog.Info("scanning npm cache", "dir", cacheDir)
 
-	var lookups []cacheLookup
+	lookups := make([]cacheLookup, 0, len(idx.Packages))
 
 	for name, vs := range idx.Packages {
 		l := cacheLookup{
 			name:      name,
 			nameBytes: []byte(name),
 			vs:        vs,
-		}
-
-		// Collect version strings to search for.
-		if vs.AnyVersion {
-			// For dropper/wildcard packages, just finding the name is enough.
-			l.versions = nil
-		} else {
-			for v := range vs.Versions {
-				l.versions = append(l.versions, []byte(v))
-			}
 		}
 
 		lookups = append(lookups, l)
@@ -458,12 +448,14 @@ func scanCacheBlobs(dir string, lookups []cacheLookup) ([]Finding, []NodeModules
 	return findings, checks
 }
 
-// versionProximity is the maximum distance (in bytes) between a package name
-// match and a version string for them to be considered related. In npm cache
-// metadata, versions appear near the package name in patterns like
-// "axios/-/axios-1.14.1.tgz" or "axios@1.14.1". 100 bytes covers all known
-// formats while excluding unrelated version strings elsewhere in the blob.
+// versionProximity is the maximum distance (in bytes) after a package name
+// match to search for version strings.
 const versionProximity = 100
+
+// semverPattern matches version-like strings (e.g., 1.14.1, 0.30.4, 1.0.0-beta.1).
+// Uses structured optional groups for prerelease (-beta.1) and build metadata (+build).
+// Does NOT greedily consume file extensions like .tgz.
+var semverPattern = regexp.MustCompile(`\d+\.\d+\.\d+(?:-[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*)?(?:\+[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*)?`)
 
 func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup) ([]Finding, []NodeModulesCheck) {
 	var findings []Finding
@@ -472,7 +464,7 @@ func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup)
 	for i := range lookups {
 		l := &lookups[i]
 
-		namePos := bytes.Index(data, l.nameBytes)
+		namePos := findPackageNameWithBoundary(data, l.nameBytes)
 		if namePos < 0 {
 			continue
 		}
@@ -489,15 +481,16 @@ func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup)
 			break
 		}
 
-		// Check for version strings near the package name.
+		// Extract version-like strings from the proximity window and check against the index.
 		window := proximityWindow(data, namePos, len(l.nameBytes))
+		versions := semverPattern.FindAll(window, -1)
 
-		for _, verBytes := range l.versions {
-			if !bytes.Contains(window, verBytes) {
+		for _, verBytes := range versions {
+			ver := string(verBytes)
+			if !l.vs.Matches(ver) {
 				continue
 			}
 
-			ver := string(verBytes)
 			slog.Warn("compromised version in npm cache", "package", l.name, "version", ver, "blob", path)
 			checks = append(checks, NodeModulesCheck{Dir: dir, Package: l.name, Version: ver, Status: StatusFound})
 			findings = append(findings, Finding{
@@ -513,10 +506,44 @@ func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup)
 	return findings, checks
 }
 
-// proximityWindow returns a slice of data starting at the package name match
-// and extending versionProximity bytes beyond the name. This limits version
-// matching to content near the package name, reducing false positives from
-// unrelated version strings elsewhere in the blob.
+// findPackageNameWithBoundary searches for a package name in data, ensuring
+// the match is at a word boundary. This prevents "atrix" from matching inside
+// "dommatrix". Boundary characters: start of data, ", /, @, whitespace, :.
+func findPackageNameWithBoundary(data, name []byte) int {
+	offset := 0
+
+	for {
+		pos := bytes.Index(data[offset:], name)
+		if pos < 0 {
+			return -1
+		}
+
+		absPos := offset + pos
+
+		// Check left boundary.
+		leftOK := absPos == 0 || isBoundaryChar(data[absPos-1])
+
+		// Check right boundary.
+		endPos := absPos + len(name)
+		rightOK := endPos >= len(data) || isBoundaryChar(data[endPos])
+
+		if leftOK && rightOK {
+			return absPos
+		}
+
+		offset = absPos + 1
+	}
+}
+
+func isBoundaryChar(c byte) bool {
+	switch c {
+	case '"', '/', '@', ':', ' ', '\t', '\n', '\r', ',', '{', '}', '[', ']':
+		return true
+	default:
+		return false
+	}
+}
+
 func proximityWindow(data []byte, namePos, nameLen int) []byte {
 	end := namePos + nameLen + versionProximity
 	if end > len(data) {

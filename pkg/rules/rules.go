@@ -3,9 +3,12 @@ package rules
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/Masterminds/semver/v3"
 )
 
 // RuleSet is the top-level JSON document containing a schema version and rules.
@@ -135,20 +138,68 @@ func LoadDir(dir string) ([]Rule, error) {
 
 // VersionSet is a fast lookup for affected versions of a specific package.
 type VersionSet struct {
-	RuleID     string
-	RuleTitle  string
-	Severity   string
-	AnyVersion bool
-	Versions   map[string]bool
+	RuleID      string
+	RuleTitle   string
+	Severity    string
+	AnyVersion  bool
+	Versions    map[string]bool
+	Constraints []*semver.Constraints
 }
 
 // Matches reports whether the given version is in the affected set.
+// Checks exact match first (fast path), then semver constraints.
 func (vs *VersionSet) Matches(version string) bool {
 	if vs.AnyVersion {
 		return true
 	}
 
-	return vs.Versions[version]
+	if vs.Versions[version] {
+		return true
+	}
+
+	if len(vs.Constraints) == 0 {
+		return false
+	}
+
+	v, err := semver.NewVersion(version)
+	if err != nil {
+		return false
+	}
+
+	for _, c := range vs.Constraints {
+		if c.Check(v) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// RangeCoversVersion checks whether a dependency range expression (e.g., "^1.14.0")
+// could resolve to any of the affected versions. Used for package.json scanning
+// where the declared version is a range, not a resolved version.
+func (vs *VersionSet) RangeCoversVersion(rangeExpr string) (covers bool, matchedVersion string) {
+	if vs.AnyVersion {
+		return true, "*"
+	}
+
+	constraint, err := semver.NewConstraint(rangeExpr)
+	if err != nil {
+		return false, ""
+	}
+
+	for ver := range vs.Versions {
+		v, parseErr := semver.NewVersion(ver)
+		if parseErr != nil {
+			continue
+		}
+
+		if constraint.Check(v) {
+			return true, ver
+		}
+	}
+
+	return false, ""
 }
 
 // PackageIndex maps package names to VersionSets for fast lockfile scanning.
@@ -182,7 +233,19 @@ func indexPackageRules(idx *PackageIndex, r *Rule) {
 			}
 
 			clean := strings.TrimPrefix(v, "=")
-			vs.Versions[clean] = true
+
+			// Try parsing as semver constraint (range expression).
+			// If it's a simple version like "1.14.1", store as exact match (fast path).
+			// If it's a range like ">=1.0.0 <2.0.0", store as constraint.
+			if _, err := semver.NewVersion(clean); err == nil {
+				vs.Versions[clean] = true
+			} else if c, err := semver.NewConstraint(v); err == nil {
+				vs.Constraints = append(vs.Constraints, c)
+			} else {
+				// Neither a valid version nor a valid constraint — store as exact string.
+				slog.Debug("unparseable version expression, storing as exact match", "package", pr.PackageName, "version", v)
+				vs.Versions[clean] = true
+			}
 		}
 	}
 }

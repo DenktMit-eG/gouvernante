@@ -297,16 +297,78 @@ func buildCacheLookups(idx *rules.PackageIndex) []cacheLookup {
 			vs:        vs,
 		}
 
-		if !vs.AnyVersion {
-			for v := range vs.Versions {
-				l.versions = append(l.versions, []byte(v))
-			}
-		}
-
 		lookups = append(lookups, l)
 	}
 
 	return lookups
+}
+
+func TestFindPackageNameWithBoundary(t *testing.T) {
+	tests := []struct {
+		name    string
+		data    string
+		pkg     string
+		wantPos bool
+	}{
+		{"exact match in JSON", `"atrix":"1.0.3"`, "atrix", true},
+		{"substring should not match", `"dommatrix":"^1.0.3"`, "atrix", false},
+		{"at sign boundary", `atrix@1.0.3`, "atrix", true},
+		{"slash boundary", `/atrix/1.0.3`, "atrix", true},
+		{"start of data", `atrix@1.0.0`, "atrix", true},
+		{"scoped package", `"@scope/pkg":"1.0.0"`, "@scope/pkg", true},
+		{"embedded in word", `formatrix-lib`, "atrix", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pos := findPackageNameWithBoundary([]byte(tt.data), []byte(tt.pkg))
+			gotFound := pos >= 0
+
+			if gotFound != tt.wantPos {
+				t.Errorf("findPackageNameWithBoundary(%q, %q) found=%v, want found=%v",
+					tt.data, tt.pkg, gotFound, tt.wantPos)
+			}
+		})
+	}
+}
+
+func TestMatchBlobAgainstIndex_NoFalsePositiveSubstring(t *testing.T) {
+	// "atrix" should NOT match inside "dommatrix".
+	idx := &rules.PackageIndex{
+		Packages: map[string]*rules.VersionSet{
+			"atrix": {
+				RuleID: "R1", RuleTitle: "Test", Severity: "high",
+				Versions: map[string]bool{"1.0.3": true},
+			},
+		},
+	}
+	lookups := buildCacheLookups(idx)
+
+	blob := []byte(`{"dommatrix":"^1.0.3","web-animations":"2.0.0"}`)
+	findings, _ := matchBlobAgainstIndex(blob, "/cache/blob", "/cache", lookups)
+
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings (substring false positive), got %d", len(findings))
+	}
+}
+
+func TestMatchBlobAgainstIndex_TruePositiveWithBoundary(t *testing.T) {
+	idx := &rules.PackageIndex{
+		Packages: map[string]*rules.VersionSet{
+			"atrix": {
+				RuleID: "R1", RuleTitle: "Test", Severity: "high",
+				Versions: map[string]bool{"1.0.3": true},
+			},
+		},
+	}
+	lookups := buildCacheLookups(idx)
+
+	blob := []byte(`"atrix/-/atrix-1.0.3.tgz"`)
+	findings, _ := matchBlobAgainstIndex(blob, "/cache/blob", "/cache", lookups)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
 }
 
 func TestReadInstalledVersion_NotInstalled(t *testing.T) {

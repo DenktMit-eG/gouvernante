@@ -52,6 +52,9 @@ type Result struct {
 }
 
 // ScanPackages checks parsed lockfile entries against the package index.
+// For exact versions (from lockfiles), uses direct matching.
+// For range expressions (from package.json), checks if the range could
+// resolve to any compromised version.
 func ScanPackages(entries []lockfile.PackageEntry, idx *rules.PackageIndex, lockfileName string) []Finding {
 	var findings []Finding
 
@@ -61,6 +64,7 @@ func ScanPackages(entries []lockfile.PackageEntry, idx *rules.PackageIndex, lock
 			continue
 		}
 
+		// Direct match: exact version or wildcard.
 		if vs.Matches(e.Version) {
 			findings = append(findings, Finding{
 				RuleID:    vs.RuleID,
@@ -70,6 +74,22 @@ func ScanPackages(entries []lockfile.PackageEntry, idx *rules.PackageIndex, lock
 				Package:   e.Name,
 				Version:   e.Version,
 				Lockfile:  lockfileName,
+			})
+
+			continue
+		}
+
+		// Range match: check if the declared range could resolve to a compromised version.
+		if covers, matched := vs.RangeCoversVersion(e.Version); covers {
+			findings = append(findings, Finding{
+				RuleID:      vs.RuleID,
+				RuleTitle:   vs.RuleTitle,
+				Severity:    vs.Severity,
+				Type:        "package",
+				Package:     e.Name,
+				Version:     e.Version,
+				Lockfile:    lockfileName,
+				Description: "range covers compromised version " + matched,
 			})
 		}
 	}
