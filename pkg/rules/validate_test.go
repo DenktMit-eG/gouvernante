@@ -343,6 +343,28 @@ func ruleSetWithHash(algo, value string) *RuleSet {
 	return rs
 }
 
+// requireEnum with empty value.
+
+func TestRequireEnum_EmptyValue(t *testing.T) {
+	ve := &ValidationError{}
+	requireEnum(ve, "test.field", "", validKinds)
+
+	if !ve.hasErrors() {
+		t.Fatal("expected error for empty value in requireEnum")
+	}
+
+	found := false
+	for _, e := range ve.Errors {
+		if strings.Contains(e, "required, must not be empty") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected 'required, must not be empty' error, got: %v", ve.Errors)
+	}
+}
+
 func assertValidationContains(t *testing.T, rs *RuleSet, substr string) {
 	t.Helper()
 

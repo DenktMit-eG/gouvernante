@@ -414,3 +414,349 @@ func TestBuildIndicatorPath_PathAndFileName(t *testing.T) {
 		t.Errorf("buildIndicatorPath (path+filename) = %q, want %q", got, want)
 	}
 }
+
+// Additional tests.
+
+func TestFormatHostChecks(t *testing.T) {
+	checks := []HostCheck{
+		{Path: "/tmp/malware.bin", Status: StatusFound, RuleID: "R1"},
+		{Path: "/home/user/.ssh/key", Status: StatusClean, RuleID: "R2"},
+		{Path: "some-process", Status: StatusSkipped, Reason: "process check not implemented", RuleID: "R3"},
+	}
+
+	var b strings.Builder
+	formatHostChecks(&b, checks)
+	out := b.String()
+
+	if !strings.Contains(out, "=== Host Indicator Checks ===") {
+		t.Error("missing header")
+	}
+
+	if !strings.Contains(out, "[FOUND]   /tmp/malware.bin  (R1)") {
+		t.Error("missing FOUND entry")
+	}
+
+	if !strings.Contains(out, "[CLEAN]   /home/user/.ssh/key  (R2)") {
+		t.Error("missing CLEAN entry")
+	}
+
+	if !strings.Contains(out, "[SKIP]    some-process") {
+		t.Error("missing SKIP entry")
+	}
+
+	if !strings.Contains(out, "process check not implemented  (R3)") {
+		t.Error("missing skip reason")
+	}
+}
+
+func TestFormatNodeModulesChecks(t *testing.T) {
+	checks := []NodeModulesCheck{
+		{Dir: "/project/node_modules", Package: "axios", Version: "1.14.1", Status: StatusFound},
+		{Dir: "/project/node_modules", Package: "express", Version: "4.18.2", Status: StatusClean},
+		{Dir: "/project/node_modules", Package: "lodash", Version: "", Status: StatusNotInstalled},
+	}
+
+	var b strings.Builder
+	formatNodeModulesChecks(&b, checks)
+	out := b.String()
+
+	if !strings.Contains(out, "=== Node Modules Checks ===") {
+		t.Error("missing header")
+	}
+
+	if !strings.Contains(out, "[FOUND]   axios@1.14.1 in /project/node_modules") {
+		t.Error("missing FOUND entry")
+	}
+
+	if !strings.Contains(out, "[CLEAN]   express@4.18.2 in /project/node_modules") {
+		t.Error("missing CLEAN entry")
+	}
+
+	// not_installed should be omitted
+	if strings.Contains(out, "lodash") {
+		t.Error("not_installed entry should be omitted")
+	}
+}
+
+func TestIndicatorDescription(t *testing.T) {
+	tests := []struct {
+		name string
+		hi   rules.HostIndicator
+		want string
+	}{
+		{
+			name: "path and filename",
+			hi:   rules.HostIndicator{Path: "/tmp", FileName: "malware.bin"},
+			want: "/tmp/malware.bin",
+		},
+		{
+			name: "path only",
+			hi:   rules.HostIndicator{Path: "/tmp/malware.bin"},
+			want: "/tmp/malware.bin",
+		},
+		{
+			name: "filename only",
+			hi:   rules.HostIndicator{FileName: "malware.bin"},
+			want: "malware.bin",
+		},
+		{
+			name: "value only",
+			hi:   rules.HostIndicator{Value: "some-process"},
+			want: "some-process",
+		},
+		{
+			name: "notes fallback",
+			hi:   rules.HostIndicator{Notes: "suspicious activity"},
+			want: "suspicious activity",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := indicatorDescription(&tt.hi)
+			if got != tt.want {
+				t.Errorf("indicatorDescription() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFormatFinding_Package(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+		Type: "package", Package: "axios", Version: "1.7.8", Lockfile: "pnpm-lock.yaml",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if !strings.Contains(out, "--- Finding 1 ---") {
+		t.Error("missing finding header")
+	}
+	if !strings.Contains(out, "Package:  axios@1.7.8") {
+		t.Error("missing package info")
+	}
+	if !strings.Contains(out, "Lockfile: pnpm-lock.yaml") {
+		t.Error("missing lockfile")
+	}
+	// No description, so Note: should not appear
+	if strings.Contains(out, "Note:") {
+		t.Error("Note should not appear without description")
+	}
+}
+
+func TestFormatFinding_PackageWithDescription(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+		Type: "package", Package: "axios", Version: "^1.14.0", Lockfile: "package.json",
+		Description: "range covers compromised version 1.14.1",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if !strings.Contains(out, "Note:     range covers compromised version 1.14.1") {
+		t.Error("missing description note")
+	}
+}
+
+func TestFormatFinding_InstalledPackage(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+		Type: "installed_package", Package: "axios", Version: "1.14.1",
+		Path: "/project/node_modules/axios",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if !strings.Contains(out, "installed package") {
+		t.Error("missing type text")
+	}
+	if !strings.Contains(out, "Package:  axios@1.14.1") {
+		t.Error("missing package info")
+	}
+	if !strings.Contains(out, "Path:     /project/node_modules/axios") {
+		t.Error("missing path")
+	}
+}
+
+func TestFormatFinding_CachedPackage(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+		Type: "cached_package", Package: "axios", Version: "1.14.1",
+		Path: "/home/user/.npm/_cacache/content-v2/sha512/abc",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if !strings.Contains(out, "cached package") {
+		t.Error("missing type text")
+	}
+	if !strings.Contains(out, "Cache:    /home/user/.npm/_cacache/content-v2/sha512/abc") {
+		t.Error("missing cache path")
+	}
+}
+
+func TestFormatFinding_HostIndicator(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+		Type: "host_indicator", Description: "RAT binary", Path: "/tmp/malware",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if !strings.Contains(out, "host indicator") {
+		t.Error("missing type text")
+	}
+	if !strings.Contains(out, "Detail:   RAT binary") {
+		t.Error("missing detail")
+	}
+	if !strings.Contains(out, "Path:     /tmp/malware") {
+		t.Error("missing path")
+	}
+}
+
+func TestFormatFinding_HostIndicatorNoDescription(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+		Type: "host_indicator", Path: "/tmp/malware",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if strings.Contains(out, "Detail:") {
+		t.Error("Detail should not appear without description")
+	}
+	if !strings.Contains(out, "Path:     /tmp/malware") {
+		t.Error("missing path")
+	}
+}
+
+func TestDedup(t *testing.T) {
+	tests := []struct {
+		name  string
+		input []string
+		want  []string
+	}{
+		{
+			name:  "with duplicates",
+			input: []string{"/a", "/b", "/a", "/c", "/b"},
+			want:  []string{"/a", "/b", "/c"},
+		},
+		{
+			name:  "empty strings filtered",
+			input: []string{"a", "", "b", "", "c"},
+			want:  []string{"a", "b", "c"},
+		},
+		{
+			name:  "empty input",
+			input: []string{},
+			want:  nil,
+		},
+		{
+			name:  "nil input",
+			input: nil,
+			want:  nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := dedup(tt.input)
+			if len(got) != len(tt.want) {
+				t.Fatalf("dedup(%v) = %v, want %v", tt.input, got, tt.want)
+			}
+			for i, v := range got {
+				if v != tt.want[i] {
+					t.Errorf("dedup(%v)[%d] = %q, want %q", tt.input, i, v, tt.want[i])
+				}
+			}
+		})
+	}
+}
+
+func TestScanPackages_RangeMatch(t *testing.T) {
+	entries := []lockfile.PackageEntry{
+		{Name: "axios", Version: "^1.14.0"},
+	}
+
+	idx := &rules.PackageIndex{
+		Packages: map[string]*rules.VersionSet{
+			"axios": {
+				RuleID:    "R1",
+				RuleTitle: "Axios compromise",
+				Severity:  "critical",
+				Versions:  map[string]bool{"1.14.1": true},
+			},
+		},
+	}
+
+	findings := ScanPackages(entries, idx, "package.json")
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding for range match, got %d", len(findings))
+	}
+
+	if findings[0].Description == "" {
+		t.Error("range match should have a description")
+	}
+
+	if !strings.Contains(findings[0].Description, "1.14.1") {
+		t.Errorf("description should mention matched version, got %q", findings[0].Description)
+	}
+}
+
+func TestFormatReport_WithHostAndNodeModuleChecks(t *testing.T) {
+	result := &Result{
+		Findings: []Finding{
+			{
+				RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+				Type: "package", Package: "axios", Version: "1.14.1", Lockfile: "pnpm-lock.yaml",
+			},
+		},
+		PackagesTotal: 50,
+		LockfilesUsed: []string{"pnpm-lock.yaml"},
+		HostChecks: []HostCheck{
+			{Path: "/tmp/malware.bin", Status: StatusFound, RuleID: "R1"},
+			{Path: "/home/user/.ssh/key", Status: StatusClean, RuleID: "R2"},
+		},
+		NodeModuleChecks: []NodeModulesCheck{
+			{Dir: "/project/node_modules", Package: "axios", Version: "1.14.1", Status: StatusFound},
+			{Dir: "/project/node_modules", Package: "express", Version: "4.18.2", Status: StatusClean},
+		},
+	}
+
+	report := FormatReport(result)
+
+	if !strings.Contains(report, "=== Host Indicator Checks ===") {
+		t.Error("report should contain host checks section")
+	}
+
+	if !strings.Contains(report, "=== Node Modules Checks ===") {
+		t.Error("report should contain node modules checks section")
+	}
+
+	if !strings.Contains(report, "[FOUND]") {
+		t.Error("report should contain FOUND entries")
+	}
+
+	if !strings.Contains(report, "[CLEAN]") {
+		t.Error("report should contain CLEAN entries")
+	}
+}
+
+func TestExpandPath_AppDataEmpty(t *testing.T) {
+	t.Setenv("APPDATA", "")
+	got := expandPath("%APPDATA%\\config")
+
+	home, _ := os.UserHomeDir()
+	want := filepath.Join(home, "AppData", "Roaming") + "\\config"
+
+	if got != want {
+		t.Errorf("expandPath(%%APPDATA%%) with empty env = %q, want %q", got, want)
+	}
+}

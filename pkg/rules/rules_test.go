@@ -312,3 +312,301 @@ func TestVersionSet_Matches(t *testing.T) {
 		})
 	}
 }
+
+// Matches with semver constraints.
+
+func TestMatches_SemverConstraintMatch(t *testing.T) {
+	// Build an index with a range constraint >=1.0.0 <2.0.0
+	ruleList := []Rule{
+		{
+			ID: "R-RANGE", Title: "Range", Severity: "high",
+			PackageRules: []PackageRule{
+				{PackageName: "rangepkg", AffectedVersions: []string{">=1.0.0 <2.0.0"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["rangepkg"]
+	if vs == nil {
+		t.Fatal("expected rangepkg in index")
+	}
+
+	if !vs.Matches("1.5.0") {
+		t.Error("expected 1.5.0 to match constraint >=1.0.0 <2.0.0")
+	}
+}
+
+func TestMatches_SemverConstraintNoMatch(t *testing.T) {
+	ruleList := []Rule{
+		{
+			ID: "R-RANGE2", Title: "Range2", Severity: "high",
+			PackageRules: []PackageRule{
+				{PackageName: "rangepkg2", AffectedVersions: []string{">=1.0.0 <2.0.0"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["rangepkg2"]
+	if vs == nil {
+		t.Fatal("expected rangepkg2 in index")
+	}
+
+	if vs.Matches("2.5.0") {
+		t.Error("expected 2.5.0 to NOT match constraint >=1.0.0 <2.0.0")
+	}
+}
+
+func TestMatches_InvalidVersionString(t *testing.T) {
+	ruleList := []Rule{
+		{
+			ID: "R-RANGE3", Title: "Range3", Severity: "high",
+			PackageRules: []PackageRule{
+				{PackageName: "rangepkg3", AffectedVersions: []string{">=1.0.0 <2.0.0"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["rangepkg3"]
+	if vs == nil {
+		t.Fatal("expected rangepkg3 in index")
+	}
+
+	// Non-semver version string should return false gracefully
+	if vs.Matches("not-a-version") {
+		t.Error("expected non-semver version to NOT match")
+	}
+}
+
+func TestMatches_NoConstraintsNoExactMatch(t *testing.T) {
+	vs := &VersionSet{
+		Versions: map[string]bool{"1.0.0": true},
+	}
+
+	if vs.Matches("2.0.0") {
+		t.Error("expected no match when no constraints and no exact match")
+	}
+}
+
+func TestMatches_ExactMatchWinsOverConstraints(t *testing.T) {
+	// Build index with both exact versions and a range constraint
+	ruleList := []Rule{
+		{
+			ID: "R-BOTH", Title: "Both", Severity: "high",
+			PackageRules: []PackageRule{
+				{PackageName: "bothpkg", AffectedVersions: []string{"1.5.0", ">=2.0.0 <3.0.0"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["bothpkg"]
+	if vs == nil {
+		t.Fatal("expected bothpkg in index")
+	}
+
+	// Exact match path
+	if !vs.Matches("1.5.0") {
+		t.Error("expected exact match for 1.5.0")
+	}
+
+	// Constraint match path
+	if !vs.Matches("2.5.0") {
+		t.Error("expected constraint match for 2.5.0")
+	}
+
+	// Neither
+	if vs.Matches("3.5.0") {
+		t.Error("expected no match for 3.5.0")
+	}
+}
+
+// RangeCoversVersion tests.
+
+func TestRangeCoversVersion_Covers(t *testing.T) {
+	ruleList := []Rule{
+		{
+			ID: "R-RCV1", Title: "RCV1", Severity: "critical",
+			PackageRules: []PackageRule{
+				{PackageName: "rcvpkg", AffectedVersions: []string{"1.14.1"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["rcvpkg"]
+	if vs == nil {
+		t.Fatal("expected rcvpkg in index")
+	}
+
+	covers, matched := vs.RangeCoversVersion("^1.14.0")
+	if !covers {
+		t.Error("expected ^1.14.0 to cover 1.14.1")
+	}
+	if matched != "1.14.1" {
+		t.Errorf("expected matched version 1.14.1, got %q", matched)
+	}
+}
+
+func TestRangeCoversVersion_DoesNotCover(t *testing.T) {
+	ruleList := []Rule{
+		{
+			ID: "R-RCV2", Title: "RCV2", Severity: "critical",
+			PackageRules: []PackageRule{
+				{PackageName: "rcvpkg2", AffectedVersions: []string{"1.14.1"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["rcvpkg2"]
+	if vs == nil {
+		t.Fatal("expected rcvpkg2 in index")
+	}
+
+	covers, matched := vs.RangeCoversVersion("^2.0.0")
+	if covers {
+		t.Error("expected ^2.0.0 to NOT cover 1.14.1")
+	}
+	if matched != "" {
+		t.Errorf("expected empty matched version, got %q", matched)
+	}
+}
+
+func TestRangeCoversVersion_AnyVersion(t *testing.T) {
+	vs := &VersionSet{
+		AnyVersion: true,
+		Versions:   map[string]bool{},
+	}
+
+	covers, matched := vs.RangeCoversVersion("^1.0.0")
+	if !covers {
+		t.Error("expected AnyVersion to cover any range")
+	}
+	if matched != "*" {
+		t.Errorf("expected matched version *, got %q", matched)
+	}
+}
+
+func TestRangeCoversVersion_InvalidRangeExpression(t *testing.T) {
+	vs := &VersionSet{
+		Versions: map[string]bool{"1.0.0": true},
+	}
+
+	covers, matched := vs.RangeCoversVersion("not-a-range[[[")
+	if covers {
+		t.Error("expected invalid range to return false")
+	}
+	if matched != "" {
+		t.Errorf("expected empty matched version, got %q", matched)
+	}
+}
+
+func TestRangeCoversVersion_NonSemverInVersionsMap(t *testing.T) {
+	vs := &VersionSet{
+		Versions: map[string]bool{
+			"not-semver": true,
+			"also-bad":   true,
+		},
+	}
+
+	covers, matched := vs.RangeCoversVersion("^1.0.0")
+	if covers {
+		t.Error("expected non-semver versions to be skipped, returning false")
+	}
+	if matched != "" {
+		t.Errorf("expected empty matched version, got %q", matched)
+	}
+}
+
+// indexPackageRules tests.
+
+func TestIndexPackageRules_RangeExpression(t *testing.T) {
+	ruleList := []Rule{
+		{
+			ID: "R-IDX1", Title: "Idx1", Severity: "high",
+			PackageRules: []PackageRule{
+				{PackageName: "idxpkg", AffectedVersions: []string{">=1.0.0 <2.0.0"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["idxpkg"]
+	if vs == nil {
+		t.Fatal("expected idxpkg in index")
+	}
+
+	if len(vs.Constraints) != 1 {
+		t.Fatalf("expected 1 constraint, got %d", len(vs.Constraints))
+	}
+
+	// Should not be stored as exact match
+	if len(vs.Versions) != 0 {
+		t.Errorf("expected no exact versions, got %d", len(vs.Versions))
+	}
+}
+
+func TestIndexPackageRules_UnparseableVersion(t *testing.T) {
+	ruleList := []Rule{
+		{
+			ID: "R-IDX2", Title: "Idx2", Severity: "high",
+			PackageRules: []PackageRule{
+				{PackageName: "idxpkg2", AffectedVersions: []string{"this-is-not-valid"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["idxpkg2"]
+	if vs == nil {
+		t.Fatal("expected idxpkg2 in index")
+	}
+
+	// Should be stored as exact match fallback
+	if !vs.Versions["this-is-not-valid"] {
+		t.Error("expected unparseable string to be stored as exact match")
+	}
+
+	if len(vs.Constraints) != 0 {
+		t.Errorf("expected no constraints, got %d", len(vs.Constraints))
+	}
+}
+
+func TestIndexPackageRules_MixedVersionsAndRanges(t *testing.T) {
+	ruleList := []Rule{
+		{
+			ID: "R-IDX3", Title: "Idx3", Severity: "high",
+			PackageRules: []PackageRule{
+				{PackageName: "mixpkg", AffectedVersions: []string{"1.0.0", ">=2.0.0 <3.0.0", "garbage!!!"}},
+			},
+		},
+	}
+	idx := BuildPackageIndex(ruleList)
+	vs := idx.Packages["mixpkg"]
+	if vs == nil {
+		t.Fatal("expected mixpkg in index")
+	}
+
+	// "1.0.0" -> exact version
+	if !vs.Versions["1.0.0"] {
+		t.Error("expected 1.0.0 as exact version")
+	}
+
+	// ">=2.0.0 <3.0.0" -> constraint
+	if len(vs.Constraints) != 1 {
+		t.Fatalf("expected 1 constraint, got %d", len(vs.Constraints))
+	}
+
+	// "garbage!!!" -> exact match fallback
+	if !vs.Versions["garbage!!!"] {
+		t.Error("expected garbage!!! as exact match fallback")
+	}
+}
+
+// LoadDir with invalid JSON alongside valid files.
+
+func TestLoadDir_InvalidJSONFile(t *testing.T) {
+	dir := t.TempDir()
+	writeRuleFile(t, dir, "valid.json", validRuleJSON)
+	writeRuleFile(t, dir, "invalid.json", "{bad json}")
+
+	_, err := LoadDir(dir)
+	if err == nil {
+		t.Fatal("expected error when directory contains invalid JSON file")
+	}
+}

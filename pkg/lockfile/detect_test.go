@@ -1,6 +1,9 @@
 package lockfile
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -250,5 +253,228 @@ packages:
 
 	if len(result.Entries) != 1 {
 		t.Errorf("expected 1 entry, got %d", len(result.Entries))
+	}
+}
+
+// handleWalkError tests.
+
+// fakeDirEntry implements fs.DirEntry for testing.
+type fakeDirEntry struct {
+	name  string
+	isDir bool
+}
+
+func (f *fakeDirEntry) Name() string               { return f.name }
+func (f *fakeDirEntry) IsDir() bool                { return f.isDir }
+func (f *fakeDirEntry) Type() fs.FileMode          { return 0 }
+func (f *fakeDirEntry) Info() (fs.FileInfo, error) { return nil, nil }
+
+func TestHandleWalkError_DirEntry(t *testing.T) {
+	d := &fakeDirEntry{name: "baddir", isDir: true}
+	err := handleWalkError("/some/path", d, fmt.Errorf("permission denied"))
+
+	if !errors.Is(err, fs.SkipDir) {
+		t.Errorf("expected fs.SkipDir, got %v", err)
+	}
+}
+
+func TestHandleWalkError_NonDirEntry(t *testing.T) {
+	d := &fakeDirEntry{name: "badfile.txt", isDir: false}
+	err := handleWalkError("/some/path", d, fmt.Errorf("permission denied"))
+	if err != nil {
+		t.Errorf("expected nil, got %v", err)
+	}
+}
+
+func TestHandleWalkError_NilDirEntry(t *testing.T) {
+	err := handleWalkError("/some/path", nil, fmt.Errorf("permission denied"))
+	if err != nil {
+		t.Errorf("expected nil for nil DirEntry, got %v", err)
+	}
+}
+
+// relPath tests.
+
+func TestRelPath_Success(t *testing.T) {
+	got := relPath("/root", "/root/sub/file.txt")
+	want := filepath.Join("sub", "file.txt")
+
+	if got != want {
+		t.Errorf("relPath() = %q, want %q", got, want)
+	}
+}
+
+func TestRelPath_SamePath(t *testing.T) {
+	got := relPath("/root", "/root")
+	if got != "." {
+		t.Errorf("relPath() = %q, want %q", got, ".")
+	}
+}
+
+// ParseFile with package.json.
+
+func TestParseFile_PackageJSON(t *testing.T) {
+	path := writeTempFile(t, "package.json", `{
+  "dependencies": {
+    "express": "^4.18.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}`)
+
+	result, err := ParseFile(path)
+	if err != nil {
+		t.Fatalf("error: %v", err)
+	}
+
+	if result.Name != "package.json" {
+		t.Errorf("expected name package.json, got %s", result.Name)
+	}
+
+	if len(result.Entries) != 2 {
+		t.Errorf("expected 2 entries, got %d", len(result.Entries))
+	}
+}
+
+// DetectAndParse with package.json.
+
+func TestDetectAndParse_PackageJSON(t *testing.T) {
+	dir := t.TempDir()
+
+	content := `{
+  "dependencies": {
+    "lodash": "^4.17.0"
+  }
+}`
+	if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	results, err := DetectAndParse(dir)
+	if err != nil {
+		t.Fatalf("error: %v", err)
+	}
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+
+	if results[0].Name != "package.json" {
+		t.Errorf("expected name package.json, got %s", results[0].Name)
+	}
+
+	if len(results[0].Entries) != 1 {
+		t.Errorf("expected 1 entry, got %d", len(results[0].Entries))
+	}
+}
+
+// DetectAndParse with invalid lockfile.
+
+func TestDetectAndParse_InvalidLockfile(t *testing.T) {
+	dir := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(dir, "package-lock.json"), []byte("{invalid json}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := DetectAndParse(dir)
+	if err == nil {
+		t.Fatal("expected error for invalid lockfile")
+	}
+}
+
+// DetectAndParseRecursive with unreadable directory.
+
+func TestDetectAndParseRecursive_UnreadableDir(t *testing.T) {
+	root := t.TempDir()
+
+	// Create a subdirectory that we'll make unreadable.
+	subDir := filepath.Join(root, "restricted")
+	if err := os.MkdirAll(subDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Put a lockfile inside.
+	content := `lockfileVersion: '9.0'
+packages:
+  axios@1.0.0:
+    resolution: {integrity: sha512-fake}
+`
+	if err := os.WriteFile(filepath.Join(subDir, "pnpm-lock.yaml"), []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// Remove read+execute permission so WalkDir can't enter it.
+	if err := os.Chmod(subDir, 0o000); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() {
+		_ = os.Chmod(subDir, 0o755)
+	})
+
+	// Should not fail — just skip the unreadable directory.
+	results, err := DetectAndParseRecursive(root)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// The lockfile in the restricted dir should not have been found.
+	if len(results) != 0 {
+		t.Errorf("expected 0 results, got %d", len(results))
+	}
+}
+
+// DetectAndParseRecursive with deep tree to trigger progress logging.
+
+func TestDetectAndParseRecursive_DeepTree(t *testing.T) {
+	root := t.TempDir()
+
+	// Create 501+ directories to trigger the progress logging path (dirCount % 500 == 0).
+	for i := range 502 {
+		dir := filepath.Join(root, fmt.Sprintf("dir%04d", i))
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// Add a lockfile in one of them to also exercise visitFile.
+	content := `{
+  "dependencies": {
+    "express": "^4.18.0"
+  }
+}`
+	if err := os.WriteFile(filepath.Join(root, "dir0001", "package.json"), []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	results, err := DetectAndParseRecursive(root)
+	if err != nil {
+		t.Fatalf("error: %v", err)
+	}
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+}
+
+// visitFile with unparseable lockfile (error return path).
+
+func TestDetectAndParseRecursive_InvalidNestedLockfile(t *testing.T) {
+	root := t.TempDir()
+
+	subDir := filepath.Join(root, "sub")
+	if err := os.MkdirAll(subDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(subDir, "package-lock.json"), []byte("{invalid}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := DetectAndParseRecursive(root)
+	if err == nil {
+		t.Fatal("expected error for invalid nested lockfile")
 	}
 }

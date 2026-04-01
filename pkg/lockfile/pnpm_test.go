@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/goccy/go-yaml"
 )
 
 func writeTempFile(t *testing.T, name, content string) string {
@@ -176,6 +178,34 @@ func TestSplitPackageKey(t *testing.T) {
 			t.Errorf("splitPackageKey(%q) = (%q, %q), want (%q, %q)",
 				tt.key, name, version, tt.name, tt.version)
 		}
+	}
+}
+
+func TestExtractFromMapSlice_NonStringKey(t *testing.T) {
+	// yaml.MapSlice with a non-string key should be skipped without panic.
+	ms := yaml.MapSlice{
+		{Key: 42, Value: nil},
+		{Key: "axios@1.7.9", Value: nil},
+	}
+
+	seen := make(map[string]bool)
+	entries := extractFromMapSlice(ms, nil, seen)
+
+	if len(entries) != 1 {
+		t.Fatalf("expected 1 entry, got %d", len(entries))
+	}
+
+	if entries[0].Name != "axios" || entries[0].Version != "1.7.9" {
+		t.Errorf("unexpected entry: %+v", entries[0])
+	}
+}
+
+func TestParsePnpmLock_InvalidYAML(t *testing.T) {
+	path := writeTempFile(t, "pnpm-lock.yaml", `{{{invalid yaml`)
+
+	_, err := ParsePnpmLock(path)
+	if err == nil {
+		t.Fatal("expected error for invalid YAML")
 	}
 }
 
