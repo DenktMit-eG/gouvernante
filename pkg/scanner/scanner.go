@@ -1,7 +1,14 @@
 package scanner
 
 import (
+	"crypto/md5"  //nolint:gosec // MD5 is used for matching known-bad file hashes from rules, not for security
+	"crypto/sha1" //nolint:gosec // SHA1 is used for matching known-bad file hashes from rules, not for security
+	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/hex"
 	"fmt"
+	"hash"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -159,32 +166,51 @@ func ScanHostIndicators(ruleList []rules.Rule) ([]Finding, []HostCheck) {
 				continue
 			}
 
-			if hi.Path == "" && hi.FileName != "" {
-				slog.Warn("file indicator has file_name but no path; will resolve relative to CWD",
-					"rule", r.ID, "file_name", hi.FileName)
-			}
+			finding, check := checkFileIndicator(r, hi)
+			checks = append(checks, check)
 
-			fullPath := buildIndicatorPath(hi)
-			if _, err := os.Stat(fullPath); err == nil {
-				slog.Warn("host indicator FOUND", "rule", r.ID, "path", fullPath, "notes", hi.Notes)
-				checks = append(checks, HostCheck{Path: fullPath, Status: StatusFound, RuleID: r.ID, Notes: hi.Notes})
-
-				findings = append(findings, Finding{
-					RuleID:      r.ID,
-					RuleTitle:   r.Title,
-					Severity:    r.Severity,
-					Type:        TypeHostIndicator,
-					Description: hi.Notes,
-					Path:        fullPath,
-				})
-			} else {
-				slog.Info("host indicator clean", "rule", r.ID, "path", fullPath)
-				checks = append(checks, HostCheck{Path: fullPath, Status: StatusClean, RuleID: r.ID, Notes: hi.Notes})
+			if finding != nil {
+				findings = append(findings, *finding)
 			}
 		}
 	}
 
 	return findings, checks
+}
+
+// checkFileIndicator checks a single file-type host indicator for existence
+// and optional hash verification. Returns a finding (nil if clean) and a check log entry.
+func checkFileIndicator(r *rules.Rule, hi *rules.HostIndicator) (*Finding, HostCheck) {
+	if hi.Path == "" && hi.FileName != "" {
+		slog.Warn("file indicator has file_name but no path; will resolve relative to CWD",
+			"rule", r.ID, "file_name", hi.FileName)
+	}
+
+	fullPath := buildIndicatorPath(hi)
+
+	if _, err := os.Stat(fullPath); err != nil {
+		slog.Info("host indicator clean", "rule", r.ID, "path", fullPath)
+
+		return nil, HostCheck{Path: fullPath, Status: StatusClean, RuleID: r.ID, Notes: hi.Notes}
+	}
+
+	desc := hi.Notes
+	if len(hi.Hashes) > 0 {
+		desc = hashCheckDescription(fullPath, hi.Hashes, hi.Notes)
+	}
+
+	slog.Warn("host indicator FOUND", "rule", r.ID, "path", fullPath, "notes", desc)
+
+	finding := Finding{
+		RuleID:      r.ID,
+		RuleTitle:   r.Title,
+		Severity:    r.Severity,
+		Type:        TypeHostIndicator,
+		Description: desc,
+		Path:        fullPath,
+	}
+
+	return &finding, HostCheck{Path: fullPath, Status: StatusFound, RuleID: r.ID, Notes: hi.Notes}
 }
 
 // buildIndicatorPath constructs the full filesystem path for a host indicator
@@ -262,6 +288,105 @@ func expandPath(path string) string {
 	}
 
 	return path
+}
+
+// hashCheckDescription computes file hashes and returns a description indicating
+// whether any rule hash matched or whether the file is an unknown variant at a
+// known-bad path. When the file cannot be read, the description notes the error.
+func hashCheckDescription(path string, ruleHashes []rules.FileHash, notes string) string {
+	computed, err := computeFileHashes(path, ruleHashes)
+	if err != nil {
+		if notes != "" {
+			return notes + "; hash verification failed: " + err.Error()
+		}
+
+		return "hash verification failed: " + err.Error()
+	}
+
+	var matched []string
+
+	for _, rh := range ruleHashes {
+		if computed[rh.Algorithm] == rh.Value {
+			matched = append(matched, rh.Algorithm)
+		}
+	}
+
+	if len(matched) > 0 {
+		suffix := "hash confirmed (" + strings.Join(matched, ", ") + ")"
+		if notes != "" {
+			return notes + "; " + suffix
+		}
+
+		return suffix
+	}
+
+	suffix := "file exists but hash does not match any known variant"
+	if notes != "" {
+		return notes + "; " + suffix
+	}
+
+	return suffix
+}
+
+// computeFileHashes reads the file at path once and computes all hash algorithms
+// referenced by the rule's hashes slice. Returns a map from algorithm name to hex digest.
+func computeFileHashes(path string, ruleHashes []rules.FileHash) (map[string]string, error) {
+	needed := make(map[string]hash.Hash)
+
+	for _, rh := range ruleHashes {
+		if _, ok := needed[rh.Algorithm]; ok {
+			continue
+		}
+
+		h, ok := newHashFunc(rh.Algorithm)
+		if !ok {
+			continue // unknown algorithm — skip (validated at load time)
+		}
+
+		needed[rh.Algorithm] = h
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("open: %w", err)
+	}
+
+	defer func() {
+		_ = f.Close()
+	}()
+
+	writers := make([]io.Writer, 0, len(needed))
+	for _, h := range needed {
+		writers = append(writers, h)
+	}
+
+	if _, err := io.Copy(io.MultiWriter(writers...), f); err != nil {
+		return nil, fmt.Errorf("read: %w", err)
+	}
+
+	result := make(map[string]string, len(needed))
+	for algo, h := range needed {
+		result[algo] = hex.EncodeToString(h.Sum(nil))
+	}
+
+	return result, nil
+}
+
+// newHashFunc returns a new hash.Hash for the given algorithm name.
+// Supported algorithms: md5, sha1, sha256, sha512.
+func newHashFunc(algorithm string) (hash.Hash, bool) {
+	switch algorithm {
+	case "md5":
+		return md5.New(), true //nolint:gosec // matching known-bad file hashes, not security use
+	case "sha1":
+		return sha1.New(), true //nolint:gosec // matching known-bad file hashes, not security use
+	case "sha256":
+		return sha256.New(), true
+	case "sha512":
+		return sha512.New(), true
+	default:
+		return nil, false
+	}
 }
 
 // FormatReport produces a human-readable text report.

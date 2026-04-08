@@ -94,7 +94,4 @@ Open [http://localhost:8000/](http://localhost:8000/) with live-reload. Stop wit
 - [Developer guide](docs/developer-guide/writing-rules.md)
 - [Operations guide](docs/operations-guide/running-scans.md)
 - [Decision log](docs/reference/decision-log/index.md)
-
-## License
-
-Internal tooling. See your organization's licensing policy.
+- [License](LICENSE)

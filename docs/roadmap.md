@@ -31,7 +31,7 @@ tags:
 | nvm cache and globals | Done | Scans $NVM_DIR cache and per-version global node_modules |
 | npm cache scanning | Done | Scans _cacache blobs for indexed package names and versions |
 | Dynamic npm prefix detection | Done | Uses `$NPM_CONFIG_PREFIX` env var and well-known OS paths |
-| Host indicator: file hashes (sha256, sha1, md5, sha512) | Schema only | Hashes are stored and validated but not checked against actual files |
+| Host indicator: file hashes (sha256, sha1, md5, sha512) | Done | When a file indicator matches and carries `hashes`, the scanner computes file hashes and reports whether they match a known-bad variant |
 | Host indicator: network | Schema only | C2 domains/IPs stored for analyst reference, not actively checked |
 | Host indicator: process | Schema only | Process names stored, not checked against running processes |
 | Host indicator: registry | Schema only | Windows registry keys stored, not checked |
@@ -48,14 +48,6 @@ tags:
 
 These features are defined in the schema or referenced in documentation but
 not yet active in the scanner.
-
-### Host indicator: file hash verification
-
-**Schema:** Supported — file indicators can carry `hashes` arrays with algorithm and value.
-
-**Current behavior:** Hashes are stored in rules and validated for correct format (algorithm, hex length) but the scanner does not read file contents or compute hashes. It only checks file existence via `os.Stat()`.
-
-**What's needed:** When a file indicator matches (file exists), read the file, compute its hash, and compare against the stored values. Report whether the hash matches a known-bad variant or is an unknown file at a known-bad path.
 
 ### Host indicator: network connections
 
@@ -111,7 +103,6 @@ Same `bytes.Contains` approach as npm cache would work.
 Pick any item from the "Not Yet Implemented" list. The easiest starting points are:
 
 1. **Environment variable checks** — straightforward `os.Getenv()`, minimal code.
-2. **File hash verification** — read file + `crypto/sha256` etc., moderate scope.
-3. **Bun lockfile parser** — follow the [Adding Parsers](developer-guide/adding-parsers.md) guide.
+2. **Bun lockfile parser** — follow the [Adding Parsers](developer-guide/adding-parsers.md) guide.
 
 For larger items (network, process, registry), open an issue to discuss the approach before starting.

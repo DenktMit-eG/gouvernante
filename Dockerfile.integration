@@ -21,11 +21,16 @@ COPY --from=builder /gouvernante /usr/local/bin/gouvernante
 
 # Copy rules and test lockfile.
 COPY testdata/rules/incidents/ /test/rules/
+COPY testdata/rules/integration/ /test/rules/
 COPY testdata/package-lock.json /test/project/package-lock.json
 
-# 1. Plant fake host IOC files (Linux paths from axios rule).
-RUN touch /tmp/ld.py && \
-    touch /tmp/processor.sh
+# 1. Plant fake host IOC files.
+#    ld.py: has content whose SHA-256 differs from the rule → tests hash mismatch path.
+#    processor.sh: rule has no hashes → tests existence-only path.
+#    hash-match-test.bin: content matches the SHA-256 in the test rule → tests hash confirmed path.
+RUN echo "fake-ioc-content" > /tmp/ld.py && \
+    touch /tmp/processor.sh && \
+    printf "hash-match-test-content" > /tmp/hash-match-test.bin
 
 # 2. Plant fake compromised node_modules.
 RUN mkdir -p /test/project/node_modules/axios && \
@@ -54,7 +59,10 @@ RUN set -e && \
     grep -q "axios@0.30.4" /tmp/report.txt || { echo "FAIL: missing lockfile axios finding"; exit 1; } && \
     grep -q "plain-crypto-js" /tmp/report.txt || { echo "FAIL: missing dropper finding"; exit 1; } && \
     grep -q "\[FOUND\].*ld.py" /tmp/report.txt || { echo "FAIL: missing host indicator ld.py"; exit 1; } && \
+    grep -q "hash does not match" /tmp/report.txt || { echo "FAIL: missing hash mismatch note for ld.py"; exit 1; } && \
     grep -q "\[FOUND\].*processor.sh" /tmp/report.txt || { echo "FAIL: missing host indicator processor.sh"; exit 1; } && \
+    grep -q "\[FOUND\].*hash-match-test.bin" /tmp/report.txt || { echo "FAIL: missing host indicator hash-match-test.bin"; exit 1; } && \
+    grep -q "hash confirmed" /tmp/report.txt || { echo "FAIL: missing hash confirmed note for hash-match-test.bin"; exit 1; } && \
     grep -q "\[FOUND\].*axios.*0.30.4" /tmp/report.txt || { echo "FAIL: missing node_modules axios"; exit 1; } && \
     grep -q "\[FOUND\].*plain-crypto-js" /tmp/report.txt || { echo "FAIL: missing node_modules dropper"; exit 1; } && \
     echo "--- Full report ---" && \

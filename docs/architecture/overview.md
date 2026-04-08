@@ -114,7 +114,7 @@ gouvernante/
 │   └── scanner/             Matching engine and output
 │       └── scanner.go       ScanPackages, ScanHostIndicators, FormatReport
 └── testdata/                Test fixtures
-    ├── rules/               Rule fixtures (valid, invalid, incident samples)
+    ├── rules/               Rule fixtures (valid, invalid, incidents, integration)
     │   └── schema.json      JSON Schema for rule validation
     ├── pnpm-lock.yaml       Lockfile fixtures
     └── package-lock.json

@@ -130,7 +130,6 @@ Use this template based on the real axios incident rule:
 | Exact (with =) | `"=1.7.8"` | Only version 1.7.8. |
 | Exact (bare) | `"1.7.8"` | Same as `"=1.7.8"`. |
 | Wildcard | `"*"` | Any version (use for dropper/typosquat packages). |
-
 | Range | `">=1.0.0 <2.0.0"` | Versions satisfying the semver constraint. |
 | Caret | `"^1.7.0"` | Compatible versions (same major). |
 | Tilde | `"~1.7.0"` | Patch-level versions (same major.minor). |
@@ -186,7 +185,7 @@ though only `file` is currently checked by the scanner:
 
 | Type | Status | Fields |
 |------|--------|--------|
-| `file` | Partial | `path` and/or `file_name` (at least one required), optional `hashes` (schema-validated but not yet checked at runtime). Existence check only. |
+| `file` | Done | `path` and/or `file_name` (at least one required), optional `hashes` (verified against actual file contents when present). |
 | `process` | Schema only | `value` (process name) |
 | `registry` | Schema only | `value` (registry key path) |
 | `network` | Schema only | `value` (host:port or domain) |

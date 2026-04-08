@@ -11,7 +11,7 @@ tags:
 # Code Style
 
 !!! tldr "TL;DR"
-    Format with `gofumpt`, lint with `golangci-lint` (30+ linters), write
+    Format with `gofumpt`, lint with `golangci-lint` (34 linters), write
     Godoc on every exported symbol, wrap errors with `%w`, keep dependencies
     minimal, and run `make fmt` + `make lint` before every push.
 

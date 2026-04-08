@@ -954,6 +954,456 @@ func TestFormatReport_WithHostAndNodeModuleChecks(t *testing.T) {
 	}
 }
 
+func TestScanHostIndicators_FileHashMatch(t *testing.T) {
+	dir := t.TempDir()
+	indicator := filepath.Join(dir, "payload.bin")
+
+	if err := os.WriteFile(indicator, []byte("known-bad-content"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	ruleList := []rules.Rule{
+		{
+			ID: "R1", Title: "Hash IOC", Severity: "critical",
+			HostIndicators: []rules.HostIndicator{
+				{
+					Type:     "file",
+					Path:     dir,
+					FileName: "payload.bin",
+					OSes:     []string{"linux", "macos", "windows"},
+					Hashes: []rules.FileHash{
+						{Algorithm: "sha256", Value: "231d243bd5264e8840b9be8ea81d9c9818a614c10a980e139cf06061bd719095"},
+					},
+					Notes: "known malware",
+				},
+			},
+		},
+	}
+
+	findings, checks := ScanHostIndicators(ruleList)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
+
+	if !strings.Contains(findings[0].Description, "hash confirmed") {
+		t.Errorf("expected 'hash confirmed' in description, got %q", findings[0].Description)
+	}
+
+	if !strings.Contains(findings[0].Description, "sha256") {
+		t.Errorf("expected 'sha256' in description, got %q", findings[0].Description)
+	}
+
+	if !strings.Contains(findings[0].Description, "known malware") {
+		t.Errorf("expected notes in description, got %q", findings[0].Description)
+	}
+
+	if len(checks) != 1 || checks[0].Status != StatusFound {
+		t.Errorf("expected 1 FOUND check, got %v", checks)
+	}
+}
+
+func TestScanHostIndicators_FileHashMismatch(t *testing.T) {
+	dir := t.TempDir()
+	indicator := filepath.Join(dir, "payload.bin")
+
+	if err := os.WriteFile(indicator, []byte("different-content"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	ruleList := []rules.Rule{
+		{
+			ID: "R1", Title: "Hash IOC", Severity: "critical",
+			HostIndicators: []rules.HostIndicator{
+				{
+					Type:     "file",
+					Path:     dir,
+					FileName: "payload.bin",
+					OSes:     []string{"linux", "macos", "windows"},
+					Hashes: []rules.FileHash{
+						{Algorithm: "sha256", Value: "231d243bd5264e8840b9be8ea81d9c9818a614c10a980e139cf06061bd719095"},
+					},
+					Notes: "known malware",
+				},
+			},
+		},
+	}
+
+	findings, _ := ScanHostIndicators(ruleList)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
+
+	if !strings.Contains(findings[0].Description, "hash does not match") {
+		t.Errorf("expected 'hash does not match' in description, got %q", findings[0].Description)
+	}
+
+	if !strings.Contains(findings[0].Description, "known malware") {
+		t.Errorf("expected notes in description, got %q", findings[0].Description)
+	}
+}
+
+func TestScanHostIndicators_FileHashMultipleAlgorithms(t *testing.T) {
+	dir := t.TempDir()
+	indicator := filepath.Join(dir, "payload.bin")
+
+	if err := os.WriteFile(indicator, []byte("known-bad-content"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	ruleList := []rules.Rule{
+		{
+			ID: "R1", Title: "Hash IOC", Severity: "critical",
+			HostIndicators: []rules.HostIndicator{
+				{
+					Type:     "file",
+					Path:     dir,
+					FileName: "payload.bin",
+					OSes:     []string{"linux", "macos", "windows"},
+					Hashes: []rules.FileHash{
+						{Algorithm: "md5", Value: "7f3499269f3f7c98961fc2202c2f54a9"},
+						{Algorithm: "sha1", Value: "6e3f008f02deb90b3240ec17797c527b067adedf"},
+						{Algorithm: "sha256", Value: "231d243bd5264e8840b9be8ea81d9c9818a614c10a980e139cf06061bd719095"},
+					},
+				},
+			},
+		},
+	}
+
+	findings, _ := ScanHostIndicators(ruleList)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
+
+	desc := findings[0].Description
+	if !strings.Contains(desc, "hash confirmed") {
+		t.Errorf("expected 'hash confirmed', got %q", desc)
+	}
+
+	for _, algo := range []string{"md5", "sha1", "sha256"} {
+		if !strings.Contains(desc, algo) {
+			t.Errorf("expected %q in description, got %q", algo, desc)
+		}
+	}
+}
+
+func TestScanHostIndicators_FileHashNoHashes(t *testing.T) {
+	// Backward compatibility: no hashes on indicator means existence-only check.
+	dir := t.TempDir()
+	indicator := filepath.Join(dir, "payload.bin")
+
+	if err := os.WriteFile(indicator, []byte("anything"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	ruleList := []rules.Rule{
+		{
+			ID: "R1", Title: "No Hash IOC", Severity: "critical",
+			HostIndicators: []rules.HostIndicator{
+				{
+					Type:     "file",
+					Path:     dir,
+					FileName: "payload.bin",
+					OSes:     []string{"linux", "macos", "windows"},
+					Notes:    "existence only",
+				},
+			},
+		},
+	}
+
+	findings, _ := ScanHostIndicators(ruleList)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
+
+	if findings[0].Description != "existence only" {
+		t.Errorf("expected notes as description, got %q", findings[0].Description)
+	}
+}
+
+func TestScanHostIndicators_FileHashEmptyNotes(t *testing.T) {
+	dir := t.TempDir()
+	indicator := filepath.Join(dir, "payload.bin")
+
+	if err := os.WriteFile(indicator, []byte("known-bad-content"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	ruleList := []rules.Rule{
+		{
+			ID: "R1", Title: "Hash IOC", Severity: "critical",
+			HostIndicators: []rules.HostIndicator{
+				{
+					Type:     "file",
+					Path:     dir,
+					FileName: "payload.bin",
+					OSes:     []string{"linux", "macos", "windows"},
+					Hashes: []rules.FileHash{
+						{Algorithm: "sha256", Value: "231d243bd5264e8840b9be8ea81d9c9818a614c10a980e139cf06061bd719095"},
+					},
+				},
+			},
+		},
+	}
+
+	findings, _ := ScanHostIndicators(ruleList)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
+
+	if !strings.Contains(findings[0].Description, "hash confirmed") {
+		t.Errorf("expected 'hash confirmed' without notes prefix, got %q", findings[0].Description)
+	}
+
+	if strings.HasPrefix(findings[0].Description, ";") {
+		t.Errorf("description should not start with semicolon, got %q", findings[0].Description)
+	}
+}
+
+func TestScanHostIndicators_FileHashMismatchEmptyNotes(t *testing.T) {
+	dir := t.TempDir()
+	indicator := filepath.Join(dir, "payload.bin")
+
+	if err := os.WriteFile(indicator, []byte("other"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	ruleList := []rules.Rule{
+		{
+			ID: "R1", Title: "Hash IOC", Severity: "critical",
+			HostIndicators: []rules.HostIndicator{
+				{
+					Type:     "file",
+					Path:     dir,
+					FileName: "payload.bin",
+					OSes:     []string{"linux", "macos", "windows"},
+					Hashes: []rules.FileHash{
+						{Algorithm: "sha256", Value: "0000000000000000000000000000000000000000000000000000000000000000"},
+					},
+				},
+			},
+		},
+	}
+
+	findings, _ := ScanHostIndicators(ruleList)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
+
+	if findings[0].Description != "file exists but hash does not match any known variant" {
+		t.Errorf("unexpected description: %q", findings[0].Description)
+	}
+}
+
+func TestComputeFileHashes(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "test.bin")
+
+	if err := os.WriteFile(path, []byte("known-bad-content"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	hashes := []rules.FileHash{
+		{Algorithm: "md5", Value: "ignored"},
+		{Algorithm: "sha256", Value: "ignored"},
+	}
+
+	result, err := computeFileHashes(path, hashes)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result["md5"] != "7f3499269f3f7c98961fc2202c2f54a9" {
+		t.Errorf("md5: got %q", result["md5"])
+	}
+
+	if result["sha256"] != "231d243bd5264e8840b9be8ea81d9c9818a614c10a980e139cf06061bd719095" {
+		t.Errorf("sha256: got %q", result["sha256"])
+	}
+}
+
+func TestComputeFileHashes_NonexistentFile(t *testing.T) {
+	hashes := []rules.FileHash{{Algorithm: "sha256", Value: "x"}}
+
+	_, err := computeFileHashes("/nonexistent/path/file.bin", hashes)
+	if err == nil {
+		t.Fatal("expected error for nonexistent file")
+	}
+
+	if !strings.Contains(err.Error(), "open") {
+		t.Errorf("expected open error, got: %v", err)
+	}
+}
+
+func TestComputeFileHashes_ReadError(t *testing.T) {
+	// Opening a directory succeeds but reading it fails.
+	dir := t.TempDir()
+	hashes := []rules.FileHash{{Algorithm: "sha256", Value: "x"}}
+
+	_, err := computeFileHashes(dir, hashes)
+	if err == nil {
+		t.Fatal("expected error when reading directory as file")
+	}
+
+	if !strings.Contains(err.Error(), "read") {
+		t.Errorf("expected read error, got: %v", err)
+	}
+}
+
+func TestComputeFileHashes_DuplicateAlgorithm(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "test.bin")
+
+	if err := os.WriteFile(path, []byte("test"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// Two sha256 entries — should only compute once.
+	hashes := []rules.FileHash{
+		{Algorithm: "sha256", Value: "aaa"},
+		{Algorithm: "sha256", Value: "bbb"},
+	}
+
+	result, err := computeFileHashes(path, hashes)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(result) != 1 {
+		t.Errorf("expected 1 algorithm in result, got %d", len(result))
+	}
+}
+
+func TestComputeFileHashes_UnknownAlgorithm(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "test.bin")
+
+	if err := os.WriteFile(path, []byte("test"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	hashes := []rules.FileHash{
+		{Algorithm: "blake2b", Value: "ignored"},
+		{Algorithm: "sha256", Value: "ignored"},
+	}
+
+	result, err := computeFileHashes(path, hashes)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if _, ok := result["blake2b"]; ok {
+		t.Error("unknown algorithm should be skipped")
+	}
+
+	if _, ok := result["sha256"]; !ok {
+		t.Error("sha256 should still be computed")
+	}
+}
+
+func TestNewHashFunc(t *testing.T) {
+	tests := []struct {
+		algo string
+		ok   bool
+	}{
+		{"md5", true},
+		{"sha1", true},
+		{"sha256", true},
+		{"sha512", true},
+		{"blake2b", false},
+		{"", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.algo, func(t *testing.T) {
+			h, ok := newHashFunc(tt.algo)
+			if ok != tt.ok {
+				t.Errorf("newHashFunc(%q) ok = %v, want %v", tt.algo, ok, tt.ok)
+			}
+
+			if tt.ok && h == nil {
+				t.Errorf("newHashFunc(%q) returned nil hash", tt.algo)
+			}
+		})
+	}
+}
+
+func TestHashCheckDescription_ReadError(t *testing.T) {
+	// Create a directory — os.Open succeeds but reading it as a file fails on some platforms,
+	// so instead use a nonexistent path to trigger open error.
+	desc := hashCheckDescription("/nonexistent/file.bin", []rules.FileHash{
+		{Algorithm: "sha256", Value: "abc"},
+	}, "malware payload")
+
+	if !strings.Contains(desc, "hash verification failed") {
+		t.Errorf("expected 'hash verification failed', got %q", desc)
+	}
+
+	if !strings.Contains(desc, "malware payload") {
+		t.Errorf("expected notes prefix, got %q", desc)
+	}
+}
+
+func TestHashCheckDescription_ReadErrorNoNotes(t *testing.T) {
+	desc := hashCheckDescription("/nonexistent/file.bin", []rules.FileHash{
+		{Algorithm: "sha256", Value: "abc"},
+	}, "")
+
+	if !strings.Contains(desc, "hash verification failed") {
+		t.Errorf("expected 'hash verification failed', got %q", desc)
+	}
+
+	if strings.HasPrefix(desc, ";") {
+		t.Errorf("description should not start with semicolon, got %q", desc)
+	}
+}
+
+func TestScanHostIndicators_FileHashSha512(t *testing.T) {
+	dir := t.TempDir()
+	indicator := filepath.Join(dir, "payload.bin")
+
+	// Empty file — use known empty-file sha512.
+	if err := os.WriteFile(indicator, []byte{}, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	ruleList := []rules.Rule{
+		{
+			ID: "R1", Title: "Hash IOC", Severity: "critical",
+			HostIndicators: []rules.HostIndicator{
+				{
+					Type:     "file",
+					Path:     dir,
+					FileName: "payload.bin",
+					OSes:     []string{"linux", "macos", "windows"},
+					Hashes: []rules.FileHash{
+						{Algorithm: "sha512", Value: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"},
+					},
+				},
+			},
+		},
+	}
+
+	findings, _ := ScanHostIndicators(ruleList)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
+
+	if !strings.Contains(findings[0].Description, "hash confirmed") {
+		t.Errorf("expected 'hash confirmed', got %q", findings[0].Description)
+	}
+
+	if !strings.Contains(findings[0].Description, "sha512") {
+		t.Errorf("expected 'sha512' in description, got %q", findings[0].Description)
+	}
+}
+
 func TestExpandPath_AppDataEmpty(t *testing.T) {
 	t.Setenv("APPDATA", "")
 	got := expandPath("%APPDATA%\\config")

@@ -137,7 +137,8 @@ testdata/
 └── rules/
     ├── valid/                    # 18 schema-valid rule fixtures
     ├── invalid/                  # 18 schema-invalid rule fixtures
-    └── incidents/                # Sample incident rules (axios, shai-hulud-2)
+    ├── incidents/                # Sample incident rules (axios, shai-hulud-2)
+    └── integration/              # Rules used by Dockerfile.integration
 ```
 
 Tests reference fixtures with relative paths from their package directory

@@ -85,7 +85,6 @@ tags:
 | Exact | `=1.7.8` | Only version 1.7.8. |
 | Bare | `1.7.8` | Same as `=1.7.8`. |
 | Wildcard | `*` | Any version. |
-
 | Range | `>=1.0.0 <2.0.0` | Versions satisfying the semver constraint. |
 | Caret | `^1.7.0` | Compatible versions (same major). |
 | Tilde | `~1.7.0` | Patch-level versions (same major.minor). |
@@ -123,7 +122,7 @@ Dropper packages are indexed with wildcard matching — any version is a finding
 
 | Type | Description | Status |
 |------|-------------|--------|
-| `file` | File existence check (`path` and/or `file_name`; hash verification planned). | Partial |
+| `file` | File existence check (`path` and/or `file_name`); hash verification when `hashes` are present. | Done |
 | `process` | Running process name. | Schema only |
 | `registry` | Windows registry key. | Schema only |
 | `network` | Network connection indicator. | Schema only |

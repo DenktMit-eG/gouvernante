@@ -129,6 +129,7 @@ The `testdata/` directory contains fixtures used by automated tests and the `mak
 | `testdata/pnpm-lock.yaml` | pnpm lockfile fixture with compromised entries. |
 | `testdata/rules/valid/*.json` | 18 schema-valid rule fixtures covering every field and conditional path. |
 | `testdata/rules/invalid/*.json` | 18 schema-invalid rule fixtures for negative validation testing. |
+| `testdata/rules/integration/*.json` | Rules used by `Dockerfile.integration` (e.g., hash-match verification). |
 
 The rule fixtures have hand-written Go struct equivalents in `pkg/rules/schema_fidelity_test.go` for bidirectional fidelity testing.
 

@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "TEST-HASH-MATCH",
+      "title": "Integration test: file hash match",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "high",
+      "package_rules": [
+        {
+          "package_name": "hash-match-test-pkg",
+          "affected_versions": ["1.0.0"]
+        }
+      ],
+      "host_indicators": [
+        {
+          "type": "file",
+          "path": "/tmp",
+          "file_name": "hash-match-test.bin",
+          "oses": ["linux"],
+          "hashes": [
+            {
+              "algorithm": "sha256",
+              "value": "7427dd5d37aa4949f95b48246ed79dcb29eeda0ab9365fee866d5c15a812d7ab"
+            }
+          ],
+          "confidence": "high",
+          "notes": "Test file with known hash"
+        }
+      ]
+    }
+  ]
+}
