@@ -145,15 +145,15 @@ esac
 Always use `-json` in CI pipelines. The JSON output is stable and scriptable:
 
 ```bash
-# Count findings (JSON output is a flat array of finding objects)
-gouvernante -rules /tmp/rules -dir . -json 2>/dev/null | jq 'length'
+# Count findings (JSON output is {"findings": [...], "summary": {...}})
+gouvernante -rules /tmp/rules -dir . -json 2>/dev/null | jq '.findings | length'
 
 # Extract critical findings only
-gouvernante -rules /tmp/rules -dir . -json 2>/dev/null | jq '[.[] | select(.severity == "critical")]'
+gouvernante -rules /tmp/rules -dir . -json 2>/dev/null | jq '[.findings[] | select(.severity == "critical")]'
 
 # Fail only on critical severity
 gouvernante -rules /tmp/rules -dir . -json -output report.json || true
-CRITICAL=$(jq '[.[] | select(.severity == "critical")] | length' report.json)
+CRITICAL=$(jq '[.findings[] | select(.severity == "critical")] | length' report.json)
 if [ "$CRITICAL" -gt 0 ]; then
   echo "Critical supply chain findings detected"
   exit 2

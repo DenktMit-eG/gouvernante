@@ -27,7 +27,7 @@ gouvernante/
 ├── cmd/
 │   └── gouvernante/          # CLI entrypoint (main.go)
 ├── pkg/
-│   ├── lockfile/            # Lockfile parsers (pnpm, npm, yarn)
+│   ├── lockfile/            # Lockfile parsers (pnpm, npm, yarn, package.json)
 │   ├── rules/               # Rule loading, indexing, validation
 │   │   └── schema.json      # JSON Schema for rule validation
 │   └── scanner/             # Core scan engine

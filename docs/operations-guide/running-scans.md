@@ -147,7 +147,11 @@ Scan complete: 2 findings in 2 lockfiles.
 
 ### JSON Output
 
-Machine-parseable JSON, suitable for piping into `jq` or ingesting in CI:
+Machine-parseable JSON, suitable for piping into `jq` or ingesting in CI.
+
+> **Note:** JSON mode emits only `findings` and `summary`. The detailed Host
+> Indicator Checks and Node Modules Checks inventories shown in text mode are
+> not included in JSON output.
 
 ```bash
 gouvernante -rules ./rules -dir ./project -json

@@ -69,10 +69,11 @@ If you need to distinguish between "error" and "findings detected":
 
 ```bash
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
-gouvernante -rules ./rules -dir . -json -output report.json
-exit_code=$?
+# Do not use set -e here — non-zero exit codes are expected (2 = findings).
+gouvernante -rules ./rules -dir . -json -output report.json || true
+exit_code=${PIPESTATUS[0]:-$?}
 
 case $exit_code in
   0)
