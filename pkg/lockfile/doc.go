@@ -5,6 +5,6 @@
 //   - package-lock.json (v1, v2, v3)
 //   - yarn.lock (v1 classic)
 //
-// All parsers are hand-written using only the Go standard library to avoid
-// depending on the npm ecosystem that is being scanned.
+// Parsers use the Go standard library where possible; the pnpm parser uses
+// goccy/go-yaml. No npm ecosystem tooling is invoked.
 package lockfile

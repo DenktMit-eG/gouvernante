@@ -2,22 +2,19 @@ package scanner
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io/fs"
 	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
-	"time"
 
 	"gouvernante/pkg/rules"
 )
 
-// packageJSON is the minimal structure we read from package.json files.
+// packageJSON is the minimal structure read from a package.json to extract name and version.
 type packageJSON struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
@@ -38,42 +35,34 @@ const cacheProgressInterval = 500
 type cacheLookup struct {
 	name      string
 	nameBytes []byte
-	vs        *rules.VersionSet
-}
-
-// Command helpers.
-
-// runCommand runs an external command and returns trimmed stdout, or empty string on failure.
-func runCommand(name string, args ...string) string {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	out, err := exec.CommandContext(ctx, name, args...).Output() //nolint:gosec // intentional external tool invocation
-	if err != nil {
-		return ""
-	}
-
-	return strings.TrimSpace(string(out))
+	vsList    []*rules.VersionSet
 }
 
 // Global npm modules.
 
-// globalNodeModulesPaths returns global node_modules locations.
-// Uses `npm config get prefix` if npm is available, falls back to well-known paths.
+// userHomeDir is the function used to resolve the user's home directory.
+// Replaced in tests to simulate errors.
+var userHomeDir = os.UserHomeDir
+
+// globalNodeModulesPaths returns global node_modules locations using environment
+// variables and well-known paths. No external binaries are executed.
 func globalNodeModulesPaths() []string {
+	return globalNodeModulesPathsForOS(runtime.GOOS)
+}
+
+// globalNodeModulesPathsForOS returns global node_modules locations for the given OS.
+func globalNodeModulesPathsForOS(goos string) []string {
 	var paths []string
 
-	// Dynamic: ask npm for its prefix.
-	if prefix := runCommand("npm", "config", "get", "prefix"); prefix != "" {
+	// Check NPM_CONFIG_PREFIX env var (equivalent to `npm config get prefix`).
+	if prefix := os.Getenv("NPM_CONFIG_PREFIX"); prefix != "" {
 		nmPath := filepath.Join(prefix, "lib", "node_modules")
-		slog.Info("npm prefix detected", "prefix", prefix, "node_modules", nmPath)
+		slog.Info("npm prefix from env", "prefix", prefix, "node_modules", nmPath)
 		paths = append(paths, nmPath)
-	} else {
-		slog.Debug("npm not available, using default global paths")
 	}
 
-	// Static fallbacks per OS.
-	switch runtime.GOOS {
+	// Well-known paths per OS.
+	switch goos {
 	case "linux":
 		paths = append(paths, "/usr/lib/node_modules", "/usr/local/lib/node_modules")
 	case "darwin":
@@ -132,40 +121,102 @@ func ScanGlobalNodeModules(idx *rules.PackageIndex) ([]Finding, []NodeModulesChe
 	return findings, checks
 }
 
+// scanSingleNodeModules walks the installed packages in nmDir and checks each
+// against the rule index. This is install-tree driven: it enumerates what is
+// actually on disk (O(installed)) and does O(1) index lookups, rather than
+// probing the filesystem for every indexed package name (O(rules)).
 func scanSingleNodeModules(nmDir string, idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 	var findings []Finding
 	var checks []NodeModulesCheck
 
-	for pkgName, vs := range idx.Packages {
+	for _, pkgName := range listInstalledPackages(nmDir) {
+		vsList := idx.Packages[pkgName]
+		if len(vsList) == 0 {
+			continue // not in the rule index
+		}
+
 		version, err := readInstalledVersion(nmDir, pkgName)
 		if err != nil {
-			slog.Debug("package not installed", "dir", nmDir, "package", pkgName)
-			checks = append(checks, NodeModulesCheck{Dir: nmDir, Package: pkgName, Status: StatusNotInstalled})
+			slog.Debug("cannot read version", "dir", nmDir, "package", pkgName, "error", err)
 
 			continue
 		}
 
-		if vs.Matches(version) {
-			slog.Warn("compromised package installed", "dir", nmDir, "package", pkgName, "version", version)
-			checks = append(checks, NodeModulesCheck{Dir: nmDir, Package: pkgName, Version: version, Status: StatusFound})
+		matched := false
 
-			findings = append(findings, Finding{
-				RuleID:      vs.RuleID,
-				RuleTitle:   vs.RuleTitle,
-				Severity:    vs.Severity,
-				Type:        "installed_package",
-				Package:     pkgName,
-				Version:     version,
-				Description: "compromised package found in " + nmDir,
-				Path:        filepath.Join(nmDir, pkgName),
-			})
-		} else {
+		for _, vs := range vsList {
+			if vs.Matches(version) {
+				slog.Warn("compromised package installed", "dir", nmDir, "package", pkgName, "version", version, "rule", vs.RuleID)
+				checks = append(checks, NodeModulesCheck{Dir: nmDir, Package: pkgName, Version: version, Status: StatusFound})
+
+				findings = append(findings, Finding{
+					RuleID:      vs.RuleID,
+					RuleTitle:   vs.RuleTitle,
+					Severity:    vs.Severity,
+					Type:        TypeInstalledPackage,
+					Package:     pkgName,
+					Version:     version,
+					Description: "compromised package found in " + nmDir,
+					Path:        filepath.Join(nmDir, pkgName),
+				})
+
+				matched = true
+			}
+		}
+
+		if !matched {
 			slog.Info("package installed, version clean", "dir", nmDir, "package", pkgName, "version", version)
 			checks = append(checks, NodeModulesCheck{Dir: nmDir, Package: pkgName, Version: version, Status: StatusClean})
 		}
 	}
 
 	return findings, checks
+}
+
+// listInstalledPackages reads the node_modules directory and returns all installed
+// package names, including scoped packages (@scope/pkg). Unreadable entries are skipped.
+func listInstalledPackages(nmDir string) []string {
+	entries, err := os.ReadDir(nmDir)
+	if err != nil {
+		return nil
+	}
+
+	var pkgs []string
+
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+
+		name := e.Name()
+
+		// Scoped packages: @scope/ contains subdirectories for each package.
+		if strings.HasPrefix(name, "@") {
+			scopeDir := filepath.Join(nmDir, name)
+
+			scopeEntries, scopeErr := os.ReadDir(scopeDir)
+			if scopeErr != nil {
+				continue
+			}
+
+			for _, se := range scopeEntries {
+				if se.IsDir() {
+					pkgs = append(pkgs, name+"/"+se.Name())
+				}
+			}
+
+			continue
+		}
+
+		// Skip hidden directories (.cache, .bin, etc.).
+		if strings.HasPrefix(name, ".") {
+			continue
+		}
+
+		pkgs = append(pkgs, name)
+	}
+
+	return pkgs
 }
 
 // readInstalledVersion reads the version from a package.json inside a node_modules directory.
@@ -189,7 +240,7 @@ func readInstalledVersion(nmDir, pkgName string) (string, error) {
 
 // ScanPnpmStore checks pnpm store and cache directories for compromised packages.
 func ScanPnpmStore(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
-	home, err := os.UserHomeDir()
+	home, err := userHomeDir()
 	if err != nil {
 		slog.Debug("cannot determine home dir for pnpm scan")
 		return nil, nil
@@ -202,10 +253,6 @@ func ScanPnpmStore(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 
 	if pnpmHome := os.Getenv("PNPM_HOME"); pnpmHome != "" {
 		dirs = append(dirs, pnpmHome)
-	}
-
-	if storePath := runCommand("pnpm", "store", "path"); storePath != "" {
-		dirs = append(dirs, storePath)
 	}
 
 	dirs = dedup(dirs)
@@ -236,8 +283,14 @@ func scanStoreForPackages(root string, idx *rules.PackageIndex, label string) ([
 	var checks []NodeModulesCheck
 
 	_ = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+		if err != nil {
+			slog.Warn("scan warning in "+label, "path", path, "error", err)
+
 			return nil //nolint:nilerr // skip errors in WalkDir callback
+		}
+
+		if d.IsDir() {
+			return nil
 		}
 
 		if d.Name() != "package.json" {
@@ -246,6 +299,8 @@ func scanStoreForPackages(root string, idx *rules.PackageIndex, label string) ([
 
 		data, readErr := os.ReadFile(path) //nolint:gosec // walking known store dir
 		if readErr != nil {
+			slog.Warn("unreadable file in "+label, "path", path, "error", readErr)
+
 			return nil //nolint:nilerr // skip unreadable files
 		}
 
@@ -254,26 +309,34 @@ func scanStoreForPackages(root string, idx *rules.PackageIndex, label string) ([
 			return nil //nolint:nilerr // skip invalid package.json
 		}
 
-		vs, ok := idx.Packages[pkg.Name]
-		if !ok {
+		vsList := idx.Packages[pkg.Name]
+		if len(vsList) == 0 {
 			return nil
 		}
 
-		if vs.Matches(pkg.Version) {
-			slog.Warn("compromised package in "+label, "package", pkg.Name, "version", pkg.Version, "path", path)
-			checks = append(checks, NodeModulesCheck{Dir: root, Package: pkg.Name, Version: pkg.Version, Status: StatusFound})
+		matched := false
 
-			findings = append(findings, Finding{
-				RuleID:      vs.RuleID,
-				RuleTitle:   vs.RuleTitle,
-				Severity:    vs.Severity,
-				Type:        "installed_package",
-				Package:     pkg.Name,
-				Version:     pkg.Version,
-				Description: "compromised package found in " + label,
-				Path:        path,
-			})
-		} else {
+		for _, vs := range vsList {
+			if vs.Matches(pkg.Version) {
+				slog.Warn("compromised package in "+label, "package", pkg.Name, "version", pkg.Version, "path", path, "rule", vs.RuleID)
+				checks = append(checks, NodeModulesCheck{Dir: root, Package: pkg.Name, Version: pkg.Version, Status: StatusFound})
+
+				findings = append(findings, Finding{
+					RuleID:      vs.RuleID,
+					RuleTitle:   vs.RuleTitle,
+					Severity:    vs.Severity,
+					Type:        TypeInstalledPackage,
+					Package:     pkg.Name,
+					Version:     pkg.Version,
+					Description: "compromised package found in " + label,
+					Path:        path,
+				})
+
+				matched = true
+			}
+		}
+
+		if !matched {
 			slog.Debug("package in "+label+" is clean", "package", pkg.Name, "version", pkg.Version)
 			checks = append(checks, NodeModulesCheck{Dir: root, Package: pkg.Name, Version: pkg.Version, Status: StatusClean})
 		}
@@ -290,7 +353,7 @@ func scanStoreForPackages(root string, idx *rules.PackageIndex, label string) ([
 func ScanNvmDirs(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 	nvmDir := os.Getenv("NVM_DIR")
 	if nvmDir == "" {
-		home, err := os.UserHomeDir()
+		home, err := userHomeDir()
 		if err != nil {
 			return nil, nil
 		}
@@ -334,8 +397,14 @@ func ScanNvmDirs(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 
 	// Find all lib/node_modules dirs under versions/
 	_ = filepath.WalkDir(versionsDir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil || !d.IsDir() {
+		if err != nil {
+			slog.Warn("scan warning in nvm versions", "path", path, "error", err)
+
 			return nil //nolint:nilerr // skip errors in WalkDir
+		}
+
+		if !d.IsDir() {
+			return nil
 		}
 
 		if d.Name() != "node_modules" {
@@ -361,10 +430,11 @@ func ScanNvmDirs(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 // npm cache scanning.
 
 // ScanNpmCache scans the npm cache for blobs containing indexed packages.
+// Uses NPM_CONFIG_CACHE env var or the well-known ~/.npm path.
 func ScanNpmCache(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
-	cacheDir := runCommand("npm", "config", "get", "cache")
+	cacheDir := os.Getenv("NPM_CONFIG_CACHE")
 	if cacheDir == "" {
-		home, err := os.UserHomeDir()
+		home, err := userHomeDir()
 		if err != nil {
 			return nil, nil
 		}
@@ -381,11 +451,11 @@ func ScanNpmCache(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 
 	lookups := make([]cacheLookup, 0, len(idx.Packages))
 
-	for name, vs := range idx.Packages {
+	for name, vsList := range idx.Packages {
 		l := cacheLookup{
 			name:      name,
 			nameBytes: []byte(name),
-			vs:        vs,
+			vsList:    vsList,
 		}
 
 		lookups = append(lookups, l)
@@ -414,14 +484,22 @@ func ScanNpmCache(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 	return findings, checks
 }
 
+// scanCacheBlobs walks dir reading each file and checking its contents
+// against the indexed package names and versions.
 func scanCacheBlobs(dir string, lookups []cacheLookup) ([]Finding, []NodeModulesCheck) {
 	var findings []Finding
 	var checks []NodeModulesCheck
 	blobCount := 0
 
 	_ = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+		if err != nil {
+			slog.Warn("scan warning in npm cache", "path", path, "error", err)
+
 			return nil //nolint:nilerr // skip errors in WalkDir callback
+		}
+
+		if d.IsDir() {
+			return nil
 		}
 
 		blobCount++
@@ -431,6 +509,8 @@ func scanCacheBlobs(dir string, lookups []cacheLookup) ([]Finding, []NodeModules
 
 		data, readErr := os.ReadFile(path) //nolint:gosec // walking known cache dir
 		if readErr != nil {
+			slog.Warn("unreadable blob in npm cache", "path", path, "error", readErr)
+
 			return nil //nolint:nilerr // skip unreadable files
 		}
 
@@ -457,6 +537,9 @@ const versionProximity = 100
 // Does NOT greedily consume file extensions like .tgz.
 var semverPattern = regexp.MustCompile(`\d+\.\d+\.\d+(?:-[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*)?(?:\+[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*)?`)
 
+// matchBlobAgainstIndex searches a single cache blob for indexed package names.
+// When a name is found at a word boundary, it extracts nearby version strings
+// and checks them against the rule index.
 func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup) ([]Finding, []NodeModulesCheck) {
 	var findings []Finding
 	var checks []NodeModulesCheck
@@ -469,37 +552,39 @@ func matchBlobAgainstIndex(data []byte, path, dir string, lookups []cacheLookup)
 			continue
 		}
 
-		if l.vs.AnyVersion {
-			slog.Warn("indexed package found in npm cache", "package", l.name, "blob", path)
-			checks = append(checks, NodeModulesCheck{Dir: dir, Package: l.name, Status: StatusFound})
-			findings = append(findings, Finding{
-				RuleID: l.vs.RuleID, RuleTitle: l.vs.RuleTitle, Severity: l.vs.Severity,
-				Type: "cached_package", Package: l.name,
-				Description: "indexed package found in npm cache", Path: path,
-			})
+		for _, vs := range l.vsList {
+			if vs.AnyVersion {
+				slog.Warn("indexed package found in npm cache", "package", l.name, "blob", path, "rule", vs.RuleID)
+				checks = append(checks, NodeModulesCheck{Dir: dir, Package: l.name, Status: StatusFound})
+				findings = append(findings, Finding{
+					RuleID: vs.RuleID, RuleTitle: vs.RuleTitle, Severity: vs.Severity,
+					Type: TypeCachedPackage, Package: l.name,
+					Description: "indexed package found in npm cache", Path: path,
+				})
 
-			break
-		}
-
-		// Extract version-like strings from the proximity window and check against the index.
-		window := proximityWindow(data, namePos, len(l.nameBytes))
-		versions := semverPattern.FindAll(window, -1)
-
-		for _, verBytes := range versions {
-			ver := string(verBytes)
-			if !l.vs.Matches(ver) {
 				continue
 			}
 
-			slog.Warn("compromised version in npm cache", "package", l.name, "version", ver, "blob", path)
-			checks = append(checks, NodeModulesCheck{Dir: dir, Package: l.name, Version: ver, Status: StatusFound})
-			findings = append(findings, Finding{
-				RuleID: l.vs.RuleID, RuleTitle: l.vs.RuleTitle, Severity: l.vs.Severity,
-				Type: "cached_package", Package: l.name, Version: ver,
-				Description: "compromised version in npm cache", Path: path,
-			})
+			// Extract version-like strings from the proximity window and check against the index.
+			window := proximityWindow(data, namePos, len(l.nameBytes))
+			versions := semverPattern.FindAll(window, -1)
 
-			break
+			for _, verBytes := range versions {
+				ver := string(verBytes)
+				if !vs.Matches(ver) {
+					continue
+				}
+
+				slog.Warn("compromised version in npm cache", "package", l.name, "version", ver, "blob", path, "rule", vs.RuleID)
+				checks = append(checks, NodeModulesCheck{Dir: dir, Package: l.name, Version: ver, Status: StatusFound})
+				findings = append(findings, Finding{
+					RuleID: vs.RuleID, RuleTitle: vs.RuleTitle, Severity: vs.Severity,
+					Type: TypeCachedPackage, Package: l.name, Version: ver,
+					Description: "compromised version in npm cache", Path: path,
+				})
+
+				break
+			}
 		}
 	}
 
@@ -535,6 +620,8 @@ func findPackageNameWithBoundary(data, name []byte) int {
 	}
 }
 
+// isBoundaryChar reports whether c is a character that can appear immediately
+// before or after a package name in JSON, lockfile, or URL contexts.
 func isBoundaryChar(c byte) bool {
 	switch c {
 	case '"', '/', '@', ':', ' ', '\t', '\n', '\r', ',', '{', '}', '[', ']':
@@ -544,6 +631,8 @@ func isBoundaryChar(c byte) bool {
 	}
 }
 
+// proximityWindow returns the slice of data starting at namePos and extending
+// up to versionProximity bytes past the end of the name match.
 func proximityWindow(data []byte, namePos, nameLen int) []byte {
 	end := namePos + nameLen + versionProximity
 	if end > len(data) {
@@ -555,6 +644,7 @@ func proximityWindow(data []byte, namePos, nameLen int) []byte {
 
 // Helpers.
 
+// dedup returns items with duplicates and empty strings removed, preserving order.
 func dedup(items []string) []string {
 	seen := make(map[string]bool, len(items))
 	var result []string

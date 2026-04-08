@@ -33,10 +33,4 @@ against configurable JSON rules and checks host filesystems for known IOCs.
 
 ---
 
-## Contributing to this documentation
 
-```bash
-docker compose -f docker-compose.docs.yml up
-```
-
-Open [http://localhost:8000/](http://localhost:8000/) with live-reload. Stop with `Ctrl+C`.

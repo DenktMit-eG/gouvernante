@@ -71,7 +71,7 @@ cd gouvernante
 make build
 ```
 
-This produces `./gouvernante` — a single static binary you can copy anywhere.
+This produces platform-specific binaries in `dist/binaries/` (e.g. `gouvernante-linux-amd64`). Copy the binary for your platform anywhere on your `PATH`.
 
 ---
 

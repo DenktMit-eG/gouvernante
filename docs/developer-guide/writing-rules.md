@@ -135,7 +135,7 @@ Use this template based on the real axios incident rule:
 | Caret | `"^1.7.0"` | Compatible versions (same major). |
 | Tilde | `"~1.7.0"` | Patch-level versions (same major.minor). |
 
-Semver range matching is implemented using Masterminds/semver v3. Ranges are evaluated via `VersionSet.Matches()` (exact match first, then semver constraints). When scanning `package.json`, `VersionSet.RangeCoversVersion()` checks whether a dependency range could resolve to a compromised version.
+Semver range matching is implemented using Masterminds/semver v3. Ranges are evaluated via `VersionSet.Matches()` (exact match first, then semver constraints). When scanning `package.json`, `VersionSet.RangeCoversVersion()` checks whether a dependency range could resolve to a compromised version. Both the rule and dependency ranges are compiled into intervals with optional lower/upper bounds (e.g., `<1.0.0` becomes `(-∞, 1.0.0)`), and overlap is determined structurally: two intervals overlap unless one ends strictly before the other starts. Disjunctive constraints (`||`) are handled as a union of intervals.
 
 ## Optional Fields
 
@@ -186,7 +186,9 @@ though only `file` is currently checked by the scanner:
 
 | Type | Status | Fields |
 |------|--------|--------|
-| `file` | Implemented | `path` and/or `file_name` (at least one required), optional `hashes` |
+| `file` | Implemented | `path` and/or `file_name` (at least one required), optional `hashes` (schema-validated but not yet checked at runtime) |
+
+> **Note:** When only `file_name` is provided without `path`, the scanner resolves the file relative to the working directory where the CLI is launched.
 | `process` | Schema only | `value` (process name) |
 | `registry` | Schema only | `value` (registry key path) |
 | `network` | Schema only | `value` (host:port or domain) |

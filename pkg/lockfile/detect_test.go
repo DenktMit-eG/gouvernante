@@ -478,3 +478,90 @@ func TestDetectAndParseRecursive_InvalidNestedLockfile(t *testing.T) {
 		t.Fatal("expected error for invalid nested lockfile")
 	}
 }
+
+func TestParseFile_SetsPath(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "package.json")
+	if err := os.WriteFile(path, []byte(`{"dependencies":{"a":"1.0.0"}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := ParseFile(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result.Path != path {
+		t.Errorf("Path: got %q, want %q", result.Path, path)
+	}
+
+	if result.Name != "package.json" {
+		t.Errorf("Name: got %q, want package.json", result.Name)
+	}
+}
+
+func TestParseFile_ParserError(t *testing.T) {
+	// A valid lockfile name but invalid content should return a parse error.
+	path := filepath.Join(t.TempDir(), "package-lock.json")
+	if err := os.WriteFile(path, []byte("{invalid json!!!}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := ParseFile(path)
+	if err == nil {
+		t.Fatal("expected error for invalid lockfile content")
+	}
+}
+
+func TestRelPath_Error(t *testing.T) {
+	// filepath.Rel returns an error when root is empty and path is absolute.
+	got := relPath("", "/some/absolute/path")
+	if got != "/some/absolute/path" {
+		t.Errorf("expected fallback to absolute path, got %q", got)
+	}
+}
+
+func TestDetectAndParseRecursive_SkipsNonLockfiles(t *testing.T) {
+	root := t.TempDir()
+
+	// Add a non-lockfile file alongside a lockfile.
+	if err := os.WriteFile(filepath.Join(root, "README.md"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(root, "package.json"), []byte(`{"dependencies":{"a":"1.0.0"}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	results, err := DetectAndParseRecursive(root)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Should find the package.json but skip README.md.
+	if len(results) != 1 {
+		t.Errorf("expected 1 result, got %d", len(results))
+	}
+}
+
+func TestDetectAndParse_SetsPath(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte(`{"dependencies":{"a":"1.0.0"}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	results, err := DetectAndParse(dir)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(results) == 0 {
+		t.Fatal("expected at least one result")
+	}
+
+	for _, r := range results {
+		if r.Path == "" {
+			t.Errorf("expected non-empty Path for %s", r.Name)
+		}
+	}
+}

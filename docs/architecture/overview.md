@@ -25,7 +25,7 @@ tags:
 
 The scanner must not execute JavaScript or depend on any npm package. A compromised
 Node.js toolchain cannot be trusted to scan itself. gouvernante is a Go binary that
-reads lockfiles as structured text using only the Go standard library.
+reads lockfiles as structured text using the Go standard library and minimal dependencies (goccy/go-yaml for pnpm).
 
 ### Rules Are Data, Not Code
 
@@ -113,10 +113,11 @@ gouvernante/
 │   │   └── yarn.go          yarn.lock parser (line scanner)
 │   └── scanner/             Matching engine and output
 │       └── scanner.go       ScanPackages, ScanHostIndicators, FormatReport
-├── rules/                   Rule data files
-│   ├── schema.json          JSON Schema for rule validation
-│   └── *.json               Individual incident rule files
-└── testdata/                Test fixture lockfiles
+└── testdata/                Test fixtures
+    ├── rules/               Rule fixtures (valid, invalid, incident samples)
+    │   └── schema.json      JSON Schema for rule validation
+    ├── pnpm-lock.yaml       Lockfile fixtures
+    └── package-lock.json
 ```
 
 ## Data Flow
@@ -150,7 +151,7 @@ sequenceDiagram
 ```
 
 1. **Load rules.** `rules.LoadDir()` reads all JSON files, unmarshals into `RuleSet` structs, merges all rules.
-2. **Build index.** `rules.BuildPackageIndex()` builds a `map[string]*VersionSet` keyed by package name. Each `VersionSet` holds exact versions, semver range constraints, or an `AnyVersion` wildcard.
+2. **Build index.** `rules.BuildPackageIndex()` builds a `map[string][]*VersionSet` keyed by package name. Each package may have multiple `VersionSet` entries (one per rule/package\_rules entry) holding exact versions, semver range constraints, or an `AnyVersion` wildcard.
 3. **Parse lockfiles.** `lockfile.DetectAndParse()` probes for known lockfile names (including `package.json`), parses each, returns per-lockfile entry lists.
 4. **Scan packages.** For each lockfile, `scanner.ScanPackages()` checks every entry against the index. Matches produce `Finding` structs.
 5. **Scan host indicators.** If enabled, scans filesystem locations (node_modules, pnpm store, nvm, npm cache) for IOC artifacts defined in rules.
@@ -182,9 +183,9 @@ Each parser uses the simplest approach that handles the format reliably:
 
 !!! question "Check your understanding"
 
-    - [ ] Can you explain why the scanner does not use a YAML library?
+    - [ ] Can you explain why the scanner uses goccy/go-yaml only for pnpm and the standard library for everything else?
     - [ ] Can you trace the path from a rule JSON file to a finding in the report?
-    - [ ] Can you name the three lockfile formats and their parser strategies?
+    - [ ] Can you name the four lockfile formats (including package.json) and their parser strategies?
     - [ ] Can you explain what crosses each trust boundary?
 
 ## Next Steps

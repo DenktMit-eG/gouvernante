@@ -1,8 +1,10 @@
 package scanner
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"gouvernante/pkg/rules"
@@ -24,18 +26,22 @@ func writePackageJSON(t *testing.T, nmDir, pkgName, version string) {
 
 func testIndex() *rules.PackageIndex {
 	return &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{
+		Packages: map[string][]*rules.VersionSet{
 			"axios": {
-				RuleID:    "R1",
-				RuleTitle: "Test",
-				Severity:  "critical",
-				Versions:  map[string]bool{"1.14.1": true, "0.30.4": true},
+				{
+					RuleID:    "R1",
+					RuleTitle: "Test",
+					Severity:  "critical",
+					Versions:  map[string]bool{"1.14.1": true, "0.30.4": true},
+				},
 			},
 			"plain-crypto-js": {
-				RuleID:     "R1",
-				RuleTitle:  "Test",
-				Severity:   "critical",
-				AnyVersion: true,
+				{
+					RuleID:     "R1",
+					RuleTitle:  "Test",
+					Severity:   "critical",
+					AnyVersion: true,
+				},
 			},
 		},
 	}
@@ -58,7 +64,7 @@ func TestScanNodeModules_FindsCompromised(t *testing.T) {
 		t.Errorf("finding: got %s@%s, want axios@1.14.1", findings[0].Package, findings[0].Version)
 	}
 
-	if findings[0].Type != "installed_package" {
+	if findings[0].Type != TypeInstalledPackage {
 		t.Errorf("type: got %q, want installed_package", findings[0].Type)
 	}
 
@@ -131,12 +137,14 @@ func TestScanNodeModules_ScopedPackage(t *testing.T) {
 	nmDir := filepath.Join(dir, "node_modules")
 
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{
+		Packages: map[string][]*rules.VersionSet{
 			"@scope/evil": {
-				RuleID:     "R2",
-				RuleTitle:  "Scoped test",
-				Severity:   "high",
-				AnyVersion: true,
+				{
+					RuleID:     "R2",
+					RuleTitle:  "Scoped test",
+					Severity:   "high",
+					AnyVersion: true,
+				},
 			},
 		},
 	}
@@ -290,11 +298,11 @@ func TestMatchBlobAgainstIndex_NoMatch(t *testing.T) {
 func buildCacheLookups(idx *rules.PackageIndex) []cacheLookup {
 	lookups := make([]cacheLookup, 0, len(idx.Packages))
 
-	for name, vs := range idx.Packages {
+	for name, vsList := range idx.Packages {
 		l := cacheLookup{
 			name:      name,
 			nameBytes: []byte(name),
-			vs:        vs,
+			vsList:    vsList,
 		}
 
 		lookups = append(lookups, l)
@@ -335,10 +343,12 @@ func TestFindPackageNameWithBoundary(t *testing.T) {
 func TestMatchBlobAgainstIndex_NoFalsePositiveSubstring(t *testing.T) {
 	// "atrix" should NOT match inside "dommatrix".
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{
+		Packages: map[string][]*rules.VersionSet{
 			"atrix": {
-				RuleID: "R1", RuleTitle: "Test", Severity: "high",
-				Versions: map[string]bool{"1.0.3": true},
+				{
+					RuleID: "R1", RuleTitle: "Test", Severity: "high",
+					Versions: map[string]bool{"1.0.3": true},
+				},
 			},
 		},
 	}
@@ -354,10 +364,12 @@ func TestMatchBlobAgainstIndex_NoFalsePositiveSubstring(t *testing.T) {
 
 func TestMatchBlobAgainstIndex_TruePositiveWithBoundary(t *testing.T) {
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{
+		Packages: map[string][]*rules.VersionSet{
 			"atrix": {
-				RuleID: "R1", RuleTitle: "Test", Severity: "high",
-				Versions: map[string]bool{"1.0.3": true},
+				{
+					RuleID: "R1", RuleTitle: "Test", Severity: "high",
+					Versions: map[string]bool{"1.0.3": true},
+				},
 			},
 		},
 	}
@@ -381,20 +393,6 @@ func TestReadInstalledVersion_NotInstalled(t *testing.T) {
 }
 
 // Additional tests.
-
-func TestRunCommand_Success(t *testing.T) {
-	got := runCommand("echo", "hello")
-	if got != "hello" {
-		t.Errorf("runCommand(echo hello) = %q, want %q", got, "hello")
-	}
-}
-
-func TestRunCommand_NonExistentCommand(t *testing.T) {
-	got := runCommand("nonexistent_command_xyz_123")
-	if got != "" {
-		t.Errorf("runCommand(nonexistent) = %q, want empty string", got)
-	}
-}
 
 func TestScanCacheBlobs(t *testing.T) {
 	dir := t.TempDir()
@@ -623,7 +621,7 @@ func TestScanGlobalNodeModules(t *testing.T) {
 	// ScanGlobalNodeModules should not panic and should return without error.
 	// With an empty index, there should be no findings.
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{},
+		Packages: map[string][]*rules.VersionSet{},
 	}
 
 	findings, checks := ScanGlobalNodeModules(idx)
@@ -818,5 +816,497 @@ func TestScanNpmCache_WithContentDir(t *testing.T) {
 
 	if !foundAxios {
 		t.Error("expected to find axios in npm cache content-v2")
+	}
+}
+
+func TestGlobalNodeModulesPaths_WithEnvPrefix(t *testing.T) {
+	prefix := t.TempDir()
+	t.Setenv("NPM_CONFIG_PREFIX", prefix)
+
+	paths := globalNodeModulesPathsForOS("linux")
+
+	expected := filepath.Join(prefix, "lib", "node_modules")
+	found := false
+
+	for _, p := range paths {
+		if p == expected {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Errorf("expected %q in paths from NPM_CONFIG_PREFIX, got %v", expected, paths)
+	}
+}
+
+func TestGlobalNodeModulesPaths_Linux(t *testing.T) {
+	t.Setenv("NPM_CONFIG_PREFIX", "")
+
+	paths := globalNodeModulesPathsForOS("linux")
+
+	if len(paths) != 2 {
+		t.Errorf("expected 2 linux paths, got %d: %v", len(paths), paths)
+	}
+}
+
+func TestGlobalNodeModulesPaths_Darwin(t *testing.T) {
+	t.Setenv("NPM_CONFIG_PREFIX", "")
+
+	paths := globalNodeModulesPathsForOS("darwin")
+
+	if len(paths) != 2 {
+		t.Errorf("expected 2 darwin paths, got %d: %v", len(paths), paths)
+	}
+
+	found := false
+	for _, p := range paths {
+		if p == "/opt/homebrew/lib/node_modules" {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Error("expected /opt/homebrew/lib/node_modules in darwin paths")
+	}
+}
+
+func TestGlobalNodeModulesPaths_Windows(t *testing.T) {
+	t.Setenv("NPM_CONFIG_PREFIX", "")
+	t.Setenv("APPDATA", "/test/appdata")
+
+	paths := globalNodeModulesPathsForOS("windows")
+
+	if len(paths) != 1 {
+		t.Errorf("expected 1 windows path, got %d: %v", len(paths), paths)
+	}
+}
+
+func TestGlobalNodeModulesPaths_WindowsNoAppData(t *testing.T) {
+	t.Setenv("NPM_CONFIG_PREFIX", "")
+	t.Setenv("APPDATA", "")
+
+	paths := globalNodeModulesPathsForOS("windows")
+
+	if len(paths) != 0 {
+		t.Errorf("expected 0 windows paths without APPDATA, got %d: %v", len(paths), paths)
+	}
+}
+
+func TestScanGlobalNodeModules_WithCompromised(t *testing.T) {
+	dir := t.TempDir()
+	writePackageJSON(t, dir, "axios", "1.14.1")
+
+	idx := testIndex()
+
+	// Directly test scanSingleNodeModules on a dir containing a compromised package.
+	findings, checks := scanSingleNodeModules(dir, idx)
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding, got %d", len(findings))
+	}
+
+	if findings[0].Type != TypeInstalledPackage {
+		t.Errorf("expected installed_package type, got %s", findings[0].Type)
+	}
+
+	// Verify checks contain at least one entry.
+	if len(checks) == 0 {
+		t.Error("expected at least one check entry")
+	}
+}
+
+func TestScanPnpmStore_NoHomeDir(t *testing.T) {
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return "", fmt.Errorf("no home") }
+	defer func() { userHomeDir = orig }()
+
+	findings, checks := ScanPnpmStore(testIndex())
+
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings when home dir unavailable, got %d", len(findings))
+	}
+
+	if len(checks) != 0 {
+		t.Errorf("expected 0 checks when home dir unavailable, got %d", len(checks))
+	}
+}
+
+func TestScanNvmDirs_NoHomeDir(t *testing.T) {
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return "", fmt.Errorf("no home") }
+	defer func() { userHomeDir = orig }()
+
+	t.Setenv("NVM_DIR", "")
+
+	findings, checks := ScanNvmDirs(testIndex())
+
+	if len(findings) != 0 || len(checks) != 0 {
+		t.Error("expected empty results when home dir unavailable")
+	}
+}
+
+func TestScanNpmCache_NoHomeDir(t *testing.T) {
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return "", fmt.Errorf("no home") }
+	defer func() { userHomeDir = orig }()
+
+	t.Setenv("NPM_CONFIG_CACHE", "")
+
+	findings, checks := ScanNpmCache(testIndex())
+
+	if len(findings) != 0 || len(checks) != 0 {
+		t.Error("expected empty results when home dir unavailable")
+	}
+}
+
+func TestListInstalledPackages_Basic(t *testing.T) {
+	nmDir := t.TempDir()
+
+	// Regular package.
+	if err := os.MkdirAll(filepath.Join(nmDir, "express"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Scoped package.
+	if err := os.MkdirAll(filepath.Join(nmDir, "@scope", "pkg"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Hidden dir — should be skipped.
+	if err := os.MkdirAll(filepath.Join(nmDir, ".cache"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// File — should be skipped.
+	if err := os.WriteFile(filepath.Join(nmDir, ".package-lock.json"), []byte("{}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	pkgs := listInstalledPackages(nmDir)
+
+	found := map[string]bool{}
+	for _, p := range pkgs {
+		found[p] = true
+	}
+
+	if !found["express"] {
+		t.Error("expected express in list")
+	}
+
+	if !found["@scope/pkg"] {
+		t.Error("expected @scope/pkg in list")
+	}
+
+	if found[".cache"] {
+		t.Error("hidden dir .cache should be skipped")
+	}
+
+	if found[".package-lock.json"] {
+		t.Error("files should be skipped")
+	}
+}
+
+func TestListInstalledPackages_UnreadableDir(t *testing.T) {
+	pkgs := listInstalledPackages("/nonexistent/node_modules")
+	if len(pkgs) != 0 {
+		t.Errorf("expected nil for unreadable dir, got %v", pkgs)
+	}
+}
+
+func TestListInstalledPackages_UnreadableScopeDir(t *testing.T) {
+	nmDir := t.TempDir()
+
+	scopeDir := filepath.Join(nmDir, "@scope")
+	if err := os.MkdirAll(scopeDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.Chmod(scopeDir, 0o000); err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() { _ = os.Chmod(scopeDir, 0o755) }()
+
+	pkgs := listInstalledPackages(nmDir)
+
+	// Should not crash; unreadable scope dir is skipped.
+	for _, p := range pkgs {
+		if strings.HasPrefix(p, "@scope") {
+			t.Errorf("should not list packages from unreadable scope dir, got %s", p)
+		}
+	}
+}
+
+func TestScanSingleNodeModules_BrokenPackageJSON(t *testing.T) {
+	nmDir := t.TempDir()
+
+	// Create an axios dir with invalid package.json.
+	pkgDir := filepath.Join(nmDir, "axios")
+	if err := os.MkdirAll(pkgDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(pkgDir, "package.json"), []byte("{bad json}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	idx := testIndex()
+	findings, _ := scanSingleNodeModules(nmDir, idx)
+
+	// Should not crash; broken package.json is skipped.
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings for broken package.json, got %d", len(findings))
+	}
+}
+
+func TestScanGlobalNodeModules_FindsCompromised(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("NPM_CONFIG_PREFIX", dir)
+
+	// Create lib/node_modules/<pkg>/package.json structure.
+	nmDir := filepath.Join(dir, "lib", "node_modules")
+	writePackageJSON(t, nmDir, "axios", "1.14.1")
+
+	idx := testIndex()
+	findings, _ := ScanGlobalNodeModules(idx)
+
+	foundAxios := false
+	for _, f := range findings {
+		if f.Package == "axios" {
+			foundAxios = true
+		}
+	}
+
+	if !foundAxios {
+		t.Error("expected to find axios in global node_modules")
+	}
+}
+
+func TestScanStoreForPackages_UnreadableFile(t *testing.T) {
+	root := t.TempDir()
+
+	pkgDir := filepath.Join(root, "some-pkg")
+	if err := os.MkdirAll(pkgDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a package.json with no read permissions.
+	path := filepath.Join(pkgDir, "package.json")
+	if err := os.WriteFile(path, []byte(`{"name":"axios","version":"1.14.1"}`), 0o000); err != nil {
+		t.Fatal(err)
+	}
+
+	idx := testIndex()
+	findings, _ := scanStoreForPackages(root, idx, "test")
+
+	// Should not crash, just skip the unreadable file.
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings, got %d", len(findings))
+	}
+}
+
+func TestScanStoreForPackages_WalkError(t *testing.T) {
+	root := t.TempDir()
+
+	// Create a subdirectory that is not readable — WalkDir will pass an error.
+	unreadable := filepath.Join(root, "noperm")
+	if err := os.MkdirAll(unreadable, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.Chmod(unreadable, 0o000); err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() { _ = os.Chmod(unreadable, 0o755) }()
+
+	idx := testIndex()
+	findings, _ := scanStoreForPackages(root, idx, "test")
+
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings, got %d", len(findings))
+	}
+}
+
+func TestScanStoreForPackages_NonPackageJSON(t *testing.T) {
+	root := t.TempDir()
+
+	// Create a non-package.json file — should be skipped.
+	if err := os.WriteFile(filepath.Join(root, "README.md"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	idx := testIndex()
+	findings, _ := scanStoreForPackages(root, idx, "test")
+
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings, got %d", len(findings))
+	}
+}
+
+func TestScanCacheBlobs_UnreadableFile(t *testing.T) {
+	dir := t.TempDir()
+	subdir := filepath.Join(dir, "ab")
+	if err := os.MkdirAll(subdir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a file with no read permissions.
+	path := filepath.Join(subdir, "blob1")
+	if err := os.WriteFile(path, []byte(`"axios":"1.14.1"`), 0o000); err != nil {
+		t.Fatal(err)
+	}
+
+	lookups := buildCacheLookups(testIndex())
+	findings, _ := scanCacheBlobs(dir, lookups)
+
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings for unreadable blob, got %d", len(findings))
+	}
+}
+
+func TestScanCacheBlobs_WalkError(t *testing.T) {
+	dir := t.TempDir()
+	unreadable := filepath.Join(dir, "noperm")
+	if err := os.MkdirAll(unreadable, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.Chmod(unreadable, 0o000); err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() { _ = os.Chmod(unreadable, 0o755) }()
+
+	lookups := buildCacheLookups(testIndex())
+	findings, _ := scanCacheBlobs(dir, lookups)
+
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings, got %d", len(findings))
+	}
+}
+
+func TestScanNvmDirs_WalkError(t *testing.T) {
+	nvmDir := t.TempDir()
+	t.Setenv("NVM_DIR", nvmDir)
+
+	versionsDir := filepath.Join(nvmDir, "versions")
+	unreadable := filepath.Join(versionsDir, "noperm")
+
+	if err := os.MkdirAll(unreadable, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.Chmod(unreadable, 0o000); err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() { _ = os.Chmod(unreadable, 0o755) }()
+
+	idx := testIndex()
+	findings, _ := ScanNvmDirs(idx)
+
+	// Should not crash.
+	_ = findings
+}
+
+func TestScanCacheBlobs_ProgressLogging(t *testing.T) {
+	dir := t.TempDir()
+	subdir := filepath.Join(dir, "ab")
+	if err := os.MkdirAll(subdir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create cacheProgressInterval+1 blobs to trigger progress logging.
+	for i := 0; i <= cacheProgressInterval; i++ {
+		name := filepath.Join(subdir, fmt.Sprintf("blob%d", i))
+		if err := os.WriteFile(name, []byte("{}"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	lookups := buildCacheLookups(testIndex())
+	findings, _ := scanCacheBlobs(dir, lookups)
+
+	// No crashes, just verifying the progress path runs.
+	_ = findings
+}
+
+func TestMatchBlobAgainstIndex_VersionNotMatching(t *testing.T) {
+	idx := &rules.PackageIndex{
+		Packages: map[string][]*rules.VersionSet{
+			"axios": {
+				{
+					RuleID: "R1", RuleTitle: "Test", Severity: "high",
+					Versions: map[string]bool{"1.14.1": true},
+				},
+			},
+		},
+	}
+	lookups := buildCacheLookups(idx)
+
+	// Blob contains axios with a non-matching version nearby.
+	blob := []byte(`"axios":"2.0.0","resolved":"test"`)
+	findings, _ := matchBlobAgainstIndex(blob, "/cache/blob", "/cache", lookups)
+
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings for non-matching version, got %d", len(findings))
+	}
+}
+
+func TestScanNvmDirs_VersionsDir(t *testing.T) {
+	nvmDir := t.TempDir()
+	t.Setenv("NVM_DIR", nvmDir)
+
+	// Create versions/node/v18/lib/node_modules/<pkg>/package.json.
+	nmDir := filepath.Join(nvmDir, "versions", "node", "v18.0.0", "lib", "node_modules")
+	writePackageJSON(t, nmDir, "axios", "1.14.1")
+
+	// Also create a node_modules dir NOT under lib/ — should be skipped.
+	wrongDir := filepath.Join(nvmDir, "versions", "node", "v18.0.0", "bin", "node_modules")
+	writePackageJSON(t, wrongDir, "axios", "1.14.1")
+
+	idx := testIndex()
+	findings, _ := ScanNvmDirs(idx)
+
+	foundAxios := false
+	for _, f := range findings {
+		if f.Package == "axios" && f.Type == TypeInstalledPackage {
+			foundAxios = true
+		}
+	}
+
+	if !foundAxios {
+		t.Error("expected to find axios in nvm versions lib/node_modules")
+	}
+}
+
+func TestScanNpmCache_WithEnvCacheDir(t *testing.T) {
+	home := t.TempDir()
+	cacheDir := filepath.Join(home, "custom-cache")
+	t.Setenv("NPM_CONFIG_CACHE", cacheDir)
+
+	indexDir := filepath.Join(cacheDir, "_cacache", "index-v5", "ab")
+	if err := os.MkdirAll(indexDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	blob := []byte(`{"axios":"1.14.1","integrity":"sha512-abc"}`)
+	if err := os.WriteFile(filepath.Join(indexDir, "blob1"), blob, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	idx := testIndex()
+	findings, _ := ScanNpmCache(idx)
+
+	foundAxios := false
+	for _, f := range findings {
+		if f.Package == "axios" {
+			foundAxios = true
+		}
+	}
+
+	if !foundAxios {
+		t.Error("expected to find axios via NPM_CONFIG_CACHE")
 	}
 }

@@ -15,12 +15,14 @@ func ExampleScanPackages() {
 	}
 
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{
+		Packages: map[string][]*rules.VersionSet{
 			"axios": {
-				RuleID:    "SSC-2025-001",
-				RuleTitle: "Axios compromise",
-				Severity:  "critical",
-				Versions:  map[string]bool{"1.7.8": true},
+				{
+					RuleID:    "SSC-2025-001",
+					RuleTitle: "Axios compromise",
+					Severity:  "critical",
+					Versions:  map[string]bool{"1.7.8": true},
+				},
 			},
 		},
 	}
@@ -54,4 +56,5 @@ func ExampleFormatReport() {
 	// Findings: 0
 	//
 	// No compromised packages or host indicators found.
+	// Scan complete: 0 findings in 1 lockfiles.
 }

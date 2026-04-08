@@ -15,8 +15,7 @@ type projectPackageJSON struct {
 
 // ParsePackageJSON reads a package.json and extracts dependencies and
 // devDependencies as PackageEntry values. Version range specifiers (^, ~, >=)
-// are passed through as-is — they won't match exact versions in the rule index,
-// but dropper packages (AnyVersion) will still be caught by name.
+// are passed through as-is for the caller to interpret.
 func ParsePackageJSON(path string) ([]PackageEntry, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

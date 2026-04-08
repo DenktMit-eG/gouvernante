@@ -3,6 +3,7 @@ package rules
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -64,15 +65,18 @@ type ValidationError struct {
 	Errors []string
 }
 
+// Error formats all collected validation failures into a single multi-line string.
 func (e *ValidationError) Error() string {
 	return fmt.Sprintf("validation failed with %d errors:\n  - %s",
 		len(e.Errors), strings.Join(e.Errors, "\n  - "))
 }
 
+// add appends a formatted validation error message to the list.
 func (e *ValidationError) add(format string, args ...interface{}) {
 	e.Errors = append(e.Errors, fmt.Sprintf(format, args...))
 }
 
+// hasErrors reports whether any validation errors have been collected.
 func (e *ValidationError) hasErrors() bool {
 	return len(e.Errors) > 0
 }
@@ -104,6 +108,7 @@ func (rs *RuleSet) Validate() error {
 	return nil
 }
 
+// validate checks all required fields and enum constraints on a single Rule.
 func (r *Rule) validate(ve *ValidationError, path string) {
 	requireNonEmpty(ve, path+".id", r.ID)
 	requireNonEmpty(ve, path+".title", r.Title)
@@ -136,16 +141,20 @@ func (r *Rule) validate(ve *ValidationError, path string) {
 	}
 }
 
+// validate checks that type is a known alias type and value is non-empty.
 func (a *Alias) validate(ve *ValidationError, path string) {
 	requireEnum(ve, path+".type", a.Type, validAliasTypes)
 	requireNonEmpty(ve, path+".value", a.Value)
 }
 
+// validate checks that type is a known reference type and url is non-empty.
 func (r *Reference) validate(ve *ValidationError, path string) {
 	requireEnum(ve, path+".type", r.Type, validReferenceTypes)
 	requireNonEmpty(ve, path+".url", r.URL)
 }
 
+// validate checks that package_name and affected_versions are present,
+// and that lockfile_ecosystems values are from the allowed set.
 func (pr *PackageRule) validate(ve *ValidationError, path string) {
 	requireNonEmpty(ve, path+".package_name", pr.PackageName)
 
@@ -164,10 +173,13 @@ func (pr *PackageRule) validate(ve *ValidationError, path string) {
 	}
 }
 
+// validate checks that package_name is non-empty.
 func (dp *DropperPkg) validate(ve *ValidationError, path string) {
 	requireNonEmpty(ve, path+".package_name", dp.PackageName)
 }
 
+// validate checks indicator type, OS values, confidence, and enforces allOf
+// conditions: file indicators require path or file_name; hashes require type=file.
 func (hi *HostIndicator) validate(ve *ValidationError, path string) {
 	requireEnum(ve, path+".type", hi.Type, validIndicatorTypes)
 
@@ -198,6 +210,8 @@ func (hi *HostIndicator) validate(ve *ValidationError, path string) {
 	}
 }
 
+// validate checks that algorithm is known (md5/sha1/sha256/sha512),
+// the value is hexadecimal, and its length matches the algorithm.
 func (fh *FileHash) validate(ve *ValidationError, path string) {
 	expectedLen, ok := validHashAlgorithms[fh.Algorithm]
 	if !ok {
@@ -216,12 +230,14 @@ func (fh *FileHash) validate(ve *ValidationError, path string) {
 	}
 }
 
+// requireNonEmpty adds a validation error if value is empty.
 func requireNonEmpty(ve *ValidationError, path, value string) {
 	if value == "" {
 		ve.add("%s: required, must not be empty", path)
 	}
 }
 
+// requireEnum adds a validation error if value is empty or not in the allowed set.
 func requireEnum(ve *ValidationError, path, value string, allowed map[string]bool) {
 	if value == "" {
 		ve.add("%s: required, must not be empty", path)
@@ -234,6 +250,7 @@ func requireEnum(ve *ValidationError, path, value string, allowed map[string]boo
 			keys = append(keys, k)
 		}
 
+		sort.Strings(keys)
 		ve.add("%s: must be one of [%s], got %q", path, strings.Join(keys, ", "), value)
 	}
 }

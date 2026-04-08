@@ -159,3 +159,44 @@ func TestExtractPackageName(t *testing.T) {
 		}
 	}
 }
+
+func TestParseNpmV2_EmptyNameKey(t *testing.T) {
+	// A key that resolves to an empty package name should be skipped.
+	path := writeTempFile(t, "package-lock.json", `{
+  "name": "test",
+  "lockfileVersion": 3,
+  "packages": {
+    "": {"version": "1.0.0"},
+    "no-node-modules": {"version": "2.0.0"}
+  }
+}`)
+
+	entries, err := ParsePackageLockJSON(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(entries) != 0 {
+		t.Errorf("expected 0 entries for empty/unrecognized keys, got %d", len(entries))
+	}
+}
+
+func TestParseNpmV1_EmptyVersion(t *testing.T) {
+	// Dependencies with empty versions should be skipped.
+	path := writeTempFile(t, "package-lock.json", `{
+  "name": "test",
+  "dependencies": {
+    "axios": {"version": ""},
+    "express": {"version": "4.18.0"}
+  }
+}`)
+
+	entries, err := ParsePackageLockJSON(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(entries) != 1 {
+		t.Errorf("expected 1 entry (express only), got %d", len(entries))
+	}
+}

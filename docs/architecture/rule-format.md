@@ -90,7 +90,7 @@ tags:
 | Caret | `^1.7.0` | Compatible versions (same major). |
 | Tilde | `~1.7.0` | Patch-level versions (same major.minor). |
 
-Semver range matching is implemented using [Masterminds/semver v3](https://github.com/Masterminds/semver). `VersionSet.Matches()` checks exact match first, then evaluates semver constraints. `VersionSet.RangeCoversVersion()` checks if a `package.json` range expression could resolve to a compromised version.
+Semver range matching is implemented using [Masterminds/semver v3](https://github.com/Masterminds/semver). `VersionSet.Matches()` checks exact match first, then evaluates semver constraints. `VersionSet.RangeCoversVersion()` checks if a `package.json` range expression could resolve to a compromised version. Both sides are compiled into intervals with optional lower/upper bounds (e.g., `<1.0.0` → `(-∞, 1.0.0)`), and overlap is structural: two intervals overlap unless one ends strictly before the other starts. Disjunctive constraints (`||`) are a union of intervals.
 
 ## Dropper Packages
 
@@ -123,7 +123,7 @@ Dropper packages are indexed with wildcard matching — any version is a finding
 
 | Type | Description | Status |
 |------|-------------|--------|
-| `file` | File existence check (path + optional hash). | Implemented |
+| `file` | File existence check (path only; hash verification planned). | Partial |
 | `process` | Running process name. | Schema only |
 | `registry` | Windows registry key. | Schema only |
 | `network` | Network connection indicator. | Schema only |

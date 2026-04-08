@@ -8,6 +8,7 @@ type PackageEntry struct {
 
 // Result holds parsed entries from one lockfile.
 type Result struct {
-	Name    string
+	Name    string // display name (base filename or relative path)
+	Path    string // original filesystem path used to parse the lockfile
 	Entries []PackageEntry
 }

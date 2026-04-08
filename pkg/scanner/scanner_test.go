@@ -18,18 +18,22 @@ func TestScanPackages_Matches(t *testing.T) {
 	}
 
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{
+		Packages: map[string][]*rules.VersionSet{
 			"axios": {
-				RuleID:    "R1",
-				RuleTitle: "Axios compromise",
-				Severity:  "critical",
-				Versions:  map[string]bool{"1.7.8": true},
+				{
+					RuleID:    "R1",
+					RuleTitle: "Axios compromise",
+					Severity:  "critical",
+					Versions:  map[string]bool{"1.7.8": true},
+				},
 			},
 			"plain-crypto-js": {
-				RuleID:     "R1",
-				RuleTitle:  "Axios compromise",
-				Severity:   "critical",
-				AnyVersion: true,
+				{
+					RuleID:     "R1",
+					RuleTitle:  "Axios compromise",
+					Severity:   "critical",
+					AnyVersion: true,
+				},
 			},
 		},
 	}
@@ -62,11 +66,13 @@ func TestScanPackages_NoMatches(t *testing.T) {
 	}
 
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{
+		Packages: map[string][]*rules.VersionSet{
 			"axios": {
-				RuleID:   "R1",
-				Severity: "critical",
-				Versions: map[string]bool{"1.7.8": true},
+				{
+					RuleID:   "R1",
+					Severity: "critical",
+					Versions: map[string]bool{"1.7.8": true},
+				},
 			},
 		},
 	}
@@ -84,7 +90,7 @@ func TestScanPackages_EmptyIndex(t *testing.T) {
 	}
 
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{},
+		Packages: map[string][]*rules.VersionSet{},
 	}
 
 	findings := ScanPackages(entries, idx, "test")
@@ -190,6 +196,34 @@ func TestScanHostIndicators_WrongOS(t *testing.T) {
 	}
 }
 
+func TestScanHostIndicators_FileNameOnlyNoPath(t *testing.T) {
+	// A file indicator with file_name but no path triggers the CWD warning
+	// and resolves relative to CWD. The file won't exist so no finding.
+	ruleList := []rules.Rule{
+		{
+			ID: "R1", Title: "Test IOC", Severity: "critical",
+			HostIndicators: []rules.HostIndicator{
+				{
+					Type:     "file",
+					FileName: "nonexistent-malware-12345.bin",
+					OSes:     []string{mapOSName("linux"), mapOSName("darwin"), "linux", "macos", "windows"},
+					Notes:    "CWD file indicator",
+				},
+			},
+		},
+	}
+
+	findings, checks := ScanHostIndicators(ruleList)
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings, got %d", len(findings))
+	}
+
+	// Should still have a check entry (clean).
+	if len(checks) != 1 {
+		t.Errorf("expected 1 check, got %d", len(checks))
+	}
+}
+
 func TestScanHostIndicators_NonFileType(t *testing.T) {
 	ruleList := []rules.Rule{
 		{
@@ -242,7 +276,7 @@ func TestFormatReport_WithFindings(t *testing.T) {
 				RuleID:    "R1",
 				RuleTitle: "Test rule",
 				Severity:  "critical",
-				Type:      "package",
+				Type:      TypePackage,
 				Package:   "axios",
 				Version:   "1.7.8",
 				Lockfile:  "pnpm-lock.yaml",
@@ -251,7 +285,7 @@ func TestFormatReport_WithFindings(t *testing.T) {
 				RuleID:      "R1",
 				RuleTitle:   "Test rule",
 				Severity:    "critical",
-				Type:        "host_indicator",
+				Type:        TypeHostIndicator,
 				Description: "RAT binary",
 				Path:        "/tmp/malware",
 			},
@@ -525,7 +559,7 @@ func TestFormatFinding_Package(t *testing.T) {
 	var b strings.Builder
 	f := &Finding{
 		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
-		Type: "package", Package: "axios", Version: "1.7.8", Lockfile: "pnpm-lock.yaml",
+		Type: TypePackage, Package: "axios", Version: "1.7.8", Lockfile: "pnpm-lock.yaml",
 	}
 	formatFinding(&b, 1, f)
 	out := b.String()
@@ -549,7 +583,7 @@ func TestFormatFinding_PackageWithDescription(t *testing.T) {
 	var b strings.Builder
 	f := &Finding{
 		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
-		Type: "package", Package: "axios", Version: "^1.14.0", Lockfile: "package.json",
+		Type: TypePackage, Package: "axios", Version: "^1.14.0", Lockfile: "package.json",
 		Description: "range covers compromised version 1.14.1",
 	}
 	formatFinding(&b, 1, f)
@@ -564,8 +598,9 @@ func TestFormatFinding_InstalledPackage(t *testing.T) {
 	var b strings.Builder
 	f := &Finding{
 		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
-		Type: "installed_package", Package: "axios", Version: "1.14.1",
-		Path: "/project/node_modules/axios",
+		Type: TypeInstalledPackage, Package: "axios", Version: "1.14.1",
+		Path:        "/project/node_modules/axios",
+		Description: "compromised package found in pnpm store",
 	}
 	formatFinding(&b, 1, f)
 	out := b.String()
@@ -579,13 +614,31 @@ func TestFormatFinding_InstalledPackage(t *testing.T) {
 	if !strings.Contains(out, "Path:     /project/node_modules/axios") {
 		t.Error("missing path")
 	}
+	if !strings.Contains(out, "Source:   compromised package found in pnpm store") {
+		t.Error("missing source/description")
+	}
+}
+
+func TestFormatFinding_InstalledPackageNoDescription(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+		Type: TypeInstalledPackage, Package: "axios", Version: "1.14.1",
+		Path: "/project/node_modules/axios",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if strings.Contains(out, "Source:") {
+		t.Error("should not contain Source when Description is empty")
+	}
 }
 
 func TestFormatFinding_CachedPackage(t *testing.T) {
 	var b strings.Builder
 	f := &Finding{
 		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
-		Type: "cached_package", Package: "axios", Version: "1.14.1",
+		Type: TypeCachedPackage, Package: "axios", Version: "1.14.1",
 		Path: "/home/user/.npm/_cacache/content-v2/sha512/abc",
 	}
 	formatFinding(&b, 1, f)
@@ -597,13 +650,33 @@ func TestFormatFinding_CachedPackage(t *testing.T) {
 	if !strings.Contains(out, "Cache:    /home/user/.npm/_cacache/content-v2/sha512/abc") {
 		t.Error("missing cache path")
 	}
+
+	if strings.Contains(out, "Source:") {
+		t.Error("should not contain Source when Description is empty")
+	}
+}
+
+func TestFormatFinding_CachedPackageWithDescription(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
+		Type: TypeCachedPackage, Package: "axios", Version: "1.14.1",
+		Path:        "/home/user/.npm/_cacache/content-v2/sha512/abc",
+		Description: "indexed package found in npm cache",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if !strings.Contains(out, "Source:   indexed package found in npm cache") {
+		t.Error("missing source/description")
+	}
 }
 
 func TestFormatFinding_HostIndicator(t *testing.T) {
 	var b strings.Builder
 	f := &Finding{
 		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
-		Type: "host_indicator", Description: "RAT binary", Path: "/tmp/malware",
+		Type: TypeHostIndicator, Description: "RAT binary", Path: "/tmp/malware",
 	}
 	formatFinding(&b, 1, f)
 	out := b.String()
@@ -623,7 +696,7 @@ func TestFormatFinding_HostIndicatorNoDescription(t *testing.T) {
 	var b strings.Builder
 	f := &Finding{
 		RuleID: "R1", RuleTitle: "Test", Severity: "critical",
-		Type: "host_indicator", Path: "/tmp/malware",
+		Type: TypeHostIndicator, Path: "/tmp/malware",
 	}
 	formatFinding(&b, 1, f)
 	out := b.String()
@@ -679,18 +752,116 @@ func TestDedup(t *testing.T) {
 	}
 }
 
+func TestScanPackages_MultiRuleAttribution(t *testing.T) {
+	entries := []lockfile.PackageEntry{
+		{Name: "axios", Version: "1.7.8"},
+	}
+
+	idx := &rules.PackageIndex{
+		Packages: map[string][]*rules.VersionSet{
+			"axios": {
+				{
+					RuleID:    "R1",
+					RuleTitle: "First rule",
+					Severity:  "critical",
+					Versions:  map[string]bool{"1.7.8": true},
+				},
+				{
+					RuleID:    "R2",
+					RuleTitle: "Second rule",
+					Severity:  "high",
+					Versions:  map[string]bool{"1.7.8": true},
+				},
+			},
+		},
+	}
+
+	findings := ScanPackages(entries, idx, "package-lock.json")
+
+	if len(findings) != 2 {
+		t.Fatalf("expected 2 findings (one per rule), got %d", len(findings))
+	}
+
+	ruleIDs := map[string]bool{}
+	for _, f := range findings {
+		ruleIDs[f.RuleID] = true
+	}
+
+	if !ruleIDs["R1"] || !ruleIDs["R2"] {
+		t.Errorf("expected findings from both R1 and R2, got %v", ruleIDs)
+	}
+}
+
+func TestScanPackages_LockfileEcosystemFilter(t *testing.T) {
+	entries := []lockfile.PackageEntry{
+		{Name: "axios", Version: "1.7.8"},
+	}
+
+	idx := &rules.PackageIndex{
+		Packages: map[string][]*rules.VersionSet{
+			"axios": {
+				{
+					RuleID:             "R1",
+					RuleTitle:          "Yarn-only rule",
+					Severity:           "critical",
+					Versions:           map[string]bool{"1.7.8": true},
+					LockfileEcosystems: []string{"yarn"},
+				},
+			},
+		},
+	}
+
+	// Should NOT match package-lock.json (npm ecosystem).
+	findings := ScanPackages(entries, idx, "package-lock.json")
+	if len(findings) != 0 {
+		t.Errorf("expected 0 findings for npm lockfile with yarn-only rule, got %d", len(findings))
+	}
+
+	// Should match yarn.lock.
+	findings = ScanPackages(entries, idx, "yarn.lock")
+	if len(findings) != 1 {
+		t.Errorf("expected 1 finding for yarn lockfile with yarn-only rule, got %d", len(findings))
+	}
+}
+
+func TestScanPackages_LockfileEcosystemEmpty(t *testing.T) {
+	entries := []lockfile.PackageEntry{
+		{Name: "axios", Version: "1.7.8"},
+	}
+
+	idx := &rules.PackageIndex{
+		Packages: map[string][]*rules.VersionSet{
+			"axios": {
+				{
+					RuleID:   "R1",
+					Severity: "critical",
+					Versions: map[string]bool{"1.7.8": true},
+					// No LockfileEcosystems — applies to all.
+				},
+			},
+		},
+	}
+
+	findings := ScanPackages(entries, idx, "package-lock.json")
+	if len(findings) != 1 {
+		t.Errorf("expected 1 finding when no ecosystem filter, got %d", len(findings))
+	}
+}
+
 func TestScanPackages_RangeMatch(t *testing.T) {
 	entries := []lockfile.PackageEntry{
 		{Name: "axios", Version: "^1.14.0"},
 	}
 
 	idx := &rules.PackageIndex{
-		Packages: map[string]*rules.VersionSet{
+		Packages: map[string][]*rules.VersionSet{
 			"axios": {
-				RuleID:    "R1",
-				RuleTitle: "Axios compromise",
-				Severity:  "critical",
-				Versions:  map[string]bool{"1.14.1": true},
+				{
+					RuleID:    "R1",
+					RuleTitle: "Axios compromise",
+					Severity:  "critical",
+					Versions:  map[string]bool{"1.14.1": true},
+				},
 			},
 		},
 	}
@@ -715,7 +886,7 @@ func TestFormatReport_WithHostAndNodeModuleChecks(t *testing.T) {
 		Findings: []Finding{
 			{
 				RuleID: "R1", RuleTitle: "Test", Severity: "critical",
-				Type: "package", Package: "axios", Version: "1.14.1", Lockfile: "pnpm-lock.yaml",
+				Type: TypePackage, Package: "axios", Version: "1.14.1", Lockfile: "pnpm-lock.yaml",
 			},
 		},
 		PackagesTotal: 50,

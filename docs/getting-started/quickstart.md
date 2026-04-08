@@ -77,10 +77,11 @@ Point the scanner at your project directory. It auto-detects lockfiles.
 Use `-recursive` to scan an entire project tree (useful for monorepos):
 
 ```bash
-./gouvernante -rules ./rules -dir /path/to/your/project
+# Use the binary for your platform from dist/binaries/
+dist/binaries/gouvernante-linux-amd64 -rules ./rules -dir /path/to/your/project
 
 # Or recursively scan all nested lockfiles
-./gouvernante -rules ./rules -dir /path/to/your/project -recursive
+dist/binaries/gouvernante-linux-amd64 -rules ./rules -dir /path/to/your/project -recursive
 ```
 
 ### Read the report
@@ -90,7 +91,7 @@ A clean scan:
 ```
 === Supply Chain Scan Report ===
 
-Lockfiles scanned: pnpm-lock.yaml
+Files scanned: 1
 Total packages analyzed: 847
 Findings: 0
 

@@ -57,9 +57,9 @@ func ExampleBuildPackageIndex() {
 
 	idx := rules.BuildPackageIndex(ruleList)
 
-	fmt.Println("axios 1.7.8:", idx.Packages["axios"].Matches("1.7.8"))
-	fmt.Println("axios 1.8.0:", idx.Packages["axios"].Matches("1.8.0"))
-	fmt.Println("dropper any:", idx.Packages["plain-crypto-js"].AnyVersion)
+	fmt.Println("axios 1.7.8:", idx.Packages["axios"][0].Matches("1.7.8"))
+	fmt.Println("axios 1.8.0:", idx.Packages["axios"][0].Matches("1.8.0"))
+	fmt.Println("dropper any:", idx.Packages["plain-crypto-js"][0].AnyVersion)
 
 	// Output:
 	// axios 1.7.8: true

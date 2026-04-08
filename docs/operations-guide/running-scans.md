@@ -10,7 +10,7 @@ tags:
 !!! tldr "TL;DR"
 
     - `gouvernante -rules <dir>` is the minimum viable command.
-    - The scanner auto-detects lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`) in the target directory.
+    - The scanner auto-detects lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `package.json`) in the target directory.
     - Use `-lockfile` to scan a single file, `-host` to check filesystem IOCs.
     - Exit code `0` = clean, `1` = error, `2` = findings detected.
 
@@ -54,6 +54,7 @@ The scanner looks for:
 - `pnpm-lock.yaml`
 - `package-lock.json`
 - `yarn.lock`
+- `package.json` (dependencies and devDependencies; range expressions are checked for overlap with compromised versions)
 
 All detected lockfiles are scanned in a single run. Findings from each lockfile are reported separately.
 
@@ -90,7 +91,7 @@ The `-host` flag performs a comprehensive scan of the host filesystem. It goes w
 
 1. **Host IOC files** — checks paths defined in each rule's `host_indicators` array (e.g., `/tmp/ld.py`, `~/.node_modules/.cache`).
 2. **Project `node_modules`** — scans `node_modules` directories within the target project directories.
-3. **Global `node_modules`** — scans the global `node_modules` directory (determined via `npm config get prefix`).
+3. **Global `node_modules`** — scans global `node_modules` directories using `$NPM_CONFIG_PREFIX` and well-known OS paths (no external binaries are executed).
 4. **pnpm store and cache** — scans the pnpm content-addressable store and cache directories.
 5. **nvm cache and globals** — scans nvm's cached versions and globally installed packages.
 6. **npm cache blobs** — scans the npm cache blob storage.
@@ -116,15 +117,29 @@ gouvernante -rules ./rules -dir ./project
 ```
 
 ```
-[FINDING] axios@1.7.9 in package-lock.json
-  Rule: SSC-2025-001 — Compromised axios release
-  Severity: critical
+=== Supply Chain Scan Report ===
 
-[FINDING] plain-crypto-js@1.0.0 in pnpm-lock.yaml
-  Rule: SSC-2025-001 — Dropper package installed by compromised axios
-  Severity: critical
+Files scanned: 2
+Total packages analyzed: 150
+Findings: 2
 
-Scan complete: 2 findings in 2 lockfiles (14ms)
+--- Finding 1 ---
+  Rule:     SSC-2025-001
+  Title:    Compromised axios release
+  Severity: critical
+  Type:     package
+  Package:  axios@1.7.9
+  Lockfile: package-lock.json
+
+--- Finding 2 ---
+  Rule:     SSC-2025-001
+  Title:    Dropper package
+  Severity: critical
+  Type:     package
+  Package:  plain-crypto-js@1.0.0
+  Lockfile: pnpm-lock.yaml
+
+Scan complete: 2 findings in 2 lockfiles.
 ```
 
 ### JSON Output
@@ -140,11 +155,12 @@ gouvernante -rules ./rules -dir ./project -json
   "findings": [
     {
       "rule_id": "SSC-2025-001",
+      "rule_title": "Compromised axios release",
+      "severity": "critical",
+      "type": "package",
       "package": "axios",
       "version": "1.7.9",
-      "lockfile": "package-lock.json",
-      "severity": "critical",
-      "kind": "compromised-release"
+      "lockfile": "package-lock.json"
     }
   ],
   "summary": {
@@ -157,7 +173,7 @@ gouvernante -rules ./rules -dir ./project -json
 
 ## Writing Output to a File
 
-Use `-output` to write the report to a file instead of (or in addition to) stdout:
+Use `-output` to write the report to a file instead of stdout:
 
 ```bash
 # Write to a specific file

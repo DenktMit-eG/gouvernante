@@ -209,6 +209,24 @@ func TestParsePnpmLock_InvalidYAML(t *testing.T) {
 	}
 }
 
+func TestParsePnpmLock_UnparseableKey(t *testing.T) {
+	// A key that can't be split into name+version should be skipped.
+	path := writeTempFile(t, "pnpm-lock.yaml", `lockfileVersion: '9.0'
+packages:
+  badkey:
+    resolution: {integrity: sha512-abc}
+`)
+
+	entries, err := ParsePnpmLock(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(entries) != 0 {
+		t.Errorf("expected 0 entries for unparseable key, got %d", len(entries))
+	}
+}
+
 func entriesToMap(entries []PackageEntry) map[string]string {
 	m := make(map[string]string, len(entries))
 	for _, e := range entries {

@@ -49,7 +49,7 @@ func DetectAndParse(dir string) ([]Result, error) {
 			return nil, fmt.Errorf("parse %s: %w", lf.name, err)
 		}
 
-		results = append(results, Result{Name: lf.name, Entries: entries})
+		results = append(results, Result{Name: lf.name, Path: path, Entries: entries})
 	}
 
 	return results, nil
@@ -76,6 +76,7 @@ func DetectAndParseRecursive(root string) ([]Result, error) {
 	return w.results, nil
 }
 
+// recursiveWalker accumulates lockfile parse results while walking a directory tree.
 type recursiveWalker struct {
 	root     string
 	parsers  map[string]func(string) ([]PackageEntry, error)
@@ -83,6 +84,8 @@ type recursiveWalker struct {
 	dirCount int
 }
 
+// buildParserMap converts the lockfileFormats slice into a map keyed by filename
+// for O(1) lookup during directory walking.
 func buildParserMap() map[string]func(string) ([]PackageEntry, error) {
 	m := make(map[string]func(string) ([]PackageEntry, error), len(lockfileFormats))
 	for _, lf := range lockfileFormats {
@@ -92,6 +95,7 @@ func buildParserMap() map[string]func(string) ([]PackageEntry, error) {
 	return m
 }
 
+// visit is the filepath.WalkDir callback that dispatches to visitDir or visitFile.
 func (w *recursiveWalker) visit(path string, d fs.DirEntry, err error) error {
 	if err != nil {
 		return handleWalkError(path, d, err)
@@ -104,6 +108,7 @@ func (w *recursiveWalker) visit(path string, d fs.DirEntry, err error) error {
 	return w.visitFile(path, d)
 }
 
+// handleWalkError skips unreadable directories and ignores file-level errors.
 func handleWalkError(path string, d fs.DirEntry, err error) error {
 	if d != nil && d.IsDir() {
 		slog.Warn("skipping unreadable directory", "path", path, "error", err)
@@ -113,6 +118,7 @@ func handleWalkError(path string, d fs.DirEntry, err error) error {
 	return nil
 }
 
+// visitDir skips excluded directories (node_modules, .git, etc.) and logs progress.
 func (w *recursiveWalker) visitDir(path string, d fs.DirEntry) error {
 	if skipDirs[d.Name()] {
 		return fs.SkipDir
@@ -129,6 +135,7 @@ func (w *recursiveWalker) visitDir(path string, d fs.DirEntry) error {
 	return nil
 }
 
+// visitFile checks whether the file is a known lockfile format and parses it.
 func (w *recursiveWalker) visitFile(path string, d fs.DirEntry) error {
 	parser, ok := w.parsers[d.Name()]
 	if !ok {
@@ -144,11 +151,12 @@ func (w *recursiveWalker) visitFile(path string, d fs.DirEntry) error {
 		return fmt.Errorf("parse %s: %w", path, err)
 	}
 
-	w.results = append(w.results, Result{Name: rel, Entries: entries})
+	w.results = append(w.results, Result{Name: rel, Path: path, Entries: entries})
 
 	return nil
 }
 
+// relPath returns path relative to root, falling back to the absolute path on error.
 func relPath(root, path string) string {
 	rel, err := filepath.Rel(root, path)
 	if err != nil {
@@ -179,8 +187,8 @@ func ParseFile(path string) (*Result, error) {
 
 	entries, err := parser(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse %s: %w", base, err)
 	}
 
-	return &Result{Name: base, Entries: entries}, nil
+	return &Result{Name: base, Path: path, Entries: entries}, nil
 }

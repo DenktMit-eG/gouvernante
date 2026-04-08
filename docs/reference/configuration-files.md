@@ -95,7 +95,7 @@ make lint
 
 ## Makefile targets
 
-The Makefile is the primary build interface. The default target (`make` with no arguments) runs `fmt`, `lint`, `test`, and `build` in sequence.
+The Makefile is the primary build interface. The default target (`make` with no arguments) runs `ensure-tools`, `fmt`, `lint`, `cover`, `build`, and `test-integration` in sequence.
 
 See [CLI Cheatsheet](cli-cheatsheet.md#makefile-targets) for the full target reference.
 

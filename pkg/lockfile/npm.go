@@ -13,10 +13,12 @@ type npmLockfile struct {
 	Dependencies map[string]npmDependency `json:"dependencies"`
 }
 
+// npmPackage is a single entry in the v2/v3 flat packages map.
 type npmPackage struct {
 	Version string `json:"version"`
 }
 
+// npmDependency is a single entry in the v1 nested dependencies tree.
 type npmDependency struct {
 	Version      string                   `json:"version"`
 	Dependencies map[string]npmDependency `json:"dependencies"`

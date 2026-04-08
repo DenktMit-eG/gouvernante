@@ -14,26 +14,26 @@ npm supply chain attacks are becoming routine. Existing tools (npm audit, Grype,
 ## Quick start
 
 ```bash
-# Build
+# Build (binaries are written to dist/binaries/)
 make build
 
 # Scan a project directory (auto-detects lockfiles)
-./gouvernante -rules /path/to/rules -dir /path/to/project
+dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/project
 
 # Scan a specific lockfile
-./gouvernante -rules /path/to/rules -lockfile /path/to/pnpm-lock.yaml
+dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -lockfile /path/to/pnpm-lock.yaml
 
 # Recursively scan a monorepo for all lockfiles
-./gouvernante -rules /path/to/rules -dir /path/to/monorepo -recursive
+dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/monorepo -recursive
 
 # Include host IOC checks
-./gouvernante -rules /path/to/rules -dir /path/to/project -host
+dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/project -host
 
 # JSON output
-./gouvernante -rules /path/to/rules -dir /path/to/project -json
+dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/project -json
 
 # Write report to file
-./gouvernante -rules /path/to/rules -dir /path/to/project -output auto
+dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/project -output auto
 
 # Enable debug-level trace logging
 ./gouvernante -rules /path/to/rules -dir /path/to/project -trace
@@ -80,6 +80,13 @@ make all        # fmt + lint + cover + build + test-integration
 See [docs/developer-guide/code-style.md](docs/developer-guide/code-style.md) for the full development guide.
 
 ## Documentation
+To build the docs site locally and read it nicely formatted in your browser, run in this project root directory:
+
+```bash
+docker compose -f docker-compose.docs.yml up
+```
+
+Open [http://localhost:8000/](http://localhost:8000/) with live-reload. Stop with `Ctrl+C`.
 
 - [Architecture overview](docs/architecture/overview.md)
 - [Rule format specification](docs/architecture/rule-format.md)

@@ -27,10 +27,10 @@ tags:
 | Dropper package detection | Done | Any version of a dropper package is a finding |
 | Host indicator: file existence | Done | Checks `os.Stat()` on expanded paths |
 | node_modules scanning | Done | Checks installed packages in project and global node_modules |
-| pnpm store/cache scanning | Done | Scans ~/.local/share/pnpm, ~/.cache/pnpm, $PNPM_HOME, `pnpm store path` |
+| pnpm store/cache scanning | Done | Scans ~/.local/share/pnpm, ~/.cache/pnpm, $PNPM_HOME |
 | nvm cache and globals | Done | Scans $NVM_DIR cache and per-version global node_modules |
 | npm cache scanning | Done | Scans _cacache blobs for indexed package names and versions |
-| Dynamic npm prefix detection | Done | Uses `npm config get prefix` when npm is available |
+| Dynamic npm prefix detection | Done | Uses `$NPM_CONFIG_PREFIX` env var and well-known OS paths |
 | Host indicator: file hashes (sha256, sha1, md5, sha512) | Schema only | Hashes are stored and validated but not checked against actual files |
 | Host indicator: network | Schema only | C2 domains/IPs stored for analyst reference, not actively checked |
 | Host indicator: process | Schema only | Process names stored, not checked against running processes |

@@ -5,7 +5,7 @@
 # end-to-end detection.
 #
 # Usage:
-#   docker build -f Dockerfile.test -t gouvernante-test . && docker run --rm gouvernante-test
+#   docker build -f Dockerfile.integration -t gouvernante-test . && docker run --rm gouvernante-test
 
 FROM golang:1.22 AS builder
 

@@ -33,6 +33,14 @@ const (
 	StatusNotInstalled = "not_installed"
 )
 
+// Finding type constants.
+const (
+	TypePackage          = "package"
+	TypeInstalledPackage = "installed_package"
+	TypeCachedPackage    = "cached_package"
+	TypeHostIndicator    = "host_indicator"
+)
+
 // HostCheck records the result of checking a single host indicator.
 type HostCheck struct {
 	Path   string
@@ -44,10 +52,15 @@ type HostCheck struct {
 
 // Result holds the complete scan output.
 type Result struct {
-	Findings         []Finding
-	PackagesTotal    int
-	LockfilesUsed    []string
-	HostChecks       []HostCheck
+	// Findings contains detected supply chain compromises across all scan sources.
+	Findings []Finding
+	// PackagesTotal is the total dependency entries across all parsed lockfiles.
+	PackagesTotal int
+	// LockfilesUsed lists the basenames of lockfiles that were scanned.
+	LockfilesUsed []string
+	// HostChecks records the results of host-indicator file checks.
+	HostChecks []HostCheck
+	// NodeModuleChecks records the results of installed and cached package checks.
 	NodeModuleChecks []NodeModulesCheck
 }
 
@@ -59,38 +72,44 @@ func ScanPackages(entries []lockfile.PackageEntry, idx *rules.PackageIndex, lock
 	var findings []Finding
 
 	for _, e := range entries {
-		vs := idx.Packages[e.Name]
-		if vs == nil {
+		vsList := idx.Packages[e.Name]
+		if len(vsList) == 0 {
 			continue
 		}
 
-		// Direct match: exact version or wildcard.
-		if vs.Matches(e.Version) {
-			findings = append(findings, Finding{
-				RuleID:    vs.RuleID,
-				RuleTitle: vs.RuleTitle,
-				Severity:  vs.Severity,
-				Type:      "package",
-				Package:   e.Name,
-				Version:   e.Version,
-				Lockfile:  lockfileName,
-			})
+		for _, vs := range vsList {
+			if !vs.AppliesToLockfile(lockfileName) {
+				continue
+			}
 
-			continue
-		}
+			// Direct match: exact version or wildcard.
+			if vs.Matches(e.Version) {
+				findings = append(findings, Finding{
+					RuleID:    vs.RuleID,
+					RuleTitle: vs.RuleTitle,
+					Severity:  vs.Severity,
+					Type:      TypePackage,
+					Package:   e.Name,
+					Version:   e.Version,
+					Lockfile:  lockfileName,
+				})
 
-		// Range match: check if the declared range could resolve to a compromised version.
-		if covers, matched := vs.RangeCoversVersion(e.Version); covers {
-			findings = append(findings, Finding{
-				RuleID:      vs.RuleID,
-				RuleTitle:   vs.RuleTitle,
-				Severity:    vs.Severity,
-				Type:        "package",
-				Package:     e.Name,
-				Version:     e.Version,
-				Lockfile:    lockfileName,
-				Description: "range covers compromised version " + matched,
-			})
+				continue
+			}
+
+			// Range match: check if the declared range could resolve to a compromised version.
+			if covers, matched := vs.RangeCoversVersion(e.Version); covers {
+				findings = append(findings, Finding{
+					RuleID:      vs.RuleID,
+					RuleTitle:   vs.RuleTitle,
+					Severity:    vs.Severity,
+					Type:        TypePackage,
+					Package:     e.Name,
+					Version:     e.Version,
+					Lockfile:    lockfileName,
+					Description: "range covers compromised version " + matched,
+				})
+			}
 		}
 	}
 
@@ -125,6 +144,11 @@ func ScanHostIndicators(ruleList []rules.Rule) ([]Finding, []HostCheck) {
 				continue
 			}
 
+			if hi.Path == "" && hi.FileName != "" {
+				slog.Warn("file indicator has file_name but no path; will resolve relative to CWD",
+					"rule", r.ID, "file_name", hi.FileName)
+			}
+
 			fullPath := buildIndicatorPath(hi)
 			if _, err := os.Stat(fullPath); err == nil {
 				slog.Warn("host indicator FOUND", "rule", r.ID, "path", fullPath, "notes", hi.Notes)
@@ -134,7 +158,7 @@ func ScanHostIndicators(ruleList []rules.Rule) ([]Finding, []HostCheck) {
 					RuleID:      r.ID,
 					RuleTitle:   r.Title,
 					Severity:    r.Severity,
-					Type:        "host_indicator",
+					Type:        TypeHostIndicator,
 					Description: hi.Notes,
 					Path:        fullPath,
 				})
@@ -148,6 +172,8 @@ func ScanHostIndicators(ruleList []rules.Rule) ([]Finding, []HostCheck) {
 	return findings, checks
 }
 
+// buildIndicatorPath constructs the full filesystem path for a host indicator
+// by expanding environment variables in hi.Path and joining with hi.FileName.
 func buildIndicatorPath(hi *rules.HostIndicator) string {
 	path := expandPath(hi.Path)
 	if hi.FileName != "" {
@@ -166,6 +192,8 @@ func mapOSName(goos string) string {
 	return goos
 }
 
+// osMatch reports whether current matches any OS in the list.
+// An empty list matches all operating systems.
 func osMatch(oses []string, current string) bool {
 	if len(oses) == 0 {
 		return true
@@ -180,6 +208,8 @@ func osMatch(oses []string, current string) bool {
 	return false
 }
 
+// expandPath replaces Windows environment variable placeholders (%PROGRAMDATA%,
+// %APPDATA%, %TEMP%) and Unix home directory shorthand (~) with their actual values.
 func expandPath(path string) string {
 	if strings.Contains(path, "%PROGRAMDATA%") {
 		pd := os.Getenv("PROGRAMDATA")
@@ -245,9 +275,12 @@ func FormatReport(result *Result) string {
 		formatNodeModulesChecks(&b, result.NodeModuleChecks)
 	}
 
+	fmt.Fprintf(&b, "Scan complete: %d findings in %d lockfiles.\n", len(result.Findings), len(result.LockfilesUsed))
+
 	return b.String()
 }
 
+// formatHostChecks writes the host indicator check results (FOUND/CLEAN/SKIP) to b.
 func formatHostChecks(b *strings.Builder, checks []HostCheck) {
 	b.WriteString("=== Host Indicator Checks ===\n\n")
 
@@ -288,6 +321,8 @@ func indicatorDescription(hi *rules.HostIndicator) string {
 	return hi.Notes
 }
 
+// formatNodeModulesChecks writes node_modules check results to b.
+// Packages with status "not_installed" are omitted for brevity.
 func formatNodeModulesChecks(b *strings.Builder, checks []NodeModulesCheck) {
 	b.WriteString("=== Node Modules Checks ===\n\n")
 
@@ -306,6 +341,8 @@ func formatNodeModulesChecks(b *strings.Builder, checks []NodeModulesCheck) {
 	b.WriteString("\n")
 }
 
+// formatFinding writes a single numbered finding to b, adapting the output
+// format based on the finding type (package, installed_package, cached_package, host_indicator).
 func formatFinding(b *strings.Builder, num int, f *Finding) {
 	fmt.Fprintf(b, "--- Finding %d ---\n", num)
 	fmt.Fprintf(b, "  Rule:     %s\n", f.RuleID)
@@ -313,7 +350,7 @@ func formatFinding(b *strings.Builder, num int, f *Finding) {
 	fmt.Fprintf(b, "  Severity: %s\n", f.Severity)
 
 	switch f.Type {
-	case "package":
+	case TypePackage:
 		fmt.Fprintf(b, "  Type:     %s\n", f.Type)
 		fmt.Fprintf(b, "  Package:  %s@%s\n", f.Package, f.Version)
 		fmt.Fprintf(b, "  Lockfile: %s\n", f.Lockfile)
@@ -321,15 +358,23 @@ func formatFinding(b *strings.Builder, num int, f *Finding) {
 		if f.Description != "" {
 			fmt.Fprintf(b, "  Note:     %s\n", f.Description)
 		}
-	case "installed_package":
+	case TypeInstalledPackage:
 		b.WriteString("  Type:     installed package\n")
 		fmt.Fprintf(b, "  Package:  %s@%s\n", f.Package, f.Version)
 		fmt.Fprintf(b, "  Path:     %s\n", f.Path)
-	case "cached_package":
+
+		if f.Description != "" {
+			fmt.Fprintf(b, "  Source:   %s\n", f.Description)
+		}
+	case TypeCachedPackage:
 		b.WriteString("  Type:     cached package\n")
 		fmt.Fprintf(b, "  Package:  %s@%s\n", f.Package, f.Version)
 		fmt.Fprintf(b, "  Cache:    %s\n", f.Path)
-	case "host_indicator":
+
+		if f.Description != "" {
+			fmt.Fprintf(b, "  Source:   %s\n", f.Description)
+		}
+	case TypeHostIndicator:
 		b.WriteString("  Type:     host indicator\n")
 
 		if f.Description != "" {

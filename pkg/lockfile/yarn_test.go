@@ -1,6 +1,7 @@
 package lockfile
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -82,5 +83,31 @@ func TestParseYarnLock_FileNotFound(t *testing.T) {
 	_, err := ParseYarnLock("/nonexistent/yarn.lock")
 	if err == nil {
 		t.Fatal("expected error for nonexistent file")
+	}
+}
+
+func TestParseYarnLock_ScannerError(t *testing.T) {
+	// A line exceeding the 10MB scanner buffer triggers bufio.ErrTooLong.
+	longLine := strings.Repeat("x", 11*1024*1024)
+	path := writeTempFile(t, "yarn.lock", "# yarn lockfile v1\n"+longLine+"\n")
+
+	_, err := ParseYarnLock(path)
+	if err == nil {
+		t.Fatal("expected error for line exceeding scanner buffer")
+	}
+}
+
+func TestParseYarnEntryHeader_NoAtSign(t *testing.T) {
+	// A header part with no @ should be skipped.
+	names := parseYarnEntryHeader("noatsign:")
+	if len(names) != 0 {
+		t.Errorf("expected 0 names for entry without @, got %d: %v", len(names), names)
+	}
+}
+
+func TestParseYarnEntryHeader_ScopedPackage(t *testing.T) {
+	names := parseYarnEntryHeader(`"@scope/pkg@^1.0.0":`)
+	if len(names) != 1 || names[0] != "@scope/pkg" {
+		t.Errorf("expected [@scope/pkg], got %v", names)
 	}
 }
