@@ -33,7 +33,7 @@ gouvernante [flags]
 | `-host` | `bool` | `false` | Also check host filesystem for IOC artifacts. |
 | `-output` | `string` | | Write report to file. Use `auto` for a timestamped filename. |
 | `-json` | `bool` | `false` | Output findings as JSON instead of text. |
-| `-trace` | `bool` | `false` | Enable trace-level debug logging. |
+| `-trace` | `bool` | `false` | Enable debug-level logging. |
 
 ---
 

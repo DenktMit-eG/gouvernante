@@ -251,7 +251,8 @@ func ExtractProjectDirs(lockfileResults []lockfile.Result, scanDir string) []str
 }
 
 // FormatOutput renders scan results as either a JSON envelope (with findings
-// and summary) or a human-readable text report.
+// and summary) or a human-readable text report. The elapsed duration is
+// included as elapsed_ms in JSON mode.
 func FormatOutput(result *scanner.Result, jsonMode bool, elapsed time.Duration) (string, error) {
 	if jsonMode {
 		report := JSONReport{
@@ -278,7 +279,8 @@ func FormatOutput(result *scanner.Result, jsonMode bool, elapsed time.Duration) 
 }
 
 // WriteOutput writes the combined header+report to stdout or to a file.
-// When outputFile is "auto", a timestamped filename is generated.
+// When outputFile is "auto", a timestamped filename is generated; the
+// jsonMode flag controls whether the extension is .json or .txt.
 func WriteOutput(stdout io.Writer, header, output, outputFile string, jsonMode bool) error {
 	combined := header + output
 

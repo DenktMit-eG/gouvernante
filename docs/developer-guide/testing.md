@@ -67,8 +67,8 @@ For a quick terminal summary:
 go test -race -cover ./...
 ```
 
-Coverage targets are not enforced by CI today, but aim for **>80%** line
-coverage on every package.
+All library packages under `pkg/` must maintain **100% statement coverage**.
+Use `go test -coverprofile` to verify before submitting changes.
 
 ## Test Patterns
 

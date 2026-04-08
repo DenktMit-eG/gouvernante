@@ -11,6 +11,9 @@ import (
 // lockfileFormats maps known lockfile names to their parsers.
 const packageJSONName = "package.json"
 
+// lockfileFormats lists recognized lockfile names and their parsers.
+// The ecosystem map in pkg/rules/rules.go also includes bun entries
+// for forward-compatible filtering; add a parser here when bun support lands.
 var lockfileFormats = []struct {
 	name   string
 	parser func(string) ([]PackageEntry, error)

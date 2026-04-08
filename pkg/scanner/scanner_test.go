@@ -8,6 +8,8 @@ import (
 
 	"gouvernante/pkg/lockfile"
 	"gouvernante/pkg/rules"
+
+	"github.com/Masterminds/semver/v3"
 )
 
 func TestScanPackages_Matches(t *testing.T) {
@@ -878,6 +880,38 @@ func TestScanPackages_RangeMatch(t *testing.T) {
 
 	if !strings.Contains(findings[0].Description, "1.14.1") {
 		t.Errorf("description should mention matched version, got %q", findings[0].Description)
+	}
+}
+
+func TestScanPackages_RangeOverlapDescription(t *testing.T) {
+	entries := []lockfile.PackageEntry{
+		{Name: "axios", Version: "^1.5.0"},
+	}
+
+	constraint, _ := semver.NewConstraint(">= 1.7.0, < 1.8.0")
+
+	idx := &rules.PackageIndex{
+		Packages: map[string][]*rules.VersionSet{
+			"axios": {
+				{
+					RuleID:      "R1",
+					RuleTitle:   "Axios compromise",
+					Severity:    "critical",
+					Constraints: []*semver.Constraints{constraint},
+					// No Versions map — forces constraintOverlap path.
+				},
+			},
+		},
+	}
+
+	findings := ScanPackages(entries, idx, "package.json")
+
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 finding for range overlap, got %d", len(findings))
+	}
+
+	if !strings.Contains(findings[0].Description, "range overlaps with rule constraint") {
+		t.Errorf("expected 'range overlaps with rule constraint' description, got %q", findings[0].Description)
 	}
 }
 

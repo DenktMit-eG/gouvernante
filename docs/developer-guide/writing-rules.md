@@ -186,13 +186,13 @@ though only `file` is currently checked by the scanner:
 
 | Type | Status | Fields |
 |------|--------|--------|
-| `file` | Implemented | `path` and/or `file_name` (at least one required), optional `hashes` (schema-validated but not yet checked at runtime) |
-
-> **Note:** When only `file_name` is provided without `path`, the scanner resolves the file relative to the working directory where the CLI is launched.
+| `file` | Partial | `path` and/or `file_name` (at least one required), optional `hashes` (schema-validated but not yet checked at runtime). Existence check only. |
 | `process` | Schema only | `value` (process name) |
 | `registry` | Schema only | `value` (registry key path) |
 | `network` | Schema only | `value` (host:port or domain) |
 | `environment` | Schema only | `value` (env var name) |
+
+> **Note:** When only `file_name` is provided without `path`, the scanner resolves the file relative to the working directory where the CLI is launched.
 
 File indicators can include multiple hashes for variant builds:
 

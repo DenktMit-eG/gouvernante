@@ -123,7 +123,7 @@ Dropper packages are indexed with wildcard matching — any version is a finding
 
 | Type | Description | Status |
 |------|-------------|--------|
-| `file` | File existence check (path only; hash verification planned). | Partial |
+| `file` | File existence check (`path` and/or `file_name`; hash verification planned). | Partial |
 | `process` | Running process name. | Schema only |
 | `registry` | Windows registry key. | Schema only |
 | `network` | Network connection indicator. | Schema only |

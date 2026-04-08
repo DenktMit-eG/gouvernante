@@ -69,7 +69,7 @@ enforces this three-group layout automatically.
 
 ### golangci-lint
 
-The project runs [golangci-lint](https://golangci-lint.run/) with **30+
+The project runs [golangci-lint](https://golangci-lint.run/) with **34
 linters** enabled. Configuration lives in `.golangci.yml` at the repository
 root.
 

@@ -175,11 +175,14 @@ func (vs *VersionSet) Matches(version string) bool {
 // could resolve to any of the affected versions. Used for package.json scanning
 // where the declared version is a range, not a resolved version.
 //
+// The second return value is the matched exact version for point-in-range hits,
+// or the overlapping rule constraint expression for range-vs-range matches.
+//
 // When the rule uses semver range constraints, both sides are compiled into interval
 // sets and tested for intersection. Disjunctions (||) produce multiple intervals;
 // overlap is determined structurally — two intervals overlap unless one ends strictly
 // before the other starts.
-func (vs *VersionSet) RangeCoversVersion(rangeExpr string) (covers bool, matchedVersion string) {
+func (vs *VersionSet) RangeCoversVersion(rangeExpr string) (covers bool, matched string) {
 	if vs.AnyVersion {
 		return true, "*"
 	}
@@ -469,6 +472,10 @@ func tightenUpper(iv *interval, b *bound) {
 }
 
 // lockfileEcosystem maps a lockfile filename to its ecosystem name.
+// Entries here should cover all ecosystems accepted by the schema.
+// Parsers exist for npm, pnpm, yarn, and package.json (see pkg/lockfile/detect.go).
+// Bun entries are included so that lockfile_ecosystems filtering works correctly
+// once a bun parser is added; until then, bun lockfiles are not detected.
 var lockfileEcosystem = map[string]string{
 	"package-lock.json": "npm",
 	"pnpm-lock.yaml":    "pnpm",

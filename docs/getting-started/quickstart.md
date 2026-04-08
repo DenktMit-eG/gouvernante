@@ -71,24 +71,29 @@ flowchart LR
 make build
 ```
 
+This produces platform-specific binaries in `dist/binaries/` (e.g. `gouvernante-linux-amd64`).
+Copy the binary for your platform onto your `PATH` as `gouvernante`.
+
 ### Scan a project
 
 Point the scanner at your project directory. It auto-detects lockfiles.
 Use `-recursive` to scan an entire project tree (useful for monorepos):
 
 ```bash
-# Use the binary for your platform from dist/binaries/
-dist/binaries/gouvernante-linux-amd64 -rules ./rules -dir /path/to/your/project
+gouvernante -rules ./rules -dir /path/to/your/project
 
 # Or recursively scan all nested lockfiles
-dist/binaries/gouvernante-linux-amd64 -rules ./rules -dir /path/to/your/project -recursive
+gouvernante -rules ./rules -dir /path/to/your/project -recursive
 ```
 
 ### Read the report
 
-A clean scan:
+A clean scan (configuration preamble trimmed for brevity):
 
 ```
+=== Scan Configuration ===
+...
+
 === Supply Chain Scan Report ===
 
 Files scanned: 1
@@ -96,14 +101,19 @@ Total packages analyzed: 847
 Findings: 0
 
 No compromised packages or host indicators found.
+
+Scan complete: 0 findings in 1 lockfiles.
 ```
 
 A scan with findings:
 
 ```
+=== Scan Configuration ===
+...
+
 === Supply Chain Scan Report ===
 
-Lockfiles scanned: pnpm-lock.yaml
+Files scanned: 1
 Total packages analyzed: 847
 Findings: 2
 
@@ -122,12 +132,14 @@ Findings: 2
   Type:     package
   Package:  plain-crypto-js@1.0.0
   Lockfile: pnpm-lock.yaml
+
+Scan complete: 2 findings in 1 lockfiles.
 ```
 
 ### Add host indicator checks
 
 ```bash
-./gouvernante -rules ./rules -dir /path/to/project -host
+gouvernante -rules ./rules -dir /path/to/project -host
 ```
 
 ### Scanning a monorepo
@@ -135,13 +147,13 @@ Findings: 2
 Use `-recursive` to walk the entire directory tree and scan every lockfile found:
 
 ```bash
-./gouvernante -rules ./rules -dir /path/to/monorepo -recursive
+gouvernante -rules ./rules -dir /path/to/monorepo -recursive
 ```
 
 ### JSON output for CI/CD
 
 ```bash
-./gouvernante -rules ./rules -dir /path/to/project -json
+gouvernante -rules ./rules -dir /path/to/project -json
 ```
 
 ### Enable trace logging
@@ -149,7 +161,7 @@ Use `-recursive` to walk the entire directory tree and scan every lockfile found
 Use `-trace` to log every directory visited (useful for debugging scan scope):
 
 ```bash
-./gouvernante -rules ./rules -dir /path/to/project -trace
+gouvernante -rules ./rules -dir /path/to/project -trace
 ```
 
 ### Exit codes

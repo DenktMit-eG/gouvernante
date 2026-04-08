@@ -22,10 +22,14 @@ type packageJSON struct {
 
 // NodeModulesCheck records the result of checking one package in a directory.
 type NodeModulesCheck struct {
-	Dir     string
+	// Dir is the node_modules or store directory that was checked.
+	Dir string
+	// Package is the npm package name.
 	Package string
+	// Version is the installed version (empty when Status is StatusNotInstalled).
 	Version string
-	Status  string
+	// Status is the check outcome: StatusFound, StatusClean, or StatusNotInstalled.
+	Status string
 }
 
 // cacheProgressInterval controls how often progress is logged during cache scanning.

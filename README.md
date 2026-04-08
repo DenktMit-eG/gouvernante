@@ -14,29 +14,30 @@ npm supply chain attacks are becoming routine. Existing tools (npm audit, Grype,
 ## Quick start
 
 ```bash
-# Build (binaries are written to dist/binaries/)
+# Build (binaries are written to dist/binaries/gouvernante-<os>-<arch>)
+# Copy the binary for your platform onto your PATH as "gouvernante"
 make build
 
 # Scan a project directory (auto-detects lockfiles)
-dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/project
+gouvernante -rules /path/to/rules -dir /path/to/project
 
 # Scan a specific lockfile
-dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -lockfile /path/to/pnpm-lock.yaml
+gouvernante -rules /path/to/rules -lockfile /path/to/pnpm-lock.yaml
 
 # Recursively scan a monorepo for all lockfiles
-dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/monorepo -recursive
+gouvernante -rules /path/to/rules -dir /path/to/monorepo -recursive
 
 # Include host IOC checks
-dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/project -host
+gouvernante -rules /path/to/rules -dir /path/to/project -host
 
 # JSON output
-dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/project -json
+gouvernante -rules /path/to/rules -dir /path/to/project -json
 
 # Write report to file
-dist/binaries/gouvernante-linux-amd64 -rules /path/to/rules -dir /path/to/project -output auto
+gouvernante -rules /path/to/rules -dir /path/to/project -output auto
 
 # Enable debug-level trace logging
-./gouvernante -rules /path/to/rules -dir /path/to/project -trace
+gouvernante -rules /path/to/rules -dir /path/to/project -trace
 ```
 
 ## Supported lockfile formats

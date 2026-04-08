@@ -17,7 +17,7 @@ type Finding struct {
 	RuleID      string `json:"rule_id"`
 	RuleTitle   string `json:"rule_title"`
 	Severity    string `json:"severity"`
-	Type        string `json:"type"` // "package" or "host_indicator"
+	Type        string `json:"type"` // TypePackage, TypeInstalledPackage, TypeCachedPackage, or TypeHostIndicator
 	Package     string `json:"package,omitempty"`
 	Version     string `json:"version,omitempty"`
 	Lockfile    string `json:"lockfile,omitempty"`
@@ -41,13 +41,23 @@ const (
 	TypeHostIndicator    = "host_indicator"
 )
 
+// IndicatorTypeFile is the host indicator type handled by the scanner.
+// Other indicator types (process, registry, network, environment) are
+// schema-validated but not yet checked at runtime.
+const IndicatorTypeFile = "file"
+
 // HostCheck records the result of checking a single host indicator.
 type HostCheck struct {
-	Path   string
+	// Path is the filesystem path that was checked.
+	Path string
+	// Status is the check outcome: StatusFound, StatusClean, or StatusSkipped.
 	Status string
+	// Reason explains why the check was skipped (empty when Status is not StatusSkipped).
 	Reason string
+	// RuleID identifies the rule that defined this indicator.
 	RuleID string
-	Notes  string
+	// Notes contains the human-readable description from the rule's host_indicator entry.
+	Notes string
 }
 
 // Result holds the complete scan output.
@@ -56,7 +66,7 @@ type Result struct {
 	Findings []Finding
 	// PackagesTotal is the total dependency entries across all parsed lockfiles.
 	PackagesTotal int
-	// LockfilesUsed lists the basenames of lockfiles that were scanned.
+	// LockfilesUsed lists the names of lockfiles that were scanned (basenames for single-dir scans, relative paths for recursive scans).
 	LockfilesUsed []string
 	// HostChecks records the results of host-indicator file checks.
 	HostChecks []HostCheck
@@ -99,6 +109,11 @@ func ScanPackages(entries []lockfile.PackageEntry, idx *rules.PackageIndex, lock
 
 			// Range match: check if the declared range could resolve to a compromised version.
 			if covers, matched := vs.RangeCoversVersion(e.Version); covers {
+				desc := "range covers compromised version " + matched
+				if matched == "*" || strings.ContainsAny(matched, "><=!^~| ") {
+					desc = "range overlaps with rule constraint " + matched
+				}
+
 				findings = append(findings, Finding{
 					RuleID:      vs.RuleID,
 					RuleTitle:   vs.RuleTitle,
@@ -107,7 +122,7 @@ func ScanPackages(entries []lockfile.PackageEntry, idx *rules.PackageIndex, lock
 					Package:     e.Name,
 					Version:     e.Version,
 					Lockfile:    lockfileName,
-					Description: "range covers compromised version " + matched,
+					Description: desc,
 				})
 			}
 		}
@@ -136,7 +151,7 @@ func ScanHostIndicators(ruleList []rules.Rule) ([]Finding, []HostCheck) {
 				continue
 			}
 
-			if hi.Type != "file" {
+			if hi.Type != IndicatorTypeFile {
 				desc := indicatorDescription(hi)
 				slog.Info("host indicator skipped", "rule", r.ID, "type", hi.Type, "value", desc, "reason", "not implemented")
 				checks = append(checks, HostCheck{Path: desc, Status: StatusSkipped, Reason: hi.Type + " check not implemented", RuleID: r.ID, Notes: hi.Notes})

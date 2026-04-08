@@ -37,7 +37,7 @@ Clone or copy the rules directory. At minimum you need one `.json` rule file fol
 ### Verify it works
 
 ```bash
-./gouvernante -rules ./rules -dir /path/to/your/project
+gouvernante -rules ./rules -dir /path/to/your/project
 ```
 
 You should see a scan report. If the directory has no lockfiles, you'll see a warning — that's expected.
@@ -86,13 +86,13 @@ Only needed if you're modifying the scanner itself.
 | `gofumpt` | Strict code formatting |
 | `goimports` | Import organization |
 | `staticcheck` | Static analysis |
-| `golangci-lint` | Meta-linter with 30+ checks |
+| `golangci-lint` | Meta-linter with 34 checks |
 
 ```bash
 go install mvdan.cc/gofumpt@latest
 go install golang.org/x/tools/cmd/goimports@latest
 go install honnef.co/go/tools/cmd/staticcheck@latest
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 ```
 
 ### Verify the dev setup
@@ -107,7 +107,7 @@ This runs formatting, linting, tests, and builds the binary. If it passes, you'r
 
 ## Self-Assessment
 
-- [ ] Can you run `./gouvernante -rules ./rules -dir .` and get a report?
+- [ ] Can you run `gouvernante -rules ./rules -dir .` and get a report?
 - [ ] (Contributors only) Does `make all` pass?
 
 ## Next Steps

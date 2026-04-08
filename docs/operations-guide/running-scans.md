@@ -32,7 +32,7 @@ tags:
 | `-host` | No | `false` | Enable host filesystem IOC checks and scan installed packages. |
 | `-output` | No | — | Write output to a file. Use `auto` for a timestamped filename. |
 | `-json` | No | `false` | Emit output as JSON instead of human-readable text. |
-| `-trace` | No | `false` | Enable trace-level debug logging. |
+| `-trace` | No | `false` | Enable debug-level logging. |
 
 ## Scanning a Directory
 
@@ -117,6 +117,9 @@ gouvernante -rules ./rules -dir ./project
 ```
 
 ```
+=== Scan Configuration ===
+...
+
 === Supply Chain Scan Report ===
 
 Files scanned: 2
