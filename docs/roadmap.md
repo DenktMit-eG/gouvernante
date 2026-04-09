@@ -43,6 +43,7 @@ tags:
 | Woodpecker CI with Codeberg releases | Done | `.woodpecker.yml` |
 | Text and JSON output | Done | `-json` flag |
 | Exit codes for CI/CD | Done | 0=clean, 1=error, 2=findings |
+| Heuristic malware scanning | Done | `-heuristic` flag: pattern-based detection of eval+decode, pipe-shell, suspicious lifecycle scripts, env harvesting, hex payloads. No rules needed. |
 
 ## Not Yet Implemented
 

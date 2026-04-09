@@ -31,6 +31,7 @@ gouvernante [flags]
 | `-lockfile` | `string` | | Path to a specific lockfile (overrides `-dir`). |
 | `-recursive` | `bool` | `false` | Recursively scan subdirectories for lockfiles. |
 | `-host` | `bool` | `false` | Also check host filesystem for IOC artifacts. |
+| `-heuristic` | `bool` | `false` | Scan JS/shell files for malware patterns (no rules needed). |
 | `-output` | `string` | | Write report to file. Use `auto` for a timestamped filename. |
 | `-json` | `bool` | `false` | Output findings as JSON instead of text. |
 | `-trace` | `bool` | `false` | Enable debug-level logging. |
@@ -67,7 +68,7 @@ gouvernante -rules ./rules -dir . -host
 
 ```bash
 # Explicit filename
-gouvernante -rules ./rules -dir . -output report.txt
+gouvernante -rules ./rules -dir . -output report-heuristics.txt
 
 # Auto-generated timestamped filename
 gouvernante -rules ./rules -dir . -output auto
@@ -83,6 +84,18 @@ gouvernante -rules ./rules -dir . -recursive
 
 ```bash
 gouvernante -rules ./rules -dir . -recursive -host
+```
+
+### Heuristic scan (no rules needed)
+
+```bash
+gouvernante -heuristic -dir ./my-project
+```
+
+### Recursive heuristic scan with JSON output
+
+```bash
+gouvernante -heuristic -dir . -recursive -json
 ```
 
 ### Full scan with JSON output saved to file

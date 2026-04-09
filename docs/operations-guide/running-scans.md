@@ -30,6 +30,7 @@ tags:
 | `-lockfile` | No | — | Path to a specific lockfile (skips auto-detection). |
 | `-recursive` | No | `false` | Recursively scan subdirectories for lockfiles. |
 | `-host` | No | `false` | Enable host filesystem IOC checks and scan installed packages. |
+| `-heuristic` | No | `false` | Scan JS/shell files in node_modules for malware patterns. No rules needed. |
 | `-output` | No | — | Write output to a file. Use `auto` for a timestamped filename. |
 | `-json` | No | `false` | Emit output as JSON instead of human-readable text. |
 | `-trace` | No | `false` | Enable debug-level logging. |
@@ -105,6 +106,37 @@ Host checks run after lockfile scanning.
 !!! warning
 
     Host checks read the local filesystem. On shared build agents or containers, paths may not be meaningful. Use `-host` primarily on developer workstations or long-lived servers.
+
+## Heuristic Scanning
+
+The `-heuristic` flag runs a separate scan pipeline that checks JavaScript and shell files inside `node_modules` for high-confidence malware patterns. Unlike rule-based scanning, heuristic mode does not require a rules directory — it detects suspicious code patterns directly.
+
+```bash
+# Scan a single project
+gouvernante -heuristic -dir ./my-project
+
+# Recursive scan across a monorepo
+gouvernante -heuristic -dir ./monorepo -recursive
+
+# JSON output for CI
+gouvernante -heuristic -dir . -json -output auto
+```
+
+Heuristic mode detects five patterns:
+
+| Pattern | What it catches |
+|---------|----------------|
+| `HEUR-EVAL-DECODE` | `eval(atob(...))` or `eval(Buffer.from(...))` — decoded payload execution |
+| `HEUR-PIPE-SHELL` | `curl ... \| sh` or `wget ... \| bash` — download and execute |
+| `HEUR-POSTINSTALL-EXEC` | Suspicious `preinstall`/`postinstall`/`preuninstall` lifecycle scripts |
+| `HEUR-ENV-HARVEST` | 3+ secret environment variables accessed with a network call in the same file |
+| `HEUR-HEX-EXEC` | Long hex-encoded payload (100+ chars) near `eval`/`exec`/`Function` |
+
+Files scanned per package: `.js`, `.cjs`, `.mjs`, `.sh` — up to 50 files, max 512 KB each. Minified files (`.min.js`) are skipped.
+
+!!! info
+
+    Heuristic findings are labeled with severity `high` (not `critical`) because they are pattern-based suspicions, not confirmed compromises. Use them as an early warning alongside rule-based scanning.
 
 ## Output Formats
 
@@ -184,7 +216,7 @@ Use `-output` to write the report to a file instead of stdout:
 
 ```bash
 # Write to a specific file
-gouvernante -rules ./rules -dir ./project -output report.txt
+gouvernante -rules ./rules -dir ./project -output report-heuristics.txt
 
 # Timestamped filename (auto)
 gouvernante -rules ./rules -dir ./project -output auto

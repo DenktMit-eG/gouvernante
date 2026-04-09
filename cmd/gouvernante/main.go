@@ -39,6 +39,7 @@ func parseFlags(w io.Writer) (cli.Config, bool) {
 	flag.StringVar(&cfg.LockfilePath, "lockfile", "", "path to a specific lockfile (overrides -dir)")
 	flag.BoolVar(&cfg.Recursive, "recursive", false, "scan directory tree for lockfiles")
 	flag.BoolVar(&cfg.HostCheck, "host", false, "also check host indicators (filesystem IOCs)")
+	flag.BoolVar(&cfg.Heuristic, "heuristic", false, "scan JS/shell files for malware patterns (no rules needed)")
 	flag.StringVar(&cfg.OutputFile, "output", "", "write report to file ('auto' for timestamped name)")
 	flag.BoolVar(&cfg.JSONOutput, "json", false, "output findings as JSON")
 	flag.BoolVar(&cfg.Trace, "trace", false, "enable debug-level logging (every directory visited)")
@@ -50,7 +51,7 @@ func parseFlags(w io.Writer) (cli.Config, bool) {
 		return cli.Config{}, true
 	}
 
-	if cfg.RulesDir == "" {
+	if cfg.RulesDir == "" && !cfg.Heuristic {
 		slog.Error("missing required flag: -rules")
 		flag.Usage()
 		os.Exit(1)

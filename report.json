@@ -1,0 +1,126 @@
+{
+  "findings": [
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.3.1",
+      "lockfile": "gec.ece/package.json",
+      "description": "range covers compromised version 1.14.1"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.3.1",
+      "lockfile": "gec.gks/package.json",
+      "description": "range covers compromised version 1.14.1"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.3.1",
+      "lockfile": "gec.postgres-aas/package.json",
+      "description": "range covers compromised version 1.14.1"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.3.1",
+      "lockfile": "gec.vmware/package.json",
+      "description": "range covers compromised version 1.14.1"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "plain-crypto-js",
+      "version": "1.0.0",
+      "lockfile": "golang-npm-scanner/testdata/package-lock.json"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "0.30.4",
+      "lockfile": "golang-npm-scanner/testdata/package-lock.json"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "1.14.1",
+      "lockfile": "golang-npm-scanner/testdata/pnpm-lock.yaml"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.13.2",
+      "lockfile": "gras-ui-shell-app-lts/mccs-diagram-editor-regression-tests/package.json",
+      "description": "range covers compromised version 1.14.1"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.13.5",
+      "lockfile": "gras-ui-shell-app-lts/package.json",
+      "description": "range covers compromised version 1.14.1"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.13.2",
+      "lockfile": "mccs-diagram-editor-regression-tests/package.json",
+      "description": "range covers compromised version 1.14.1"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.7.1",
+      "lockfile": "mccs-jointjs-diagram-viewer/package.json",
+      "description": "range covers compromised version 1.14.1"
+    },
+    {
+      "rule_id": "SSC-2025-001",
+      "rule_title": "Axios compromised npm releases with embedded RAT",
+      "severity": "critical",
+      "type": "package",
+      "package": "axios",
+      "version": "^1.7.7",
+      "lockfile": "sld-editor-demo/package.json",
+      "description": "range covers compromised version 1.14.1"
+    }
+  ],
+  "summary": {
+    "total_findings": 12,
+    "lockfiles_scanned": 699,
+    "elapsed_ms": 116870
+  }
+}

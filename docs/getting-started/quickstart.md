@@ -172,15 +172,26 @@ gouvernante -rules ./rules -dir /path/to/project -trace
 | `1` | Error (bad arguments, parse failure) |
 | `2` | Findings detected — compromised packages or IOCs found |
 
+### Heuristic scan (no rules needed)
+
+The `-heuristic` flag scans JavaScript and shell files in `node_modules` for malware patterns without requiring any rule files:
+
+```bash
+gouvernante -heuristic -dir /path/to/your/project
+```
+
+This detects suspicious patterns like `eval(atob(...))`, `curl | sh` in scripts, and credential harvesting. See [Running Scans](../operations-guide/running-scans.md#heuristic-scanning) for details.
+
 ### CLI flags reference
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `-rules` | string (required) | Directory containing rule JSON files |
+| `-rules` | string (required unless `-heuristic`) | Directory containing rule JSON files |
 | `-dir` | string (default `"."`) | Directory to scan for lockfiles |
 | `-lockfile` | string | Path to a specific lockfile (overrides `-dir`) |
 | `-recursive` | bool | Scan directory tree for lockfiles |
 | `-host` | bool | Check host indicators + node_modules + pnpm store + nvm + npm cache |
+| `-heuristic` | bool | Scan JS/shell files for malware patterns (no rules needed) |
 | `-output` | string | Write report to file (`"auto"` for timestamped) |
 | `-json` | bool | Output findings as JSON |
 | `-trace` | bool | Enable debug-level logging (every directory visited) |

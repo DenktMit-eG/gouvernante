@@ -28,6 +28,7 @@ type Config struct {
 	LockfilePath string
 	Recursive    bool
 	HostCheck    bool
+	Heuristic    bool
 	OutputFile   string
 	JSONOutput   bool
 	Trace        bool
@@ -37,6 +38,10 @@ type Config struct {
 // It does not call os.Exit — the caller is responsible for that.
 // Exit codes: 0 = clean, 1 = error, 2 = findings detected.
 func Run(cfg Config, stdout io.Writer) int {
+	if cfg.Heuristic {
+		return RunHeuristic(cfg, stdout)
+	}
+
 	startTime := time.Now()
 	ConfigureLogging(cfg)
 

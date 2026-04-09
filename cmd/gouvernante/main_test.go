@@ -190,7 +190,7 @@ func TestMain_FileOutput(t *testing.T) {
 	scanDir := t.TempDir()
 	writeTestLockfile(t, scanDir, `{"dependencies":{"express":"4.18.0"}}`)
 
-	outFile := filepath.Join(t.TempDir(), "report.txt")
+	outFile := filepath.Join(t.TempDir(), "report-heuristics.txt")
 	_, code := helperProcess(t, "-rules", rulesDir, "-dir", scanDir, "-output", outFile)
 
 	if code != 0 {
@@ -204,6 +204,62 @@ func TestMain_FileOutput(t *testing.T) {
 
 	if len(data) == 0 {
 		t.Error("expected non-empty report file")
+	}
+}
+
+func TestMain_HeuristicClean(t *testing.T) {
+	scanDir := t.TempDir()
+	_, code := helperProcess(t, "-heuristic", "-dir", scanDir)
+
+	if code != 0 {
+		t.Errorf("expected exit code 0 for heuristic clean, got %d", code)
+	}
+}
+
+func TestMain_HeuristicFindings(t *testing.T) {
+	scanDir := t.TempDir()
+	pkgDir := filepath.Join(scanDir, "node_modules", "evil-pkg")
+
+	if err := os.MkdirAll(pkgDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(pkgDir, "package.json"),
+		[]byte(`{"name":"evil-pkg","version":"1.0.0"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(pkgDir, "index.js"),
+		[]byte(`eval(atob("d2hvYW1p"))`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	_, code := helperProcess(t, "-heuristic", "-dir", scanDir)
+	if code != 2 {
+		t.Errorf("expected exit code 2 for heuristic findings, got %d", code)
+	}
+}
+
+func TestMain_HeuristicNoRulesRequired(t *testing.T) {
+	// -heuristic without -rules should not fail.
+	scanDir := t.TempDir()
+	_, code := helperProcess(t, "-heuristic", "-dir", scanDir)
+
+	if code != 0 {
+		t.Errorf("expected exit code 0 (no -rules needed with -heuristic), got %d", code)
+	}
+}
+
+func TestMain_HeuristicJSON(t *testing.T) {
+	scanDir := t.TempDir()
+	out, code := helperProcess(t, "-heuristic", "-dir", scanDir, "-json")
+
+	if code != 0 {
+		t.Errorf("expected exit code 0, got %d", code)
+	}
+
+	if !strings.Contains(out, `"findings"`) {
+		t.Error("expected JSON output with findings key")
 	}
 }
 

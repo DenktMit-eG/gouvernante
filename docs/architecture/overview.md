@@ -89,10 +89,12 @@ flowchart TB
     CLI --> Rules["rules<br/>pkg/rules/"]
     CLI --> Lockfile["lockfile<br/>pkg/lockfile/"]
     CLI --> Scanner["scanner<br/>pkg/scanner/"]
+    CLI --> Heuristic["heuristic<br/>pkg/heuristic/"]
 
     Rules --> |"Load JSON<br/>Build index<br/>Validate"| Scanner
     Lockfile --> |"Parse pnpm/npm/yarn<br/>Extract entries"| Scanner
     Scanner --> |"Match packages<br/>Check host IOCs<br/>Format report"| Output["Report<br/>text / JSON"]
+    Heuristic --> |"Pattern scan<br/>JS/shell files"| Output
 ```
 
 ## Package Layout
@@ -111,8 +113,11 @@ gouvernante/
 │   │   ├── pnpm.go          pnpm-lock.yaml parser (goccy/go-yaml)
 │   │   ├── npm.go           package-lock.json parser (encoding/json)
 │   │   └── yarn.go          yarn.lock parser (line scanner)
-│   └── scanner/             Matching engine and output
-│       └── scanner.go       ScanPackages, ScanHostIndicators, FormatReport
+│   ├── scanner/             Matching engine and output
+│   │   └── scanner.go       ScanPackages, ScanHostIndicators, FormatReport
+│   └── heuristic/           Pattern-based malware detection (no rules needed)
+│       ├── patterns.go      Signal definitions (5 high-confidence patterns)
+│       └── heuristic.go     ScanDir, file walking, pattern matching
 └── testdata/                Test fixtures
     ├── rules/               Rule fixtures (valid, invalid, incidents, integration)
     │   └── schema.json      JSON Schema for rule validation
@@ -149,6 +154,8 @@ sequenceDiagram
     CLI->>Out: Format all findings
     Out-->>CLI: Text or JSON report
 ```
+
+When `-heuristic` is used instead, the pipeline skips steps 1–4 entirely and runs `heuristic.ScanDir()` which walks `node_modules`, reads JS/shell files, and matches against built-in malware patterns.
 
 1. **Load rules.** `rules.LoadDir()` reads all JSON files, unmarshals into `RuleSet` structs, merges all rules.
 2. **Build index.** `rules.BuildPackageIndex()` builds a `map[string][]*VersionSet` keyed by package name. Each package may have multiple `VersionSet` entries (one per rule/package\_rules entry) holding exact versions, semver range constraints, or an `AnyVersion` wildcard.

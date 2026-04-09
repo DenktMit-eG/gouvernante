@@ -46,6 +46,7 @@ const (
 	TypeInstalledPackage = "installed_package"
 	TypeCachedPackage    = "cached_package"
 	TypeHostIndicator    = "host_indicator"
+	TypeHeuristic        = "heuristic"
 )
 
 // IndicatorTypeFile is the host indicator type handled by the scanner.
@@ -79,6 +80,8 @@ type Result struct {
 	HostChecks []HostCheck
 	// NodeModuleChecks records the results of installed and cached package checks.
 	NodeModuleChecks []NodeModulesCheck
+	// Heuristic indicates that the result comes from a heuristic scan rather than rule-based scanning.
+	Heuristic bool
 }
 
 // ScanPackages checks parsed lockfile entries against the package index.
@@ -393,13 +396,22 @@ func newHashFunc(algorithm string) (hash.Hash, bool) {
 func FormatReport(result *Result) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "=== Supply Chain Scan Report ===\n\n")
-	fmt.Fprintf(&b, "Files scanned: %d\n", len(result.LockfilesUsed))
-	fmt.Fprintf(&b, "Total packages analyzed: %d\n", result.PackagesTotal)
-	fmt.Fprintf(&b, "Findings: %d\n\n", len(result.Findings))
+	if result.Heuristic {
+		fmt.Fprintf(&b, "=== Heuristic Scan Report ===\n\n")
+		fmt.Fprintf(&b, "Findings: %d\n\n", len(result.Findings))
+	} else {
+		fmt.Fprintf(&b, "=== Supply Chain Scan Report ===\n\n")
+		fmt.Fprintf(&b, "Files scanned: %d\n", len(result.LockfilesUsed))
+		fmt.Fprintf(&b, "Total packages analyzed: %d\n", result.PackagesTotal)
+		fmt.Fprintf(&b, "Findings: %d\n\n", len(result.Findings))
+	}
 
 	if len(result.Findings) == 0 {
-		b.WriteString("No compromised packages or host indicators found.\n")
+		if result.Heuristic {
+			b.WriteString("No suspicious patterns found.\n")
+		} else {
+			b.WriteString("No compromised packages or host indicators found.\n")
+		}
 	} else {
 		for i := range result.Findings {
 			f := &result.Findings[i]
@@ -415,7 +427,11 @@ func FormatReport(result *Result) string {
 		formatNodeModulesChecks(&b, result.NodeModuleChecks)
 	}
 
-	fmt.Fprintf(&b, "Scan complete: %d findings in %d lockfiles.\n", len(result.Findings), len(result.LockfilesUsed))
+	if result.Heuristic {
+		fmt.Fprintf(&b, "Heuristic scan complete: %d findings.\n", len(result.Findings))
+	} else {
+		fmt.Fprintf(&b, "Scan complete: %d findings in %d lockfiles.\n", len(result.Findings), len(result.LockfilesUsed))
+	}
 
 	return b.String()
 }
@@ -522,6 +538,14 @@ func formatFinding(b *strings.Builder, num int, f *Finding) {
 		}
 
 		fmt.Fprintf(b, "  Path:     %s\n", f.Path)
+	case TypeHeuristic:
+		b.WriteString("  Type:     heuristic\n")
+		fmt.Fprintf(b, "  Package:  %s\n", f.Package)
+		fmt.Fprintf(b, "  Path:     %s\n", f.Path)
+
+		if f.Description != "" {
+			fmt.Fprintf(b, "  Match:    %s\n", f.Description)
+		}
 	}
 
 	b.WriteString("\n")

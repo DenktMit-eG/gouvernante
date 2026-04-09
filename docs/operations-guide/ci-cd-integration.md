@@ -140,6 +140,28 @@ esac
 
     If you use `set -e`, the script will exit immediately on a non-zero return. To capture the exit code for branching, either disable `set -e` before the scan command or use `|| true` and inspect `${PIPESTATUS[0]}`.
 
+## Heuristic Scanning in CI
+
+The `-heuristic` flag can run alongside or independently of rule-based scanning. It does not require a rules directory, making it useful as a standalone zero-config check:
+
+```yaml
+      - name: Heuristic scan
+        run: |
+          gouvernante -heuristic -dir . -recursive -json -output heuristic-report.json
+```
+
+For maximum coverage, run both scans:
+
+```yaml
+      - name: Rule-based scan
+        run: |
+          gouvernante -rules /tmp/rules -dir . -recursive -json -output rule-report.json
+
+      - name: Heuristic scan
+        run: |
+          gouvernante -heuristic -dir . -recursive -json -output heuristic-report.json
+```
+
 ## JSON Output for Machine Parsing
 
 Always use `-json` in CI pipelines. The JSON output is stable and scriptable:

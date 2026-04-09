@@ -46,6 +46,12 @@ gouvernante -rules /path/to/rules -dir /path/to/project -output auto
 
 # Enable debug-level trace logging
 gouvernante -rules /path/to/rules -dir /path/to/project -trace
+
+# Heuristic scan — detect malware patterns without rules
+gouvernante -heuristic -dir /path/to/project
+
+# Heuristic scan with recursive directory walk and JSON output
+gouvernante -heuristic -dir /path/to/monorepo -recursive -json
 ```
 
 ## Supported lockfile formats

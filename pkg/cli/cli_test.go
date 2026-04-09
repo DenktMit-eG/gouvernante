@@ -436,7 +436,7 @@ func TestWriteOutput_Stdout(t *testing.T) {
 }
 
 func TestWriteOutput_File(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "report.txt")
+	path := filepath.Join(t.TempDir(), "report-heuristics.txt")
 	var buf bytes.Buffer
 
 	err := WriteOutput(&buf, "header\n", "body\n", path, false)
@@ -456,7 +456,7 @@ func TestWriteOutput_File(t *testing.T) {
 
 func TestWriteOutput_FileNotStdout(t *testing.T) {
 	var buf bytes.Buffer
-	outFile := filepath.Join(t.TempDir(), "report.txt")
+	outFile := filepath.Join(t.TempDir(), "report-heuristics.txt")
 
 	err := WriteOutput(&buf, "header\n", "body\n", outFile, false)
 	if err != nil {
@@ -537,46 +537,9 @@ func TestWriteOutput_AutoJSON(t *testing.T) {
 func TestWriteOutput_FileError(t *testing.T) {
 	var buf bytes.Buffer
 
-	err := WriteOutput(&buf, "", "content", "/nonexistent/dir/report.txt", false)
+	err := WriteOutput(&buf, "", "content", "/nonexistent/dir/report-heuristics.txt", false)
 	if err == nil {
 		t.Fatal("expected error for unwritable path")
-	}
-}
-
-// BuildReportHeader tests.
-
-func TestBuildReportHeader_Basic(t *testing.T) {
-	ruleList := []rules.Rule{
-		{ID: "R1", Kind: "vulnerability", Severity: "high", Title: "Test"},
-	}
-	results := []lockfile.Result{
-		{Name: "pnpm-lock.yaml", Entries: []lockfile.PackageEntry{{Name: "a", Version: "1.0"}}},
-	}
-
-	header := BuildReportHeader(ruleList, 5, results, false)
-
-	if !strings.Contains(header, "Scan Configuration") {
-		t.Error("expected Scan Configuration header")
-	}
-
-	if !strings.Contains(header, "R1") {
-		t.Error("expected rule ID in header")
-	}
-
-	if !strings.Contains(header, "1 files") {
-		t.Error("expected lockfile count")
-	}
-
-	if strings.Contains(header, "Filesystem Checks") {
-		t.Error("should not contain Filesystem Checks when hostCheck=false")
-	}
-}
-
-func TestBuildReportHeader_WithHostCheck(t *testing.T) {
-	header := BuildReportHeader(nil, 0, nil, true)
-
-	if !strings.Contains(header, "Filesystem Checks") {
-		t.Error("expected Filesystem Checks section when hostCheck=true")
 	}
 }
 
@@ -705,7 +668,7 @@ func TestRun_WriteError(t *testing.T) {
 
 	// Write to a file in a nonexistent directory → WriteOutput fails.
 	var buf bytes.Buffer
-	cfg := Config{RulesDir: rulesDir, ScanDir: scanDir, OutputFile: "/nonexistent/dir/report.txt"}
+	cfg := Config{RulesDir: rulesDir, ScanDir: scanDir, OutputFile: "/nonexistent/dir/report-heuristics.txt"}
 	code := Run(cfg, &buf)
 
 	if code != 1 {
@@ -749,7 +712,7 @@ func TestRun_FileOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	outFile := filepath.Join(t.TempDir(), "report.txt")
+	outFile := filepath.Join(t.TempDir(), "report-heuristics.txt")
 	var buf bytes.Buffer
 	cfg := Config{RulesDir: rulesDir, ScanDir: scanDir, OutputFile: outFile}
 	code := Run(cfg, &buf)

@@ -711,6 +711,88 @@ func TestFormatFinding_HostIndicatorNoDescription(t *testing.T) {
 	}
 }
 
+func TestFormatFinding_Heuristic(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "HEUR-EVAL-DECODE", RuleTitle: "Decoded payload execution", Severity: "high",
+		Type: TypeHeuristic, Package: "evil-pkg", Path: "/tmp/node_modules/evil-pkg/index.js",
+		Description: `eval(atob("payload"))`,
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if !strings.Contains(out, "Type:     heuristic") {
+		t.Error("missing heuristic type")
+	}
+	if !strings.Contains(out, "Package:  evil-pkg") {
+		t.Error("missing package")
+	}
+	if !strings.Contains(out, "Path:     /tmp/node_modules/evil-pkg/index.js") {
+		t.Error("missing path")
+	}
+	if !strings.Contains(out, `Match:    eval(atob("payload"))`) {
+		t.Error("missing match description")
+	}
+}
+
+func TestFormatFinding_HeuristicNoDescription(t *testing.T) {
+	var b strings.Builder
+	f := &Finding{
+		RuleID: "HEUR-ENV-HARVEST", RuleTitle: "Credential harvesting", Severity: "high",
+		Type: TypeHeuristic, Package: "harvester", Path: "/tmp/node_modules/harvester/index.js",
+	}
+	formatFinding(&b, 1, f)
+	out := b.String()
+
+	if strings.Contains(out, "Match:") {
+		t.Error("Match should not appear without description")
+	}
+	if !strings.Contains(out, "Package:  harvester") {
+		t.Error("missing package")
+	}
+}
+
+func TestFormatReport_Heuristic(t *testing.T) {
+	result := &Result{
+		Findings: []Finding{
+			{RuleID: "HEUR-EVAL-DECODE", RuleTitle: "Decoded payload", Severity: "high", Type: TypeHeuristic, Package: "evil", Path: "/tmp/evil/index.js"},
+		},
+		Heuristic: true,
+	}
+	out := FormatReport(result)
+
+	if !strings.Contains(out, "Heuristic Scan Report") {
+		t.Error("expected 'Heuristic Scan Report' header")
+	}
+
+	if strings.Contains(out, "Files scanned") {
+		t.Error("heuristic report should not mention 'Files scanned'")
+	}
+
+	if strings.Contains(out, "lockfiles") {
+		t.Error("heuristic report should not mention 'lockfiles'")
+	}
+
+	if !strings.Contains(out, "Heuristic scan complete: 1 findings.") {
+		t.Error("expected heuristic footer")
+	}
+}
+
+func TestFormatReport_HeuristicClean(t *testing.T) {
+	result := &Result{
+		Heuristic: true,
+	}
+	out := FormatReport(result)
+
+	if !strings.Contains(out, "No suspicious patterns found.") {
+		t.Error("expected 'No suspicious patterns found.' for clean heuristic scan")
+	}
+
+	if strings.Contains(out, "compromised packages") {
+		t.Error("heuristic report should not mention 'compromised packages'")
+	}
+}
+
 func TestDedup(t *testing.T) {
 	tests := []struct {
 		name  string
