@@ -89,7 +89,9 @@ make all        # fmt + lint + cover + build + test-integration
 See [docs/developer-guide/code-style.md](docs/developer-guide/code-style.md) for the full development guide.
 
 ## Documentation
-To build the docs site locally and read it nicely formatted in your browser, run in this project root directory:
+The [documentation for this project is available online as Github Page](https://denktmit-eg.github.io/gouvernante/).
+
+To build and preview the docs site locally and read it nicely formatted in your browser, run in this project root directory:
 
 ```bash
 docker compose -f docker-compose.docs.yml up

@@ -5,7 +5,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log/slog"
 	"os"
 
@@ -43,7 +42,7 @@ func parseFlags() (cli.Config, bool) {
 	flag.Parse()
 
 	if showVersion {
-		fmt.Println(version)
+		_, _ = os.Stdout.WriteString(version + "\n")
 		return cli.Config{}, true
 	}
 
