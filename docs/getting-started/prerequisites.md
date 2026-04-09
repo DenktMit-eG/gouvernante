@@ -52,7 +52,7 @@ Only needed if you don't have a prebuilt binary or want to contribute.
 
 | Tool | Purpose |
 |------|---------|
-| `go` (1.22+) | Build the binary |
+| `go` (1.25+) | Build the binary |
 | `make` | Build automation |
 
 ```bash

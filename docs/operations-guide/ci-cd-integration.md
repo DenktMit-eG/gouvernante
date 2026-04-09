@@ -82,7 +82,7 @@ Key points:
 ```yaml
 supply-chain-scan:
   stage: test
-  image: golang:1.22-alpine
+  image: golang:1.25-alpine
   before_script:
     - wget -qO /usr/local/bin/gouvernante \
         https://github.com/your-org/gouvernante/releases/latest/download/gouvernante-linux-amd64
@@ -196,7 +196,7 @@ Advantages:
 If you build a custom Docker image for CI, copy the rules directory into the image:
 
 ```dockerfile
-FROM golang:1.22-alpine
+FROM golang:1.25-alpine
 COPY gouvernante /usr/local/bin/gouvernante
 COPY rules/ /opt/gouvernante-rules/
 ```

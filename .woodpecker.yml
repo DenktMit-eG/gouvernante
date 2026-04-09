@@ -3,7 +3,7 @@ when:
 
 steps:
   test:
-    image: golang:1.22
+    image: golang:1.25.9
     commands:
       - go vet ./...
       - go test -race -count=1 ./...
@@ -14,7 +14,7 @@ steps:
       - golangci-lint run ./...
 
   build:
-    image: golang:1.22
+    image: golang:1.25.9
     commands:
       - make build
 
