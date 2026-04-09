@@ -14,6 +14,13 @@ import (
 	"gouvernante/pkg/rules"
 )
 
+// OS constants for platform-specific path resolution.
+const (
+	osLinux   = "linux"
+	osDarwin  = "darwin"
+	osWindows = "windows"
+)
+
 // packageJSON is the minimal structure read from a package.json to extract name and version.
 type packageJSON struct {
 	Name    string `json:"name"`
@@ -67,11 +74,11 @@ func globalNodeModulesPathsForOS(goos string) []string {
 
 	// Well-known paths per OS.
 	switch goos {
-	case "linux":
+	case osLinux:
 		paths = append(paths, "/usr/lib/node_modules", "/usr/local/lib/node_modules")
-	case "darwin":
+	case osDarwin:
 		paths = append(paths, "/usr/local/lib/node_modules", "/opt/homebrew/lib/node_modules")
-	case "windows":
+	case osWindows:
 		if appdata := os.Getenv("APPDATA"); appdata != "" {
 			paths = append(paths, filepath.Join(appdata, "npm", "node_modules"))
 		}
@@ -244,19 +251,9 @@ func readInstalledVersion(nmDir, pkgName string) (string, error) {
 
 // ScanPnpmStore checks pnpm store and cache directories for compromised packages.
 func ScanPnpmStore(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
-	home, err := userHomeDir()
-	if err != nil {
-		slog.Debug("cannot determine home dir for pnpm scan")
+	dirs := pnpmStorePaths(runtime.GOOS)
+	if len(dirs) == 0 {
 		return nil, nil
-	}
-
-	dirs := []string{
-		filepath.Join(home, ".local", "share", "pnpm"),
-		filepath.Join(home, ".cache", "pnpm"),
-	}
-
-	if pnpmHome := os.Getenv("PNPM_HOME"); pnpmHome != "" {
-		dirs = append(dirs, pnpmHome)
 	}
 
 	dirs = dedup(dirs)
@@ -355,14 +352,9 @@ func scanStoreForPackages(root string, idx *rules.PackageIndex, label string) ([
 
 // ScanNvmDirs checks nvm cache directories and nvm-managed global node_modules.
 func ScanNvmDirs(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
-	nvmDir := os.Getenv("NVM_DIR")
+	nvmDir := nvmDirPath(runtime.GOOS)
 	if nvmDir == "" {
-		home, err := userHomeDir()
-		if err != nil {
-			return nil, nil
-		}
-
-		nvmDir = filepath.Join(home, ".nvm")
+		return nil, nil
 	}
 
 	if _, err := os.Stat(nvmDir); err != nil {
@@ -434,16 +426,11 @@ func ScanNvmDirs(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
 // npm cache scanning.
 
 // ScanNpmCache scans the npm cache for blobs containing indexed packages.
-// Uses NPM_CONFIG_CACHE env var or the well-known ~/.npm path.
+// Uses NPM_CONFIG_CACHE env var or the well-known platform-specific path.
 func ScanNpmCache(idx *rules.PackageIndex) ([]Finding, []NodeModulesCheck) {
-	cacheDir := os.Getenv("NPM_CONFIG_CACHE")
+	cacheDir := npmCachePath()
 	if cacheDir == "" {
-		home, err := userHomeDir()
-		if err != nil {
-			return nil, nil
-		}
-
-		cacheDir = filepath.Join(home, ".npm")
+		return nil, nil
 	}
 
 	if _, err := os.Stat(cacheDir); err != nil {
@@ -644,6 +631,92 @@ func proximityWindow(data []byte, namePos, nameLen int) []byte {
 	}
 
 	return data[namePos:end]
+}
+
+// nvmDirPath returns the nvm directory for the given OS, checking environment
+// variables and falling back to well-known paths.
+func nvmDirPath(goos string) string {
+	if dir := os.Getenv("NVM_DIR"); dir != "" {
+		return dir
+	}
+
+	if goos == osWindows {
+		if dir := os.Getenv("NVM_HOME"); dir != "" {
+			return dir
+		}
+	}
+
+	home, err := userHomeDir()
+	if err != nil {
+		return ""
+	}
+
+	if goos == osWindows {
+		if appdata := os.Getenv("APPDATA"); appdata != "" {
+			return filepath.Join(appdata, "nvm")
+		}
+
+		return filepath.Join(home, "AppData", "Roaming", "nvm")
+	}
+
+	return filepath.Join(home, ".nvm")
+}
+
+// pnpmStorePaths returns pnpm store and cache directories for the given OS.
+func pnpmStorePaths(goos string) []string {
+	home, err := userHomeDir()
+	if err != nil {
+		slog.Debug("cannot determine home dir for pnpm scan")
+		return nil
+	}
+
+	var dirs []string
+
+	switch goos {
+	case osWindows:
+		if localAppData := os.Getenv("LOCALAPPDATA"); localAppData != "" {
+			dirs = append(dirs, filepath.Join(localAppData, "pnpm"), filepath.Join(localAppData, "pnpm-store"))
+		}
+	default:
+		dirs = append(dirs,
+			filepath.Join(home, ".local", "share", "pnpm"),
+			filepath.Join(home, ".cache", "pnpm"),
+		)
+	}
+
+	if pnpmHome := os.Getenv("PNPM_HOME"); pnpmHome != "" {
+		dirs = append(dirs, pnpmHome)
+	}
+
+	return dedup(dirs)
+}
+
+// npmCachePath returns the npm cache directory using NPM_CONFIG_CACHE env var
+// or the well-known platform-specific default path.
+func npmCachePath() string {
+	return npmCachePathForOS(runtime.GOOS)
+}
+
+// npmCachePathForOS returns the npm cache directory for the given OS.
+func npmCachePathForOS(goos string) string {
+	if cache := os.Getenv("NPM_CONFIG_CACHE"); cache != "" {
+		return cache
+	}
+
+	if goos == osWindows {
+		if localAppData := os.Getenv("LOCALAPPDATA"); localAppData != "" {
+			return filepath.Join(localAppData, "npm-cache")
+		}
+
+		return ""
+	}
+
+	home, err := userHomeDir()
+	if err != nil {
+		return ""
+	}
+
+	return filepath.Join(home, ".npm")
 }
 
 // Helpers.

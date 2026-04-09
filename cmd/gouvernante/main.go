@@ -5,6 +5,7 @@ package main
 
 import (
 	"flag"
+	"io"
 	"log/slog"
 	"os"
 
@@ -14,19 +15,22 @@ import (
 // version is set at build time via -ldflags "-X main.version=...".
 var version = "dev"
 
+// osExit is the function used to terminate the process. Replaced in tests.
+var osExit = os.Exit
+
 func main() {
-	cfg, exit := parseFlags()
+	cfg, exit := parseFlags(os.Stdout)
 	if exit {
 		return
 	}
 
-	os.Exit(cli.Run(cfg, os.Stdout))
+	osExit(cli.Run(cfg, os.Stdout))
 }
 
 // parseFlags registers CLI flags, parses them, and validates required arguments.
 // This stays in main because flag.Parse mutates global state.
 // Returns the config and whether the program should exit early (e.g. -version).
-func parseFlags() (cli.Config, bool) {
+func parseFlags(w io.Writer) (cli.Config, bool) {
 	var cfg cli.Config
 	var showVersion bool
 
@@ -42,7 +46,7 @@ func parseFlags() (cli.Config, bool) {
 	flag.Parse()
 
 	if showVersion {
-		_, _ = os.Stdout.WriteString(version + "\n")
+		_, _ = io.WriteString(w, version+"\n")
 		return cli.Config{}, true
 	}
 

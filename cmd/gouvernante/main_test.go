@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -61,6 +62,54 @@ func TestMain_VersionFlag(t *testing.T) {
 	trimmed := strings.TrimSpace(out)
 	if trimmed == "" {
 		t.Error("expected version output, got empty string")
+	}
+}
+
+func TestMain_VersionExitsEarly(t *testing.T) {
+	origArgs := os.Args
+	origFlags := flag.CommandLine
+	origExit := osExit
+
+	defer func() {
+		os.Args = origArgs
+		flag.CommandLine = origFlags
+		osExit = origExit
+	}()
+
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"gouvernante", "-version"}
+
+	exitCalled := false
+	osExit = func(_ int) { exitCalled = true }
+
+	main()
+
+	if exitCalled {
+		t.Error("os.Exit should not be called when -version is used")
+	}
+}
+
+func TestParseFlags_Version(t *testing.T) {
+	origArgs := os.Args
+	origFlags := flag.CommandLine
+
+	defer func() {
+		os.Args = origArgs
+		flag.CommandLine = origFlags
+	}()
+
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = []string{"gouvernante", "-version"}
+
+	var buf strings.Builder
+
+	_, exit := parseFlags(&buf)
+	if !exit {
+		t.Error("expected exit=true for -version")
+	}
+
+	if !strings.Contains(buf.String(), version) {
+		t.Errorf("expected version %q in output, got %q", version, buf.String())
 	}
 }
 

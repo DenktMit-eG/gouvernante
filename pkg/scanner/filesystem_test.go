@@ -1310,3 +1310,270 @@ func TestScanNpmCache_WithEnvCacheDir(t *testing.T) {
 		t.Error("expected to find axios via NPM_CONFIG_CACHE")
 	}
 }
+
+// npmCachePathForOS tests.
+
+func TestNpmCachePathForOS_EnvOverride(t *testing.T) {
+	t.Setenv("NPM_CONFIG_CACHE", "/custom/cache")
+
+	result := npmCachePathForOS("linux")
+	if result != "/custom/cache" {
+		t.Errorf("expected /custom/cache, got %s", result)
+	}
+}
+
+func TestNpmCachePathForOS_Windows(t *testing.T) {
+	t.Setenv("NPM_CONFIG_CACHE", "")
+
+	localAppData := t.TempDir()
+	t.Setenv("LOCALAPPDATA", localAppData)
+
+	result := npmCachePathForOS("windows")
+
+	expected := filepath.Join(localAppData, "npm-cache")
+	if result != expected {
+		t.Errorf("expected %s, got %s", expected, result)
+	}
+}
+
+func TestNpmCachePathForOS_WindowsNoLocalAppData(t *testing.T) {
+	t.Setenv("NPM_CONFIG_CACHE", "")
+	t.Setenv("LOCALAPPDATA", "")
+
+	result := npmCachePathForOS("windows")
+	if result != "" {
+		t.Errorf("expected empty string, got %s", result)
+	}
+}
+
+func TestNpmCachePathForOS_Linux(t *testing.T) {
+	t.Setenv("NPM_CONFIG_CACHE", "")
+
+	home := t.TempDir()
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return home, nil }
+	defer func() { userHomeDir = orig }()
+
+	result := npmCachePathForOS("linux")
+
+	expected := filepath.Join(home, ".npm")
+	if result != expected {
+		t.Errorf("expected %s, got %s", expected, result)
+	}
+}
+
+func TestNpmCachePathForOS_NoHome(t *testing.T) {
+	t.Setenv("NPM_CONFIG_CACHE", "")
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return "", fmt.Errorf("no home") }
+	defer func() { userHomeDir = orig }()
+
+	result := npmCachePathForOS("linux")
+	if result != "" {
+		t.Errorf("expected empty string, got %s", result)
+	}
+}
+
+// pnpmStorePaths tests.
+
+func TestPnpmStorePaths_Linux(t *testing.T) {
+	t.Setenv("PNPM_HOME", "")
+
+	home := t.TempDir()
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return home, nil }
+	defer func() { userHomeDir = orig }()
+
+	paths := pnpmStorePaths("linux")
+
+	if len(paths) != 2 {
+		t.Fatalf("expected 2 paths, got %d", len(paths))
+	}
+
+	if paths[0] != filepath.Join(home, ".local", "share", "pnpm") {
+		t.Errorf("unexpected path[0]: %s", paths[0])
+	}
+
+	if paths[1] != filepath.Join(home, ".cache", "pnpm") {
+		t.Errorf("unexpected path[1]: %s", paths[1])
+	}
+}
+
+func TestPnpmStorePaths_Windows(t *testing.T) {
+	t.Setenv("PNPM_HOME", "")
+
+	localAppData := t.TempDir()
+	t.Setenv("LOCALAPPDATA", localAppData)
+
+	home := t.TempDir()
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return home, nil }
+	defer func() { userHomeDir = orig }()
+
+	paths := pnpmStorePaths("windows")
+
+	if len(paths) != 2 {
+		t.Fatalf("expected 2 paths, got %d", len(paths))
+	}
+
+	expected0 := filepath.Join(localAppData, "pnpm")
+	expected1 := filepath.Join(localAppData, "pnpm-store")
+
+	if paths[0] != expected0 {
+		t.Errorf("expected %s, got %s", expected0, paths[0])
+	}
+
+	if paths[1] != expected1 {
+		t.Errorf("expected %s, got %s", expected1, paths[1])
+	}
+}
+
+func TestPnpmStorePaths_WindowsNoLocalAppData(t *testing.T) {
+	t.Setenv("PNPM_HOME", "")
+	t.Setenv("LOCALAPPDATA", "")
+
+	home := t.TempDir()
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return home, nil }
+	defer func() { userHomeDir = orig }()
+
+	paths := pnpmStorePaths("windows")
+	if len(paths) != 0 {
+		t.Errorf("expected 0 paths, got %d: %v", len(paths), paths)
+	}
+}
+
+func TestPnpmStorePaths_WithPnpmHomeEnv(t *testing.T) {
+	t.Setenv("PNPM_HOME", "/custom/pnpm")
+
+	home := t.TempDir()
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return home, nil }
+	defer func() { userHomeDir = orig }()
+
+	paths := pnpmStorePaths("linux")
+
+	found := false
+	for _, p := range paths {
+		if p == "/custom/pnpm" {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Errorf("expected /custom/pnpm in paths, got %v", paths)
+	}
+}
+
+func TestPnpmStorePaths_NoHome(t *testing.T) {
+	t.Setenv("PNPM_HOME", "")
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return "", fmt.Errorf("no home") }
+	defer func() { userHomeDir = orig }()
+
+	paths := pnpmStorePaths("linux")
+	if paths != nil {
+		t.Errorf("expected nil, got %v", paths)
+	}
+}
+
+// nvmDirPath tests.
+
+func TestNvmDirPath_EnvOverride(t *testing.T) {
+	t.Setenv("NVM_DIR", "/custom/nvm")
+
+	result := nvmDirPath("linux")
+	if result != "/custom/nvm" {
+		t.Errorf("expected /custom/nvm, got %s", result)
+	}
+}
+
+func TestNvmDirPath_WindowsNvmHome(t *testing.T) {
+	t.Setenv("NVM_DIR", "")
+
+	nvmHome := t.TempDir()
+	t.Setenv("NVM_HOME", nvmHome)
+
+	result := nvmDirPath("windows")
+	if result != nvmHome {
+		t.Errorf("expected %s, got %s", nvmHome, result)
+	}
+}
+
+func TestNvmDirPath_WindowsFallbackAppdata(t *testing.T) {
+	t.Setenv("NVM_DIR", "")
+	t.Setenv("NVM_HOME", "")
+
+	appdata := t.TempDir()
+	t.Setenv("APPDATA", appdata)
+
+	home := t.TempDir()
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return home, nil }
+	defer func() { userHomeDir = orig }()
+
+	result := nvmDirPath("windows")
+
+	expected := filepath.Join(appdata, "nvm")
+	if result != expected {
+		t.Errorf("expected %s, got %s", expected, result)
+	}
+}
+
+func TestNvmDirPath_WindowsFallbackHome(t *testing.T) {
+	t.Setenv("NVM_DIR", "")
+	t.Setenv("NVM_HOME", "")
+	t.Setenv("APPDATA", "")
+
+	home := t.TempDir()
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return home, nil }
+	defer func() { userHomeDir = orig }()
+
+	result := nvmDirPath("windows")
+
+	expected := filepath.Join(home, "AppData", "Roaming", "nvm")
+	if result != expected {
+		t.Errorf("expected %s, got %s", expected, result)
+	}
+}
+
+func TestNvmDirPath_LinuxFallback(t *testing.T) {
+	t.Setenv("NVM_DIR", "")
+
+	home := t.TempDir()
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return home, nil }
+	defer func() { userHomeDir = orig }()
+
+	result := nvmDirPath("linux")
+
+	expected := filepath.Join(home, ".nvm")
+	if result != expected {
+		t.Errorf("expected %s, got %s", expected, result)
+	}
+}
+
+func TestNvmDirPath_NoHome(t *testing.T) {
+	t.Setenv("NVM_DIR", "")
+	t.Setenv("NVM_HOME", "")
+
+	orig := userHomeDir
+	userHomeDir = func() (string, error) { return "", fmt.Errorf("no home") }
+	defer func() { userHomeDir = orig }()
+
+	result := nvmDirPath("linux")
+	if result != "" {
+		t.Errorf("expected empty string, got %s", result)
+	}
+}
