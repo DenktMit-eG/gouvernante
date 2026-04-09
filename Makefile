@@ -3,7 +3,8 @@
 BINARY   := gouvernante
 CMD      := ./cmd/gouvernante/
 DIST     := dist
-LDFLAGS  := -s -w
+VERSION  := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+LDFLAGS  := -s -w -X main.version=$(VERSION)
 GOBIN    := $(shell go env GOPATH 2>/dev/null)/bin
 
 PLATFORMS := \

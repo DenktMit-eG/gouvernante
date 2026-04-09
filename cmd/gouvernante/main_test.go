@@ -52,6 +52,18 @@ func TestSubprocess(t *testing.T) {
 	main()
 }
 
+func TestMain_VersionFlag(t *testing.T) {
+	out, code := helperProcess(t, "-version")
+	if code != 0 {
+		t.Errorf("expected exit code 0 for -version, got %d", code)
+	}
+
+	trimmed := strings.TrimSpace(out)
+	if trimmed == "" {
+		t.Error("expected version output, got empty string")
+	}
+}
+
 func TestMain_MissingRulesFlag(t *testing.T) {
 	_, code := helperProcess(t)
 	if code != 1 {

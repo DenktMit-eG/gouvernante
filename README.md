@@ -1,5 +1,11 @@
 # gouvernante
 
+[![CI](https://github.com/DenktMit-eG/gouvernante/actions/workflows/ci.yaml/badge.svg)](https://github.com/DenktMit-eG/gouvernante/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/DenktMit-eG/gouvernante/branch/main/graph/badge.svg)](https://codecov.io/gh/DenktMit-eG/gouvernante)
+[![Go Report Card](https://goreportcard.com/badge/github.com/DenktMit-eG/gouvernante)](https://goreportcard.com/report/github.com/DenktMit-eG/gouvernante)
+[![Latest Release](https://img.shields.io/github/v/release/DenktMit-eG/gouvernante)](https://github.com/DenktMit-eG/gouvernante/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A static Go binary for detecting npm supply chain compromises. Scans lockfiles against configurable JSON rules and checks the host filesystem for known indicators of compromise (IOCs).
 
 ## Why
@@ -14,8 +20,10 @@ npm supply chain attacks are becoming routine. Existing tools (npm audit, Grype,
 ## Quick start
 
 ```bash
-# Build (binaries are written to dist/binaries/gouvernante-<os>-<arch>)
-# Copy the binary for your platform onto your PATH as "gouvernante"
+# Download the latest release for your platform from:
+# https://github.com/DenktMit-eG/gouvernante/releases/latest
+#
+# Or build from source (binaries are written to dist/binaries/gouvernante-<os>-<arch>)
 make build
 
 # Scan a project directory (auto-detects lockfiles)
