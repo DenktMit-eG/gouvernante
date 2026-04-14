@@ -8,13 +8,6 @@ LDFLAGS  := -s -w -X main.version=$(VERSION)
 GOMOD    := -mod=vendor
 GOBIN    := $(shell go env GOPATH 2>/dev/null)/bin
 
-PLATFORMS := \
-	linux/amd64 \
-	linux/arm64 \
-	darwin/amd64 \
-	darwin/arm64 \
-	windows/amd64
-
 # Tool detection — check PATH and GOPATH/bin
 tool-check = $(if $(shell command -v $(1) 2>/dev/null || test -x $(GOBIN)/$(1) && echo found),,$(1))
 MISSING_TOOLS := $(call tool-check,gofumpt) $(call tool-check,goimports) $(call tool-check,golangci-lint) $(call tool-check,staticcheck)
@@ -86,14 +79,11 @@ setup: check-go
 build: check-go
 	$(call STEP,Building binaries)
 	@mkdir -p $(DIST)/binaries
-	@$(foreach platform,$(PLATFORMS),\
-		$(eval OS := $(word 1,$(subst /, ,$(platform))))\
-		$(eval ARCH := $(word 2,$(subst /, ,$(platform))))\
-		$(eval EXT := $(if $(filter windows,$(OS)),.exe,))\
-		echo "  $(OS)/$(ARCH)" && \
-		GOOS=$(OS) GOARCH=$(ARCH) go build $(GOMOD) -trimpath -ldflags="$(LDFLAGS)" \
-			-o $(DIST)/binaries/$(BINARY)-$(OS)-$(ARCH)$(EXT) $(CMD) && \
-	) true
+	CGO_ENABLED=0 GOOS=linux   GOARCH=amd64 go build $(GOMOD) -trimpath -ldflags="$(LDFLAGS)" -o $(DIST)/binaries/$(BINARY)-linux-amd64 $(CMD)
+	CGO_ENABLED=0 GOOS=linux   GOARCH=arm64 go build $(GOMOD) -trimpath -ldflags="$(LDFLAGS)" -o $(DIST)/binaries/$(BINARY)-linux-arm64 $(CMD)
+	CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 go build $(GOMOD) -trimpath -ldflags="$(LDFLAGS)" -o $(DIST)/binaries/$(BINARY)-darwin-amd64 $(CMD)
+	CGO_ENABLED=0 GOOS=darwin  GOARCH=arm64 go build $(GOMOD) -trimpath -ldflags="$(LDFLAGS)" -o $(DIST)/binaries/$(BINARY)-darwin-arm64 $(CMD)
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build $(GOMOD) -trimpath -ldflags="$(LDFLAGS)" -o $(DIST)/binaries/$(BINARY)-windows-amd64.exe $(CMD)
 	$(call PASS,Binaries in $(DIST)/binaries/)
 
 # --- Test ---
