@@ -78,7 +78,7 @@ flowchart TB
 | npm ecosystem → scanner | **Nothing executed** | The scanner never invokes `node`, `npm`, or any JavaScript |
 | Host indicator checks | `os.Stat()` only | Never reads file contents, never executes files |
 
-The binary has minimal, vetted external dependencies (`goccy/go-yaml` for YAML parsing). The scanning and matching engine uses only the Go standard library. See the [Minimal Dependencies](../reference/decision-log/minimal-dependencies.md) decision record for the full dependency policy.
+The binary has minimal, vetted external dependencies (`goccy/go-yaml` for YAML parsing), all vendored in `vendor/` for offline, reproducible builds. The scanning and matching engine uses only the Go standard library. A third-party license report is generated automatically during builds (`make licenses`). See the [Minimal Dependencies](../reference/decision-log/minimal-dependencies.md) decision record for the full dependency and vendoring policy.
 
 ## Component Diagram
 
@@ -118,6 +118,9 @@ gouvernante/
 │   └── heuristic/           Pattern-based malware detection (no rules needed)
 │       ├── patterns.go      Signal definitions (5 high-confidence patterns)
 │       └── heuristic.go     ScanDir, file walking, pattern matching
+├── vendor/                  Vendored dependencies (committed, offline builds)
+├── scripts/
+│   └── licenses.sh          License report generator
 └── testdata/                Test fixtures
     ├── rules/               Rule fixtures (valid, invalid, incidents, integration)
     │   └── schema.json      JSON Schema for rule validation

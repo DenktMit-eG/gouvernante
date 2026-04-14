@@ -5,8 +5,8 @@
 scan-report-*.txt
 *.test
 
-# Go module (go.sum is committed; vendor is not)
-/vendor/
+# Go module (go.sum and vendor/ are committed for fully vendored builds)
+# /vendor/  — tracked: all dependencies are vendored for offline, reproducible builds
 
 # IDE and editor files
 .idea/

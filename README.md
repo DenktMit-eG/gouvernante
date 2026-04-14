@@ -15,7 +15,7 @@ npm supply chain attacks are becoming routine. Existing tools (npm audit, Grype,
 - Does not depend on the npm ecosystem (running `node` to detect a Node supply chain attack is self-defeating)
 - Can be configured with new rules in minutes, not days
 - Checks both lockfiles and host artifacts in a single pass
-- Ships as a single static binary with minimal, vetted dependencies
+- Ships as a single static binary with minimal, vendored dependencies and full license compliance
 
 ## Quick start
 
@@ -82,6 +82,29 @@ Each rule file contains a `schema_version` and a `rules` array. A rule combines:
 - **host_indicators** -- filesystem artifacts left by the compromise (files, paths, hashes)
 - **remediation** -- what to do if a match is found
 
+## Vendored dependencies
+
+All external dependencies are committed in `vendor/` for fully offline, reproducible builds. No network access is required at build time.
+
+After modifying `go.mod`, update the vendor directory:
+
+```bash
+make vendor
+```
+
+A third-party license report is generated automatically during `make all` and included in every release:
+
+```bash
+make licenses   # → dist/reports/licenses.md
+```
+
+| Module | License |
+|--------|---------|
+| `github.com/Masterminds/semver/v3` | MIT |
+| `github.com/goccy/go-yaml` | MIT |
+| `github.com/santhosh-tekuri/jsonschema/v6` | Apache-2.0 |
+| `golang.org/x/text` | BSD-3-Clause |
+
 ## Development
 
 ```bash
@@ -89,7 +112,9 @@ make fmt        # Format code (gofumpt + goimports)
 make lint       # Run golangci-lint with strict config
 make test       # Run tests with race detector
 make cover      # Run tests with coverage report
-make all        # fmt + lint + cover + build + test-integration
+make vendor     # Update vendored dependencies
+make licenses   # Generate third-party license report
+make all        # fmt + lint + cover + build + licenses + test-integration
 ```
 
 See [docs/developer-guide/code-style.md](docs/developer-guide/code-style.md) for the full development guide.

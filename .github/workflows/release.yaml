@@ -20,9 +20,16 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.25.9"
+          cache: false
+
+      - name: Verify vendor
+        run: make vendor-check
 
       - name: Build binaries
         run: make build
+
+      - name: Generate license report
+        run: make licenses
 
       - name: Generate checksums
         run: |
@@ -46,7 +53,7 @@ jobs:
         run: |
           tag="${{ github.ref_name }}"
           if ! gh release view "$tag" > /dev/null 2>&1; then
-            gh release create "$tag" --generate-notes dist/binaries/*
+            gh release create "$tag" --generate-notes dist/binaries/* dist/reports/licenses.md
           else
-            gh release upload "$tag" dist/binaries/* --clobber
+            gh release upload "$tag" dist/binaries/* dist/reports/licenses.md --clobber
           fi

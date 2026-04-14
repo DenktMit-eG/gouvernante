@@ -112,9 +112,9 @@ Run these from the repository root with `make <target>`.
 
 | Target | Description |
 |--------|-------------|
-| `make all` | Ensure tools, format, lint, cover, build, and run integration tests. |
+| `make all` | Ensure tools, format, lint, cover, build, licenses, and run integration tests. |
 | `make build` | Cross-compile 5 platforms (output in `dist/binaries/`). |
-| `make test` | Run all tests with the race detector (`go test -race`). |
+| `make test` | Run all tests with the race detector (`go test -mod=vendor -race`). |
 | `make cover` | Run tests with coverage report (output in `dist/reports/`). |
 | `make scan` | Run scan on `testdata/` (output in `dist/reports/`). |
 | `make fmt` | Format code with `gofumpt` and `goimports`. |
@@ -122,6 +122,9 @@ Run these from the repository root with `make <target>`.
 | `make vet` | Run `go vet` on all packages. |
 | `make staticcheck` | Run `staticcheck` on all packages. |
 | `make lint` | Run `golangci-lint` (includes `vet`). |
+| `make vendor` | Update `vendor/` directory from `go.mod`. |
+| `make vendor-check` | Verify `vendor/` is consistent with `go.mod`. |
+| `make licenses` | Generate third-party license report in `dist/reports/`. |
 | `make setup` | Install all development tools. |
 | `make test-integration` | Run Docker integration tests. |
 | `make clean` | Remove `dist/` and reports. |

@@ -71,7 +71,17 @@ cd gouvernante
 make build
 ```
 
-This produces platform-specific binaries in `dist/binaries/` (e.g. `gouvernante-linux-amd64`). Copy the binary for your platform anywhere on your `PATH`.
+All dependencies are vendored in `vendor/` — no network access is required at build time. This produces platform-specific binaries in `dist/binaries/` (e.g. `gouvernante-linux-amd64`). Copy the binary for your platform anywhere on your `PATH`.
+
+### License compliance
+
+A third-party license report is generated during the build pipeline:
+
+```bash
+make licenses   # → dist/reports/licenses.md
+```
+
+The report lists every vendored dependency, its license type, and includes the full license texts. It is also attached to every GitHub release.
 
 ---
 

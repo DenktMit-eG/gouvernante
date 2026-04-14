@@ -1,0 +1,32 @@
+# github.com/Masterminds/semver/v3 v3.4.0
+## explicit; go 1.21
+github.com/Masterminds/semver/v3
+# github.com/goccy/go-yaml v1.19.2
+## explicit; go 1.21.0
+github.com/goccy/go-yaml
+github.com/goccy/go-yaml/ast
+github.com/goccy/go-yaml/internal/errors
+github.com/goccy/go-yaml/internal/format
+github.com/goccy/go-yaml/lexer
+github.com/goccy/go-yaml/parser
+github.com/goccy/go-yaml/printer
+github.com/goccy/go-yaml/scanner
+github.com/goccy/go-yaml/token
+# github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+## explicit; go 1.21
+github.com/santhosh-tekuri/jsonschema/v6
+github.com/santhosh-tekuri/jsonschema/v6/kind
+# golang.org/x/text v0.36.0
+## explicit; go 1.25.0
+golang.org/x/text/feature/plural
+golang.org/x/text/internal
+golang.org/x/text/internal/catmsg
+golang.org/x/text/internal/format
+golang.org/x/text/internal/language
+golang.org/x/text/internal/language/compact
+golang.org/x/text/internal/number
+golang.org/x/text/internal/stringset
+golang.org/x/text/internal/tag
+golang.org/x/text/language
+golang.org/x/text/message
+golang.org/x/text/message/catalog

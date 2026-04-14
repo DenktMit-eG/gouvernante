@@ -181,21 +181,28 @@ for pnpm lockfile parsing).
 | Test infrastructure | Test-only dependencies allowed |
 | CLI framework | `flag` package (standard library) |
 
+All dependencies are vendored in `vendor/` and committed to the repository. After
+modifying `go.mod`, run `make vendor` to update the vendor directory. CI verifies
+vendor consistency via `make vendor-check`.
+
 Before adding a new dependency, open an issue to discuss scope and justification.
 See the [Minimal Dependencies ADR](../reference/decision-log/minimal-dependencies.md)
-for the full rationale and policy evolution.
+for the full rationale, vendoring policy, and license compliance.
 
 ## Makefile Targets
 
 | Target | Command | Description |
 |---|---|---|
-| `make all` | `fmt` + `lint` + `cover` + `build` + `test-integration` | Full pre-push validation. |
+| `make all` | `fmt` + `lint` + `cover` + `build` + `licenses` + `test-integration` | Full pre-push validation. |
 | `make build` | Cross-compile all platforms | Binaries in `dist/binaries/`. |
-| `make test` | `go test -race ./...` | Run tests with race detector. |
-| `make cover` | `go test -race -coverprofile=... ./...` | Generate coverage report. |
+| `make test` | `go test -mod=vendor -race ./...` | Run tests with race detector. |
+| `make cover` | `go test -mod=vendor -race -coverprofile=... ./...` | Generate coverage report. |
 | `make fmt` | `gofumpt -w .` | Format all Go files in place. |
 | `make fmt-check` | `gofumpt -d .` (fail on diff) | Check formatting without writing. |
 | `make lint` | `golangci-lint run ./...` | Run the full linter suite. |
+| `make vendor` | `go mod vendor` | Update vendored dependencies. |
+| `make vendor-check` | `go mod verify` | Verify vendor directory consistency. |
+| `make licenses` | `scripts/licenses.sh` | Generate third-party license report. |
 | `make test-integration` | Docker build + run | End-to-end integration test with planted IOCs. |
 
 Run `make all` before pushing. CI runs the same targets and will reject any
@@ -209,6 +216,7 @@ commit that fails.
 - [ ] Errors are wrapped with `fmt.Errorf("context: %w", err)`.
 - [ ] No `panic` calls outside of `main()` or test helpers.
 - [ ] No unapproved external dependencies added to `go.mod`.
+- [ ] `vendor/` is up to date (`make vendor && make vendor-check`).
 - [ ] `make all` passes.
 
 ## Next Steps

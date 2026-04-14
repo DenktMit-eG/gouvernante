@@ -64,7 +64,7 @@ The policy must balance: **minimal trust surface** against **robust, maintainabl
 | **Audit surface** | Only this repository | This repo + 2-3 vetted modules | Large — `go.sum` can be hundreds of lines |
 | **Robustness** | Lower — bespoke parsers break on format changes | Higher — libraries handle edge cases | Highest |
 | **Maintenance** | Higher — must maintain custom parsers | Moderate | Lower |
-| **Build reproducibility** | No network needed | Needs `github.com` at build time | Depends on module proxy |
+| **Build reproducibility** | No network needed | Vendored — no network needed | Depends on module proxy |
 
 ---
 
@@ -117,10 +117,30 @@ Reasoning:
 
 - Contributors must evaluate whether a new dependency falls in the "parser"
   or "engine" scope before adding it.
-- Builds require network access to `github.com` (though `go mod vendor`
-  can restore offline builds).
 - Each new dependency requires justification — this intentionally slows
   down dependency growth.
+
+### Vendoring
+
+All dependencies are vendored in `vendor/` and committed to the repository.
+This provides:
+
+- **Offline builds** — no network access to `github.com` required at build time.
+- **Reproducibility** — builds are not affected by upstream module proxy outages
+  or deletions.
+- **Auditability** — the exact source code of every dependency is visible in the
+  repository and can be reviewed in pull requests.
+
+After modifying `go.mod`, run `make vendor` to update the vendor directory. CI
+verifies vendor consistency via `make vendor-check`.
+
+### License compliance
+
+A third-party license report is generated automatically during `make all` and
+attached to every release. The report is produced by `scripts/licenses.sh`,
+which scans `vendor/` for LICENSE files and identifies each dependency's license
+type. All current dependencies use permissive licenses (MIT, Apache-2.0,
+BSD-3-Clause).
 
 ---
 

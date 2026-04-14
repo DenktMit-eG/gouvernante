@@ -1,10 +1,11 @@
-.PHONY: all build test lint fmt fmt-check vet staticcheck clean cover scan demo setup test-integration help
+.PHONY: all build test lint fmt fmt-check vet staticcheck clean cover scan demo setup test-integration help vendor licenses vendor-check
 
 BINARY   := gouvernante
 CMD      := ./cmd/gouvernante/
 DIST     := dist
 VERSION  := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS  := -s -w -X main.version=$(VERSION)
+GOMOD    := -mod=vendor
 GOBIN    := $(shell go env GOPATH 2>/dev/null)/bin
 
 PLATFORMS := \
@@ -49,7 +50,7 @@ endef
 
 # --- Default target ---
 
-all: ensure-tools fmt lint cover build test-integration
+all: ensure-tools vendor-check fmt lint cover build licenses test-integration
 	$(call PASS,All checks passed.)
 
 # --- Tool management ---
@@ -90,7 +91,7 @@ build: check-go
 		$(eval ARCH := $(word 2,$(subst /, ,$(platform))))\
 		$(eval EXT := $(if $(filter windows,$(OS)),.exe,))\
 		echo "  $(OS)/$(ARCH)" && \
-		GOOS=$(OS) GOARCH=$(ARCH) go build -trimpath -ldflags="$(LDFLAGS)" \
+		GOOS=$(OS) GOARCH=$(ARCH) go build $(GOMOD) -trimpath -ldflags="$(LDFLAGS)" \
 			-o $(DIST)/binaries/$(BINARY)-$(OS)-$(ARCH)$(EXT) $(CMD) && \
 	) true
 	$(call PASS,Binaries in $(DIST)/binaries/)
@@ -99,13 +100,13 @@ build: check-go
 
 test: check-go
 	$(call STEP,Running tests)
-	go test -race -count=1 ./...
+	go test $(GOMOD) -race -count=1 ./...
 	$(call PASS,All tests passed)
 
 cover: check-go
 	$(call STEP,Running tests with coverage)
 	@mkdir -p $(DIST)/reports
-	go test -race -coverprofile=$(DIST)/reports/coverage.out -covermode=atomic ./...
+	go test $(GOMOD) -race -coverprofile=$(DIST)/reports/coverage.out -covermode=atomic ./...
 	go tool cover -func=$(DIST)/reports/coverage.out
 	go tool cover -html=$(DIST)/reports/coverage.out -o $(DIST)/reports/coverage.html
 	$(call PASS,Coverage report: $(DIST)/reports/coverage.html)
@@ -145,7 +146,7 @@ fmt-check: ensure-tools
 # --- Linting ---
 
 vet: check-go
-	go vet ./...
+	go vet $(GOMOD) ./...
 
 staticcheck: ensure-tools
 	$(STATICCHECK) ./...
@@ -162,6 +163,24 @@ test-integration:
 	docker build -f Dockerfile.integration -t gouvernante-test .
 	docker run --rm gouvernante-test
 	$(call PASS,Integration tests passed)
+
+# --- Vendoring & licenses ---
+
+vendor: check-go
+	$(call STEP,Vendoring dependencies)
+	go mod vendor
+	$(call PASS,vendor/ updated)
+
+vendor-check: check-go
+	$(call STEP,Verifying vendor directory)
+	@test -d vendor || { echo "error: vendor/ directory missing. Run 'make vendor'."; exit 1; }
+	go mod verify
+	$(call PASS,Vendor directory verified)
+
+licenses:
+	$(call STEP,Generating license report)
+	@./scripts/licenses.sh $(DIST)/reports/licenses.md
+	$(call PASS,License report: $(DIST)/reports/licenses.md)
 
 # --- Utilities ---
 
@@ -189,6 +208,9 @@ help:
 	@echo "  $(CYAN)staticcheck$(RESET)      Run staticcheck"
 	@echo "  $(CYAN)lint$(RESET)             Run golangci-lint (includes vet)"
 	@echo "  $(CYAN)setup$(RESET)            Install all development tools"
+	@echo "  $(CYAN)vendor$(RESET)           Update vendor/ directory from go.mod"
+	@echo "  $(CYAN)vendor-check$(RESET)     Verify vendor/ directory is consistent"
+	@echo "  $(CYAN)licenses$(RESET)         Generate third-party license report"
 	@echo "  $(CYAN)scan$(RESET)             Run scan on test fixtures (reports in dist/reports/)"
 	@echo "  $(CYAN)test-integration$(RESET) Run Docker integration test (IOCs + node_modules)"
 	@echo "  $(CYAN)clean$(RESET)            Remove all build artifacts"
