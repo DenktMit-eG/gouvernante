@@ -105,13 +105,13 @@ scan: build
 	$(call STEP,Running scan on test fixtures)
 	@mkdir -p $(DIST)/reports
 	@./$(DIST)/binaries/$(BINARY)-$$(go env GOOS)-$$(go env GOARCH) \
-		-rules ./testdata/rules/incidents \
+		-rules ./rules/incidents \
 		-dir ./testdata \
 		-recursive \
 		-host \
 		-output $(DIST)/reports/scan-report.txt || true
 	@./$(DIST)/binaries/$(BINARY)-$$(go env GOOS)-$$(go env GOARCH) \
-		-rules ./testdata/rules/incidents \
+		-rules ./rules/incidents \
 		-dir ./testdata \
 		-recursive \
 		-host \
@@ -180,7 +180,7 @@ clean:
 
 demo: build
 	$(call STEP,Running demo scan)
-	./$(DIST)/binaries/$(BINARY)-$$(go env GOOS)-$$(go env GOARCH) -rules ./testdata/rules/incidents -dir ./testdata -host; \
+	./$(DIST)/binaries/$(BINARY)-$$(go env GOOS)-$$(go env GOARCH) -rules ./rules/incidents -dir ./testdata -host; \
 	EXIT=$$?; \
 	if [ $$EXIT -eq 2 ]; then echo "\nDemo complete: findings detected (expected)."; \
 	elif [ $$EXIT -eq 0 ]; then echo "\nDemo complete: no findings."; \

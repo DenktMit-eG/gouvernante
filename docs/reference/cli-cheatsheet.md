@@ -26,7 +26,9 @@ gouvernante [flags]
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
-| `-rules` | `string` | *(required)* | Directory containing rule JSON files. |
+| `-rules` | `string` | | Directory containing rule JSON files. |
+| `-rules-url` | `string` | | URL to download rules ZIP (cached with ETag). |
+| `-rules-cache` | `string` | OS cache dir | Cache directory for remote rules. |
 | `-dir` | `string` | `.` | Directory to scan for lockfiles. |
 | `-lockfile` | `string` | | Path to a specific lockfile (overrides `-dir`). |
 | `-recursive` | `bool` | `false` | Recursively scan subdirectories for lockfiles. |
@@ -35,6 +37,8 @@ gouvernante [flags]
 | `-output` | `string` | | Write report to file. Use `auto` for a timestamped filename. |
 | `-json` | `bool` | `false` | Output findings as JSON instead of text. |
 | `-trace` | `bool` | `false` | Enable debug-level logging. |
+
+One of `-rules`, `-rules-url`, or `-heuristic` is required. `-rules` and `-rules-url` are mutually exclusive.
 
 ---
 
@@ -96,6 +100,18 @@ gouvernante -heuristic -dir ./my-project
 
 ```bash
 gouvernante -heuristic -dir . -recursive -json
+```
+
+### Scan with the official rules feed
+
+```bash
+gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -dir .
+```
+
+### Remote rules with custom cache directory
+
+```bash
+gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -rules-cache /tmp/rules-cache -dir .
 ```
 
 ### Full scan with JSON output saved to file

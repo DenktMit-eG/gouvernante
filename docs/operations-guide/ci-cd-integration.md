@@ -35,6 +35,8 @@ In most CI systems, any non-zero exit code fails the step. This means both error
 
 ## GitHub Actions
 
+Using `-rules-url` (recommended — no separate clone step needed):
+
 ```yaml
 name: Supply Chain Scan
 
@@ -51,17 +53,15 @@ jobs:
 
       - name: Download gouvernante
         run: |
-          curl -sL https://github.com/your-org/gouvernante/releases/latest/download/gouvernante-linux-amd64 \
+          curl -sL https://github.com/DenktMit-eG/gouvernante/releases/latest/download/gouvernante-linux-amd64 \
             -o /usr/local/bin/gouvernante
           chmod +x /usr/local/bin/gouvernante
 
-      - name: Fetch latest rules
-        run: |
-          git clone --depth 1 https://github.com/your-org/gouvernante-rules.git /tmp/rules
-
       - name: Run scan
         run: |
-          gouvernante -rules /tmp/rules -dir . -recursive -json -output auto
+          gouvernante \
+            -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip \
+            -dir . -recursive -json -output auto
 
       - name: Upload scan report
         if: always()
@@ -73,8 +73,9 @@ jobs:
 
 Key points:
 
-- The **Fetch latest rules** step ensures every build uses the most current rules.
-- The **Run scan** step will exit `2` and fail the job if findings are detected.
+- The scanner downloads and caches rules automatically — no separate `git clone` step.
+- ETag-based caching ensures rules are only re-downloaded when they change.
+- The **Run scan** step will exit `2` and fail the job if findings are detected, or `1` if the rules download or validation fails.
 - The **Upload scan report** step runs `if: always()` so the JSON report is available even when the scan fails.
 
 ## GitLab CI
@@ -85,11 +86,12 @@ supply-chain-scan:
   image: golang:1.25-alpine
   before_script:
     - wget -qO /usr/local/bin/gouvernante \
-        https://github.com/your-org/gouvernante/releases/latest/download/gouvernante-linux-amd64
+        https://github.com/DenktMit-eG/gouvernante/releases/latest/download/gouvernante-linux-amd64
     - chmod +x /usr/local/bin/gouvernante
-    - git clone --depth 1 https://github.com/your-org/gouvernante-rules.git /tmp/rules
   script:
-    - gouvernante -rules /tmp/rules -dir . -recursive -json -output gouvernante-report.json
+    - gouvernante
+        -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip
+        -dir . -recursive -json -output gouvernante-report.json
   artifacts:
     when: always
     paths:
@@ -98,7 +100,7 @@ supply-chain-scan:
   allow_failure: false
 ```
 
-Setting `allow_failure: false` (the default) ensures that exit code `2` blocks the pipeline.
+Setting `allow_failure: false` (the default) ensures that exit code `2` blocks the pipeline. Exit code `1` (rules download or validation failure) also blocks the pipeline.
 
 ## Generic Shell Script
 
@@ -111,9 +113,10 @@ set -euo pipefail
 RULES_DIR="/tmp/gouvernante-rules"
 REPORT_FILE="gouvernante-report.json"
 
-# 1. Fetch latest rules
-git clone --depth 1 https://github.com/your-org/gouvernante-rules.git "$RULES_DIR" 2>/dev/null \
+# 1. Fetch latest rules (shallow clone of the gouvernante repo; use rules/incidents/)
+git clone --depth 1 https://codeberg.org/DenktMit-eG/gouvernante.git "$RULES_DIR" 2>/dev/null \
   || (cd "$RULES_DIR" && git pull --ff-only)
+RULES_DIR="$RULES_DIR/rules/incidents"
 
 # 2. Run the scan
 gouvernante -rules "$RULES_DIR" -dir . -recursive -json -output "$REPORT_FILE"
@@ -186,21 +189,48 @@ fi
 
 The scanner is only as effective as the freshness of its rules. Every CI run should use the latest rules.
 
-### Option 1: Clone a Rules Repository (Recommended)
+### Option 1: Use `-rules-url` (Recommended)
 
-Maintain rules in a dedicated Git repository. Clone it at build time:
+The simplest approach: point the scanner at a hosted rules ZIP. The scanner handles downloading, caching, and ETag-based conditional requests automatically:
 
 ```bash
-git clone --depth 1 https://github.com/your-org/gouvernante-rules.git /tmp/rules
+gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip \
+  -dir . -recursive -json -output auto
+```
+
+In CI, you can optionally set `-rules-cache` to a path that is cached between builds:
+
+```yaml
+      # GitHub Actions example
+      - name: Run scan
+        run: |
+          gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip \
+            -rules-cache ${{ runner.temp }}/gouvernante-rules \
+            -dir . -recursive -json -output auto
 ```
 
 Advantages:
 
-- Rules are versioned and auditable.
-- Teams can pin to a tag (`git clone --branch v2026.04.01`) for reproducibility.
-- Pull requests on the rules repo provide peer review.
+- **Zero setup.** No `git clone`, no separate fetch step, no artifact store configuration.
+- **Efficient.** ETag-based caching means unchanged rules are never re-downloaded.
+- **Safe.** Every downloaded rule file is validated against the JSON schema before use. Invalid rules are rejected and the scanner exits with code 1, failing the CI pipeline.
 
-### Option 2: Fetch from an Artifact Store
+### Option 2: Clone the gouvernante Repository
+
+Clone this repository and point `-rules` at its `rules/incidents/` directory. Useful when you want to pin to a specific commit or tag:
+
+```bash
+git clone --depth 1 https://codeberg.org/DenktMit-eG/gouvernante.git /tmp/gouvernante
+gouvernante -rules /tmp/gouvernante/rules/incidents -dir . -recursive
+```
+
+Advantages:
+
+- Rules are versioned alongside the scanner and auditable via git history.
+- Teams can pin to a tag (`git clone --branch v0.3.0`) for reproducibility.
+- Works offline after the initial clone — no HTTP round-trip on every run.
+
+### Option 3: Fetch from an Artifact Store
 
 Store rules as a tarball in your artifact registry (Artifactory, S3, GCS):
 
@@ -213,7 +243,7 @@ Advantages:
 - Works in air-gapped environments.
 - Can be signed and verified.
 
-### Option 3: Bundle Rules in the Scanner Image
+### Option 4: Bundle Rules in the Scanner Image
 
 If you build a custom Docker image for CI, copy the rules directory into the image:
 

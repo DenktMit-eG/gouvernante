@@ -6,11 +6,13 @@ on:
     paths:
       - docs/**
       - mkdocs.yml
+      - rules/**
   pull_request:
     branches: [main]
     paths:
       - docs/**
       - mkdocs.yml
+      - rules/**
 
 concurrency:
   group: pages
@@ -30,6 +32,23 @@ jobs:
 
       - name: Build docs
         run: docker compose -f docker-compose.docs.yml run --rm mkdocs build --strict
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.9"
+          cache: false
+
+      - name: Validate incident rules
+        run: |
+          mkdir -p /tmp/empty
+          go run -mod=vendor ./cmd/gouvernante -rules ./rules/incidents -dir /tmp/empty
+
+      - name: Build rules.zip
+        run: |
+          find rules/incidents -name '*.json' -exec touch -d '2024-01-01T00:00:00Z' {} +
+          mkdir -p site/rules
+          cd rules/incidents
+          TZ=UTC zip -X -j ../../site/rules/rules.zip $(ls *.json | sort)
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'

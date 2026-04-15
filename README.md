@@ -26,7 +26,10 @@ npm supply chain attacks are becoming routine. Existing tools (npm audit, Grype,
 # Or build from source (binaries are written to dist/binaries/gouvernante-<os>-<arch>)
 make build
 
-# Scan a project directory (auto-detects lockfiles)
+# Scan using remote rules (downloaded and cached automatically)
+gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -dir /path/to/project
+
+# Scan a project directory with local rules
 gouvernante -rules /path/to/rules -dir /path/to/project
 
 # Scan a specific lockfile

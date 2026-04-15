@@ -25,7 +25,9 @@ tags:
 
 | Flag | Required | Default | Description |
 |------|----------|---------|-------------|
-| `-rules` | Yes | — | Path to the rules directory containing JSON rule files. |
+| `-rules` | No | — | Path to the rules directory containing JSON rule files. |
+| `-rules-url` | No | — | URL to download rules ZIP from (cached with ETag/304). |
+| `-rules-cache` | No | OS cache dir | Override cache directory for remote rules. |
 | `-dir` | No | `.` | Directory to scan for lockfiles. |
 | `-lockfile` | No | — | Path to a specific lockfile (skips auto-detection). |
 | `-recursive` | No | `false` | Recursively scan subdirectories for lockfiles. |
@@ -34,6 +36,8 @@ tags:
 | `-output` | No | — | Write output to a file. Use `auto` for a timestamped filename. |
 | `-json` | No | `false` | Emit output as JSON instead of human-readable text. |
 | `-trace` | No | `false` | Enable debug-level logging. |
+
+One of `-rules`, `-rules-url`, or `-heuristic` is required. `-rules` and `-rules-url` are mutually exclusive.
 
 ## Scanning a Directory
 
@@ -58,6 +62,57 @@ The scanner looks for:
 - `package.json` (dependencies and devDependencies; range expressions are checked for overlap with compromised versions)
 
 All detected lockfiles are scanned in a single run. Findings from each lockfile are reported separately.
+
+## Remote Rules
+
+Instead of maintaining a local rules directory, you can download rules from a URL with automatic caching:
+
+```bash
+gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -dir .
+```
+
+### Official rules feed
+
+The project publishes its curated incident rules as a flat ZIP archive alongside the docs site:
+
+| | |
+|---|---|
+| **URL** | `https://denktmit-eg.github.io/gouvernante/rules/rules.zip` |
+| **Contents** | Every `*.json` file in [`rules/incidents/`](https://codeberg.org/DenktMit-eG/gouvernante/src/branch/main/rules/incidents) of the repository |
+| **Refresh cadence** | Rebuilt on every push to `main` that touches `rules/**` or `docs/**` (via `.github/workflows/docs.yaml`) |
+| **Integrity** | No checksum is published today — `rulesync` validates schema, structure, and a 5 MB size cap on every fetch |
+
+### How caching works
+
+1. On the first run, the scanner downloads the ZIP, validates every file against the rule schema, and stores the rules in a local cache directory.
+2. On subsequent runs, the scanner sends an `If-None-Match` header with the cached ETag. If the server responds with `304 Not Modified`, the cached rules are reused instantly.
+3. If the server returns new rules, they are validated before replacing the cache. Invalid rules are rejected — the old cache is preserved and the scanner exits with code 1.
+
+### Cache location
+
+The default cache directory follows OS conventions:
+
+| OS | Default path |
+|----|-------------|
+| Linux | `~/.cache/gouvernante/rules/` (or `$XDG_CACHE_HOME`) |
+| macOS | `~/Library/Caches/gouvernante/rules/` |
+| Windows | `%LocalAppData%\gouvernante\rules\` |
+
+Override with `-rules-cache`:
+
+```bash
+gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -rules-cache /tmp/my-cache -dir .
+```
+
+### Security
+
+The scanner enforces strict validation on downloaded rules:
+
+- **Only `.json` files** are extracted from the ZIP. All other file types are skipped.
+- **Symlinks and binary content** (null bytes) cause the entire archive to be rejected.
+- **Zip-slip prevention** ensures no extracted file escapes the cache directory.
+- **Schema validation** runs on every extracted file. If any file fails, the download is rejected, the existing cache is preserved, and the scanner exits with code 1.
+- **Response size** is limited to 5 MB.
 
 ## Scanning a Specific Lockfile
 

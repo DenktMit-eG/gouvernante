@@ -21,7 +21,7 @@ FROM alpine:3.20
 COPY --from=builder /gouvernante /usr/local/bin/gouvernante
 
 # Copy rules and test lockfile.
-COPY testdata/rules/incidents/ /test/rules/
+COPY rules/incidents/ /test/rules/
 COPY testdata/rules/integration/ /test/rules/
 COPY testdata/package-lock.json /test/project/package-lock.json
 

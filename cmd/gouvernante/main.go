@@ -34,7 +34,9 @@ func parseFlags(w io.Writer) (cli.Config, bool) {
 	var cfg cli.Config
 	var showVersion bool
 
-	flag.StringVar(&cfg.RulesDir, "rules", "", "directory containing rule JSON files (required)")
+	flag.StringVar(&cfg.RulesDir, "rules", "", "directory containing rule JSON files")
+	flag.StringVar(&cfg.RulesURL, "rules-url", "", "URL to download rules ZIP from (cached with ETag)")
+	flag.StringVar(&cfg.RulesCacheDir, "rules-cache", "", "cache directory for remote rules (default: OS cache dir)")
 	flag.StringVar(&cfg.ScanDir, "dir", ".", "directory to scan for lockfiles")
 	flag.StringVar(&cfg.LockfilePath, "lockfile", "", "path to a specific lockfile (overrides -dir)")
 	flag.BoolVar(&cfg.Recursive, "recursive", false, "scan directory tree for lockfiles")
@@ -51,8 +53,20 @@ func parseFlags(w io.Writer) (cli.Config, bool) {
 		return cli.Config{}, true
 	}
 
-	if cfg.RulesDir == "" && !cfg.Heuristic {
-		slog.Error("missing required flag: -rules")
+	if cfg.RulesDir == "" && cfg.RulesURL == "" && !cfg.Heuristic {
+		slog.Error("missing required flag: -rules or -rules-url")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if cfg.RulesDir != "" && cfg.RulesURL != "" {
+		slog.Error("-rules and -rules-url are mutually exclusive")
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if cfg.RulesCacheDir != "" && cfg.RulesURL == "" {
+		slog.Error("-rules-cache requires -rules-url")
 		flag.Usage()
 		os.Exit(1)
 	}

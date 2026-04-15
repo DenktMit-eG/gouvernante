@@ -134,7 +134,7 @@ If the original advisory contains incorrect information:
 
 - **GitHub Advisory:** Open a discussion or suggest an improvement on the GHSA page.
 - **npm:** Report via the npm security contact.
-- **Rule author:** File an issue or PR on the gouvernante-rules repository with your findings.
+- **Rule author:** File an issue or PR against [`rules/incidents/`](https://codeberg.org/DenktMit-eG/gouvernante/src/branch/main/rules/incidents) in the gouvernante repository with your findings.
 
 Include:
 

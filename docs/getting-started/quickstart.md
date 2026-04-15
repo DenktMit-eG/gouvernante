@@ -182,11 +182,33 @@ gouvernante -heuristic -dir /path/to/your/project
 
 This detects suspicious patterns like `eval(atob(...))`, `curl | sh` in scripts, and credential harvesting. See [Running Scans](../operations-guide/running-scans.md#heuristic-scanning) for details.
 
+### Using remote rules
+
+Instead of maintaining a local rules directory, you can fetch rules from a URL. The scanner downloads the ZIP, validates every rule against the schema, and caches the result locally with ETag-based conditional requests. The project publishes an official feed at `https://denktmit-eg.github.io/gouvernante/rules/rules.zip`, rebuilt on every push to `main` that touches `rules/**` or `docs/**`:
+
+```bash
+gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -dir /path/to/project
+```
+
+On subsequent runs, the scanner sends an `If-None-Match` header. If the server returns `304 Not Modified`, the cached rules are reused without re-downloading. This makes `-rules-url` efficient for CI pipelines that run on every push.
+
+To override the default cache location (OS-specific: `~/.cache/gouvernante/rules/` on Linux, `~/Library/Caches/gouvernante/rules/` on macOS, `%LocalAppData%\gouvernante\rules\` on Windows):
+
+```bash
+gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -rules-cache /tmp/my-rules-cache -dir .
+```
+
+!!! warning "Security"
+
+    The scanner validates every downloaded rule file against the JSON schema before caching. If any file fails validation, the download is rejected, the existing cache is preserved, and the scanner exits with code 1. Only `.json` files are extracted from the ZIP — all other file types, symlinks, and binary content are rejected.
+
 ### CLI flags reference
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `-rules` | string (required unless `-heuristic`) | Directory containing rule JSON files |
+| `-rules` | string | Directory containing rule JSON files |
+| `-rules-url` | string | URL to download rules ZIP from (cached with ETag) |
+| `-rules-cache` | string | Cache directory for remote rules (default: OS cache dir) |
 | `-dir` | string (default `"."`) | Directory to scan for lockfiles |
 | `-lockfile` | string | Path to a specific lockfile (overrides `-dir`) |
 | `-recursive` | bool | Scan directory tree for lockfiles |
@@ -195,6 +217,10 @@ This detects suspicious patterns like `eval(atob(...))`, `curl | sh` in scripts,
 | `-output` | string | Write report to file (`"auto"` for timestamped) |
 | `-json` | bool | Output findings as JSON |
 | `-trace` | bool | Enable debug-level logging (every directory visited) |
+
+!!! note
+
+    One of `-rules`, `-rules-url`, or `-heuristic` is required. `-rules` and `-rules-url` are mutually exclusive.
 
 ---
 

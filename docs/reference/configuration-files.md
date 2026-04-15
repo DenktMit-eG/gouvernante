@@ -61,10 +61,13 @@ constraints programmatically for rules constructed in code.
 
 See [Rule Format](../architecture/rule-format.md) for the full schema documentation and [Writing Rules](../developer-guide/writing-rules.md) for authoring guidance.
 
-## testdata/rules/incidents/
+## rules/incidents/
 
-Sample incident rule files for testing and demos. Each follows the naming
-convention `<incident>-<year>.json` and contains a `schema_version` + `rules` array.
+Curated incident rule files for real npm supply chain compromises. Each follows
+the naming convention `<incident>-<year>.json` and contains a `schema_version`
++ `rules` array. This directory is packaged into `rules.zip` on every docs
+deploy and published alongside the static site, so users can point
+`-rules-url` at the published feed directly.
 
 ---
 

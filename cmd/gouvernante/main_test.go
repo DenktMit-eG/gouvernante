@@ -263,6 +263,32 @@ func TestMain_HeuristicJSON(t *testing.T) {
 	}
 }
 
+func TestMain_MissingBothRulesFlags(t *testing.T) {
+	// Neither -rules nor -rules-url — should fail.
+	scanDir := t.TempDir()
+	_, code := helperProcess(t, "-dir", scanDir)
+
+	if code != 1 {
+		t.Errorf("expected exit code 1 for missing -rules and -rules-url, got %d", code)
+	}
+}
+
+func TestMain_BothRulesFlags(t *testing.T) {
+	// Both -rules and -rules-url — mutually exclusive.
+	_, code := helperProcess(t, "-rules", "/tmp", "-rules-url", "http://example.com/rules.zip")
+	if code != 1 {
+		t.Errorf("expected exit code 1 for both -rules and -rules-url, got %d", code)
+	}
+}
+
+func TestMain_RulesCacheWithoutURL(t *testing.T) {
+	// -rules-cache without -rules-url.
+	_, code := helperProcess(t, "-rules", "/tmp", "-rules-cache", "/tmp/cache")
+	if code != 1 {
+		t.Errorf("expected exit code 1 for -rules-cache without -rules-url, got %d", code)
+	}
+}
+
 // writeTestRule creates a minimal valid rule file in dir.
 func writeTestRule(t *testing.T, dir string) {
 	t.Helper()

@@ -1,9 +1,12 @@
 package cli
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -91,6 +94,132 @@ func TestLoadRules_InvalidRule(t *testing.T) {
 	_, err := LoadRules(dir)
 	if err == nil {
 		t.Fatal("expected error for invalid rule")
+	}
+}
+
+// ResolveRulesDir tests.
+
+func TestResolveRulesDir_LocalDir(t *testing.T) {
+	dir := t.TempDir()
+
+	got, err := ResolveRulesDir(Config{RulesDir: dir})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if got != dir {
+		t.Errorf("expected %s, got %s", dir, got)
+	}
+}
+
+func TestResolveRulesDir_LocalDirTakesPrecedence(t *testing.T) {
+	dir := t.TempDir()
+
+	// RulesDir is set, so RulesURL is ignored.
+	got, err := ResolveRulesDir(Config{RulesDir: dir, RulesURL: "http://example.com/rules.zip"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if got != dir {
+		t.Errorf("expected %s, got %s", dir, got)
+	}
+}
+
+func TestResolveRulesDir_DefaultCacheDir(t *testing.T) {
+	// RulesCacheDir is empty, so DefaultCacheDir is used. The sync will fail
+	// (unreachable URL) but the DefaultCacheDir path should be exercised.
+	_, err := ResolveRulesDir(Config{RulesURL: "http://127.0.0.1:1/unreachable"})
+	if err == nil {
+		t.Fatal("expected error for unreachable URL")
+	}
+
+	// The error should be a sync error, not a cache dir error.
+	if !strings.Contains(err.Error(), "sync remote rules") {
+		t.Errorf("error should mention sync, got: %v", err)
+	}
+}
+
+func TestResolveRulesDir_DefaultCacheDirError(t *testing.T) {
+	t.Setenv("HOME", "")
+	t.Setenv("XDG_CACHE_HOME", "")
+
+	_, err := ResolveRulesDir(Config{RulesURL: "http://example.com/rules.zip"})
+	if err == nil {
+		t.Fatal("expected error when HOME is unset")
+	}
+
+	if !strings.Contains(err.Error(), "cache directory") {
+		t.Errorf("error should mention cache directory, got: %v", err)
+	}
+}
+
+func TestResolveRulesDir_RemoteURL(t *testing.T) {
+	// Create a valid rules ZIP.
+	var buf bytes.Buffer
+	w := zip.NewWriter(&buf)
+
+	f, err := w.Create("rule.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := f.Write([]byte(validRuleJSON)); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
+		rw.Header().Set("Content-Type", "application/zip")
+		_, _ = rw.Write(buf.Bytes())
+	}))
+	defer srv.Close()
+
+	cacheDir := t.TempDir()
+	dir, err := ResolveRulesDir(Config{
+		RulesURL:      srv.URL,
+		RulesCacheDir: cacheDir,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Verify the returned dir contains the rule file.
+	if _, statErr := os.Stat(filepath.Join(dir, "rule.json")); statErr != nil {
+		t.Errorf("expected rule.json in resolved dir: %v", statErr)
+	}
+}
+
+func TestResolveRulesDir_SyncFailure(t *testing.T) {
+	_, err := ResolveRulesDir(Config{
+		RulesURL:      "http://127.0.0.1:1/nonexistent",
+		RulesCacheDir: t.TempDir(),
+	})
+	if err == nil {
+		t.Fatal("expected error for unreachable URL")
+	}
+
+	if !strings.Contains(err.Error(), "sync remote rules") {
+		t.Errorf("error should mention sync failure, got: %v", err)
+	}
+}
+
+func TestResolveRulesDir_CustomCacheDir(t *testing.T) {
+	cacheDir := t.TempDir()
+
+	// This will fail because the URL is unreachable, but we can verify
+	// it attempts to use the custom cache dir.
+	_, err := ResolveRulesDir(Config{
+		RulesURL:      "http://127.0.0.1:1/nonexistent",
+		RulesCacheDir: cacheDir,
+	})
+
+	// Error expected (can't connect), but should not mention cache dir issues.
+	if err == nil {
+		t.Fatal("expected error for unreachable URL")
 	}
 }
 
@@ -639,6 +768,16 @@ func TestRun_Findings(t *testing.T) {
 func TestRun_BadRulesDir(t *testing.T) {
 	var buf bytes.Buffer
 	cfg := Config{RulesDir: "/nonexistent", ScanDir: "."}
+	code := Run(cfg, &buf)
+
+	if code != 1 {
+		t.Errorf("expected exit code 1, got %d", code)
+	}
+}
+
+func TestRun_ResolveRulesDirError(t *testing.T) {
+	var buf bytes.Buffer
+	cfg := Config{RulesURL: "http://127.0.0.1:1/unreachable", RulesCacheDir: t.TempDir()}
 	code := Run(cfg, &buf)
 
 	if code != 1 {

@@ -16,6 +16,7 @@ import (
 
 	"gouvernante/pkg/lockfile"
 	"gouvernante/pkg/rules"
+	"gouvernante/pkg/rulesync"
 	"gouvernante/pkg/scanner"
 )
 
@@ -39,15 +40,17 @@ var jsonMarshalIndent = func(v any, prefix, indent string) ([]byte, error) {
 
 // Config holds all CLI options for a single scan invocation.
 type Config struct {
-	RulesDir     string
-	ScanDir      string
-	LockfilePath string
-	Recursive    bool
-	HostCheck    bool
-	Heuristic    bool
-	OutputFile   string
-	JSONOutput   bool
-	Trace        bool
+	RulesDir      string
+	RulesURL      string
+	RulesCacheDir string
+	ScanDir       string
+	LockfilePath  string
+	Recursive     bool
+	HostCheck     bool
+	Heuristic     bool
+	OutputFile    string
+	JSONOutput    bool
+	Trace         bool
 }
 
 // Run executes the full scan pipeline and returns the process exit code.
@@ -61,7 +64,13 @@ func Run(cfg Config, stdout io.Writer) int {
 	startTime := time.Now()
 	ConfigureLogging(cfg)
 
-	ruleList, err := LoadRules(cfg.RulesDir)
+	rulesDir, err := ResolveRulesDir(cfg)
+	if err != nil {
+		slog.Error("failed to resolve rules", "error", err)
+		return 1
+	}
+
+	ruleList, err := LoadRules(rulesDir)
 	if err != nil {
 		slog.Error("failed to load rules", "error", err)
 		return 1
@@ -131,6 +140,35 @@ func ConfigureLogging(cfg Config) {
 		Level: level,
 	})
 	slog.SetDefault(slog.New(handler))
+}
+
+// ResolveRulesDir determines the rules directory to use based on the config.
+// If RulesDir is set, it is used directly. If RulesURL is set, rules are
+// downloaded, validated, and cached. Returns the path to the rules directory.
+func ResolveRulesDir(cfg Config) (string, error) {
+	if cfg.RulesDir != "" {
+		return cfg.RulesDir, nil
+	}
+
+	cacheDir := cfg.RulesCacheDir
+	if cacheDir == "" {
+		d, err := rulesync.DefaultCacheDir()
+		if err != nil {
+			return "", fmt.Errorf("determine cache directory: %w", err)
+		}
+
+		cacheDir = d
+	}
+
+	dir, err := rulesync.Sync(rulesync.Options{
+		URL:      cfg.RulesURL,
+		CacheDir: cacheDir,
+	})
+	if err != nil {
+		return "", fmt.Errorf("sync remote rules: %w", err)
+	}
+
+	return dir, nil
 }
 
 // LoadRules loads and validates all JSON rule files from dir.
