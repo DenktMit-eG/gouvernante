@@ -365,6 +365,47 @@ func TestFormatOutput_JSON(t *testing.T) {
 	}
 }
 
+func TestFormatOutput_JSONNoHTMLEscaping(t *testing.T) {
+	// Semver range descriptions contain '<' and '>' characters; they must
+	// appear verbatim in JSON output, not as \u003c / \u003e escapes.
+	result := &scanner.Result{
+		Findings: []scanner.Finding{
+			{
+				RuleID:      "CVE-2026-40175",
+				Package:     "axios",
+				Version:     "^1.3.1",
+				Type:        scanner.TypePackage,
+				Description: "range overlaps with rule constraint >=1.0.0 <1.15.0",
+			},
+		},
+	}
+
+	output, err := FormatOutput(result, true, 0)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !strings.Contains(output, ">=1.0.0 <1.15.0") {
+		t.Errorf("expected raw '>=1.0.0 <1.15.0' in output, got:\n%s", output)
+	}
+
+	for _, esc := range []string{`\u003c`, `\u003e`, `\u0026`} {
+		if strings.Contains(output, esc) {
+			t.Errorf("output must not contain HTML-escape sequence %q, got:\n%s", esc, output)
+		}
+	}
+}
+
+func TestJSONMarshalIndent_EncodeError(t *testing.T) {
+	// Channels are not JSON-serializable, so json.Encoder.Encode returns
+	// an error. This exercises the enc.Encode(v) failure branch inside
+	// jsonMarshalIndent, which otherwise has no dedicated coverage.
+	_, err := jsonMarshalIndent(make(chan int), "", "  ")
+	if err == nil {
+		t.Fatal("expected error when encoding an unsupported type")
+	}
+}
+
 func TestFormatOutput_JSONEmptyFindings(t *testing.T) {
 	result := &scanner.Result{}
 

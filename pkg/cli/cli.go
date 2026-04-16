@@ -4,12 +4,14 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"gouvernante/pkg/lockfile"
@@ -18,8 +20,22 @@ import (
 )
 
 // jsonMarshalIndent is the function used to marshal JSON output.
+// It disables HTML escaping so that characters like '<', '>', and '&'
+// (common in semver range expressions such as ">=1.0.0 <1.15.0") appear
+// verbatim instead of as \u003c / \u003e / \u0026 escape sequences.
 // Replaced in tests to simulate encoding failures.
-var jsonMarshalIndent = json.MarshalIndent
+var jsonMarshalIndent = func(v any, prefix, indent string) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent(prefix, indent)
+	if err := enc.Encode(v); err != nil {
+		return nil, err
+	}
+	// json.Encoder always appends a trailing newline; strip it so the
+	// result matches json.MarshalIndent's contract (callers add their own).
+	return []byte(strings.TrimRight(buf.String(), "\n")), nil
+}
 
 // Config holds all CLI options for a single scan invocation.
 type Config struct {
