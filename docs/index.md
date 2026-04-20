@@ -8,7 +8,7 @@ against configurable JSON rules and checks host filesystems for known IOCs.
     Grab the [latest binary for your platform](https://github.com/DenktMit-eG/gouvernante/releases/latest) and scan your project using the official rules feed:
 
     ```bash
-    gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -dir /path/to/your/project -host -output report.txt
+    gouvernante -rules-url https://denktmit-eg.github.io/gouvernante/rules/rules.zip -dir /path/to/your/project -recursive -host -output report.txt
     ```
 
 ---
