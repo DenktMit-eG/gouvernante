@@ -65,14 +65,34 @@ flowchart LR
 
 ## Your first scan
 
-### Build
+### Download
+
+Grab the latest release binary for your platform:
+
+| OS | Architecture | Download |
+|----|--------------|----------|
+| macOS | Intel | [gouvernante-darwin-amd64](https://github.com/DenktMit-eG/gouvernante/releases/latest/download/gouvernante-darwin-amd64) |
+| macOS | Apple Silicon | [gouvernante-darwin-arm64](https://github.com/DenktMit-eG/gouvernante/releases/latest/download/gouvernante-darwin-arm64) |
+| Linux | x86_64 | [gouvernante-linux-amd64](https://github.com/DenktMit-eG/gouvernante/releases/latest/download/gouvernante-linux-amd64) |
+| Linux | ARM64 | [gouvernante-linux-arm64](https://github.com/DenktMit-eG/gouvernante/releases/latest/download/gouvernante-linux-arm64) |
+| Windows | x86_64 | [gouvernante-windows-amd64.exe](https://github.com/DenktMit-eG/gouvernante/releases/latest/download/gouvernante-windows-amd64.exe) |
+
+Make the binary executable and move it onto your `PATH`:
+
+```bash
+chmod +x gouvernante-*
+sudo mv gouvernante-$(uname -s | tr A-Z a-z)-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') /usr/local/bin/gouvernante
+```
+
+### Build from source
+
+Alternatively, build from source:
 
 ```bash
 make build
 ```
 
 This produces platform-specific binaries in `dist/binaries/` (e.g. `gouvernante-linux-amd64`).
-Copy the binary for your platform onto your `PATH` as `gouvernante`.
 
 ### Scan a project
 
