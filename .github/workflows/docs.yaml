@@ -31,7 +31,9 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Build docs
-        run: docker compose -f docker-compose.docs.yml run --rm mkdocs build --strict
+        run: |
+          docker compose -f docker-compose.docs.yml run --rm mkdocs build --strict
+          sudo chown -R $(id -u):$(id -g) site/
 
       - uses: actions/setup-go@v5
         with:
