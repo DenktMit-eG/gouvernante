@@ -1,0 +1,2590 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {
+      "id": "SSC-2026-001",
+      "title": "Mini Shai-Hulud npm supply chain campaign including TanStack compromised releases",
+      "kind": "compromised-release",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "summary": "Mini Shai-Hulud is an ongoing supply chain campaign affecting npm, PyPI, and Composer packages. This npm rule covers every npm row from the Socket CSV: 409 npm artifacts grouped into 175 full npm package names, including TanStack, OpenSearch, Squawk, Mistral AI npm SDKs, UiPath, Intercom, SAP CAP, and related packages. The campaign uses install-time JavaScript payloads such as router_init.js, router_runtime.js, and execution.js to harvest CI, cloud, npm, GitHub, Vault, Kubernetes, SSH, and AI-tool credentials, exfiltrate data, persist through developer tooling configuration, and self-propagate by republishing packages reachable through stolen credentials. The same CSV also listed non-npm artifacts that this schema cannot match directly: composer:intercom/intercom-php@5.0.2, pypi:guardrails-ai@0.10.1, pypi:lightning@2.6.2/2.6.3, pypi:mistralai@2.4.6.",
+      "aliases": [
+        {
+          "type": "cve",
+          "value": "CVE-2026-45321"
+        },
+        {
+          "type": "ghsa",
+          "value": "GHSA-g7cv-rxg3-hmpx"
+        },
+        {
+          "type": "article",
+          "value": "Socket: Mini Shai-Hulud supply chain attack campaign"
+        }
+      ],
+      "references": [
+        {
+          "type": "article",
+          "url": "https://socket.dev/blog/tanstack-npm-packages-compromised-mini-shai-hulud-supply-chain-attack"
+        },
+        {
+          "type": "article",
+          "url": "https://socket.dev/supply-chain-attacks/mini-shai-hulud"
+        },
+        {
+          "type": "advisory",
+          "url": "https://github.com/advisories/GHSA-g7cv-rxg3-hmpx"
+        },
+        {
+          "type": "advisory",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-45321"
+        },
+        {
+          "type": "vendor",
+          "url": "https://tanstack.com/blog/npm-supply-chain-compromise-postmortem"
+        },
+        {
+          "type": "article",
+          "url": "https://www.stepsecurity.io/blog/mini-shai-hulud-is-back-a-self-spreading-supply-chain-attack-hits-the-npm-ecosystem"
+        }
+      ],
+      "package_rules": [
+        {
+          "package_name": "@beproduct/nestjs-auth",
+          "affected_versions": [
+            "=0.1.2",
+            "=0.1.3",
+            "=0.1.4",
+            "=0.1.5",
+            "=0.1.6",
+            "=0.1.7",
+            "=0.1.8",
+            "=0.1.9",
+            "=0.1.10",
+            "=0.1.11",
+            "=0.1.12",
+            "=0.1.13",
+            "=0.1.14",
+            "=0.1.15",
+            "=0.1.16",
+            "=0.1.17",
+            "=0.1.18",
+            "=0.1.19"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@cap-js/db-service",
+          "affected_versions": [
+            "=2.10.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@cap-js/postgres",
+          "affected_versions": [
+            "=2.2.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@cap-js/sqlite",
+          "affected_versions": [
+            "=2.2.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@dirigible-ai/sdk",
+          "affected_versions": [
+            "=0.6.2",
+            "=0.6.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@draftauth/client",
+          "affected_versions": [
+            "=0.2.1",
+            "=0.2.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@draftauth/core",
+          "affected_versions": [
+            "=0.13.1",
+            "=0.13.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@draftlab/auth",
+          "affected_versions": [
+            "=0.24.1",
+            "=0.24.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@draftlab/auth-router",
+          "affected_versions": [
+            "=0.5.1",
+            "=0.5.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@draftlab/db",
+          "affected_versions": [
+            "=0.16.1",
+            "=0.16.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@mesadev/rest",
+          "affected_versions": [
+            "=0.28.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@mesadev/saguaro",
+          "affected_versions": [
+            "=0.4.22"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@mesadev/sdk",
+          "affected_versions": [
+            "=0.28.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@mistralai/mistralai",
+          "affected_versions": [
+            "=2.2.2",
+            "=2.2.3",
+            "=2.2.4"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@mistralai/mistralai-azure",
+          "affected_versions": [
+            "=1.7.1",
+            "=1.7.2",
+            "=1.7.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@mistralai/mistralai-gcp",
+          "affected_versions": [
+            "=1.7.1",
+            "=1.7.2",
+            "=1.7.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@ml-toolkit-ts/preprocessing",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@ml-toolkit-ts/xgboost",
+          "affected_versions": [
+            "=1.0.3",
+            "=1.0.4"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@opensearch-project/opensearch",
+          "affected_versions": [
+            "=3.5.3",
+            "=3.6.2",
+            "=3.7.0",
+            "=3.8.0"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/airport-data",
+          "affected_versions": [
+            "=0.7.4",
+            "=0.7.5",
+            "=0.7.6",
+            "=0.7.7",
+            "=0.7.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/airports",
+          "affected_versions": [
+            "=0.6.2",
+            "=0.6.3",
+            "=0.6.4",
+            "=0.6.5",
+            "=0.6.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/airspace",
+          "affected_versions": [
+            "=0.8.1",
+            "=0.8.2",
+            "=0.8.3",
+            "=0.8.4",
+            "=0.8.5"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/airspace-data",
+          "affected_versions": [
+            "=0.5.3",
+            "=0.5.4",
+            "=0.5.5",
+            "=0.5.6",
+            "=0.5.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/airway-data",
+          "affected_versions": [
+            "=0.5.4",
+            "=0.5.5",
+            "=0.5.6",
+            "=0.5.7",
+            "=0.5.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/airways",
+          "affected_versions": [
+            "=0.4.2",
+            "=0.4.3",
+            "=0.4.4",
+            "=0.4.5",
+            "=0.4.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/fix-data",
+          "affected_versions": [
+            "=0.6.4",
+            "=0.6.5",
+            "=0.6.6",
+            "=0.6.7",
+            "=0.6.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/fixes",
+          "affected_versions": [
+            "=0.3.2",
+            "=0.3.3",
+            "=0.3.4",
+            "=0.3.5",
+            "=0.3.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/flight-math",
+          "affected_versions": [
+            "=0.5.4",
+            "=0.5.5",
+            "=0.5.6",
+            "=0.5.7",
+            "=0.5.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/flightplan",
+          "affected_versions": [
+            "=0.5.2",
+            "=0.5.3",
+            "=0.5.4",
+            "=0.5.5",
+            "=0.5.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/geo",
+          "affected_versions": [
+            "=0.4.4",
+            "=0.4.5",
+            "=0.4.6",
+            "=0.4.7",
+            "=0.4.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/icao-registry",
+          "affected_versions": [
+            "=0.5.2",
+            "=0.5.3",
+            "=0.5.4",
+            "=0.5.5",
+            "=0.5.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/icao-registry-data",
+          "affected_versions": [
+            "=0.8.4",
+            "=0.8.5",
+            "=0.8.6",
+            "=0.8.7",
+            "=0.8.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/mcp",
+          "affected_versions": [
+            "=0.9.1",
+            "=0.9.2",
+            "=0.9.3",
+            "=0.9.4",
+            "=0.9.5"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/navaid-data",
+          "affected_versions": [
+            "=0.6.4",
+            "=0.6.5",
+            "=0.6.6",
+            "=0.6.7",
+            "=0.6.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/navaids",
+          "affected_versions": [
+            "=0.4.2",
+            "=0.4.3",
+            "=0.4.4",
+            "=0.4.5",
+            "=0.4.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/notams",
+          "affected_versions": [
+            "=0.3.6",
+            "=0.3.7",
+            "=0.3.8",
+            "=0.3.9",
+            "=0.3.10"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/procedure-data",
+          "affected_versions": [
+            "=0.7.3",
+            "=0.7.4",
+            "=0.7.5",
+            "=0.7.6",
+            "=0.7.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/procedures",
+          "affected_versions": [
+            "=0.5.2",
+            "=0.5.3",
+            "=0.5.4",
+            "=0.5.5",
+            "=0.5.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/types",
+          "affected_versions": [
+            "=0.8.1",
+            "=0.8.2",
+            "=0.8.3",
+            "=0.8.4",
+            "=0.8.5"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/units",
+          "affected_versions": [
+            "=0.4.3",
+            "=0.4.4",
+            "=0.4.5",
+            "=0.4.6",
+            "=0.4.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@squawk/weather",
+          "affected_versions": [
+            "=0.5.6",
+            "=0.5.7",
+            "=0.5.8",
+            "=0.5.9",
+            "=0.5.10"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@supersurkhet/cli",
+          "affected_versions": [
+            "=0.0.2",
+            "=0.0.3",
+            "=0.0.4",
+            "=0.0.5",
+            "=0.0.6",
+            "=0.0.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@supersurkhet/sdk",
+          "affected_versions": [
+            "=0.0.2",
+            "=0.0.3",
+            "=0.0.4",
+            "=0.0.5",
+            "=0.0.6",
+            "=0.0.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/components",
+          "affected_versions": [
+            "=1.0.1",
+            "=1.0.2",
+            "=1.0.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/connector-medusa",
+          "affected_versions": [
+            "=1.0.1",
+            "=1.0.2",
+            "=1.0.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/connector-shopify",
+          "affected_versions": [
+            "=1.0.1",
+            "=1.0.2",
+            "=1.0.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/connector-vendure",
+          "affected_versions": [
+            "=1.0.1",
+            "=1.0.2",
+            "=1.0.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/connector-woocommerce",
+          "affected_versions": [
+            "=1.0.1",
+            "=1.0.2",
+            "=1.0.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/core",
+          "affected_versions": [
+            "=0.2.1",
+            "=0.2.2",
+            "=0.2.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/database",
+          "affected_versions": [
+            "=1.0.1",
+            "=1.0.2",
+            "=1.0.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/pos",
+          "affected_versions": [
+            "=0.1.1",
+            "=0.1.2",
+            "=0.1.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/storage-sqlite",
+          "affected_versions": [
+            "=0.2.1",
+            "=0.2.2",
+            "=0.2.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tallyui/theme",
+          "affected_versions": [
+            "=0.2.1",
+            "=0.2.2",
+            "=0.2.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/arktype-adapter",
+          "affected_versions": [
+            "=1.166.12",
+            "=1.166.15"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/eslint-plugin-router",
+          "affected_versions": [
+            "=1.161.9",
+            "=1.161.12"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/eslint-plugin-start",
+          "affected_versions": [
+            "=0.0.4",
+            "=0.0.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/history",
+          "affected_versions": [
+            "=1.161.9",
+            "=1.161.12"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/nitro-v2-vite-plugin",
+          "affected_versions": [
+            "=1.154.12",
+            "=1.154.15"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/react-router",
+          "affected_versions": [
+            "=1.169.5",
+            "=1.169.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/react-router-devtools",
+          "affected_versions": [
+            "=1.166.16",
+            "=1.166.19"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/react-router-ssr-query",
+          "affected_versions": [
+            "=1.166.15",
+            "=1.166.18"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/react-start",
+          "affected_versions": [
+            "=1.167.68",
+            "=1.167.71"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/react-start-client",
+          "affected_versions": [
+            "=1.166.51",
+            "=1.166.54"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/react-start-rsc",
+          "affected_versions": [
+            "=0.0.47",
+            "=0.0.50"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/react-start-server",
+          "affected_versions": [
+            "=1.166.55",
+            "=1.166.58"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-cli",
+          "affected_versions": [
+            "=1.166.46",
+            "=1.166.49"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-core",
+          "affected_versions": [
+            "=1.169.5",
+            "=1.169.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-devtools",
+          "affected_versions": [
+            "=1.166.16",
+            "=1.166.19"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-devtools-core",
+          "affected_versions": [
+            "=1.167.6",
+            "=1.167.9"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-generator",
+          "affected_versions": [
+            "=1.166.45",
+            "=1.166.48"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-plugin",
+          "affected_versions": [
+            "=1.167.38",
+            "=1.167.41"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-ssr-query-core",
+          "affected_versions": [
+            "=1.168.3",
+            "=1.168.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-utils",
+          "affected_versions": [
+            "=1.161.11",
+            "=1.161.14"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/router-vite-plugin",
+          "affected_versions": [
+            "=1.166.53",
+            "=1.166.56"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/solid-router",
+          "affected_versions": [
+            "=1.169.5",
+            "=1.169.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/solid-router-devtools",
+          "affected_versions": [
+            "=1.166.16",
+            "=1.166.19"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/solid-router-ssr-query",
+          "affected_versions": [
+            "=1.166.15",
+            "=1.166.18"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/solid-start",
+          "affected_versions": [
+            "=1.167.65",
+            "=1.167.68"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/solid-start-client",
+          "affected_versions": [
+            "=1.166.50",
+            "=1.166.53"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/solid-start-server",
+          "affected_versions": [
+            "=1.166.54",
+            "=1.166.57"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/start-client-core",
+          "affected_versions": [
+            "=1.168.5",
+            "=1.168.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/start-fn-stubs",
+          "affected_versions": [
+            "=1.161.9",
+            "=1.161.12"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/start-plugin-core",
+          "affected_versions": [
+            "=1.169.23",
+            "=1.169.26"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/start-server-core",
+          "affected_versions": [
+            "=1.167.33",
+            "=1.167.36"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/start-static-server-functions",
+          "affected_versions": [
+            "=1.166.44",
+            "=1.166.47"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/start-storage-context",
+          "affected_versions": [
+            "=1.166.38",
+            "=1.166.41"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/valibot-adapter",
+          "affected_versions": [
+            "=1.166.12",
+            "=1.166.15"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/virtual-file-routes",
+          "affected_versions": [
+            "=1.161.10",
+            "=1.161.13"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/vue-router",
+          "affected_versions": [
+            "=1.169.5",
+            "=1.169.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/vue-router-devtools",
+          "affected_versions": [
+            "=1.166.16",
+            "=1.166.19"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/vue-router-ssr-query",
+          "affected_versions": [
+            "=1.166.15",
+            "=1.166.18"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/vue-start",
+          "affected_versions": [
+            "=1.167.61",
+            "=1.167.64"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/vue-start-client",
+          "affected_versions": [
+            "=1.166.46",
+            "=1.166.49"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/vue-start-server",
+          "affected_versions": [
+            "=1.166.50",
+            "=1.166.53"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tanstack/zod-adapter",
+          "affected_versions": [
+            "=1.166.12",
+            "=1.166.15"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@taskflow-corp/cli",
+          "affected_versions": [
+            "=0.1.24",
+            "=0.1.25",
+            "=0.1.26",
+            "=0.1.27",
+            "=0.1.28",
+            "=0.1.29"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@tolka/cli",
+          "affected_versions": [
+            "=1.0.2",
+            "=1.0.3",
+            "=1.0.4",
+            "=1.0.5",
+            "=1.0.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/access-policy-sdk",
+          "affected_versions": [
+            "=0.3.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/access-policy-tool",
+          "affected_versions": [
+            "=0.3.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/admin-tool",
+          "affected_versions": [
+            "=0.1.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/agent-sdk",
+          "affected_versions": [
+            "=1.0.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/agent-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/agent.sdk",
+          "affected_versions": [
+            "=0.0.18"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/aops-policy-tool",
+          "affected_versions": [
+            "=0.3.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/ap-chat",
+          "affected_versions": [
+            "=1.5.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/api-workflow-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/apollo-core",
+          "affected_versions": [
+            "=5.9.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/apollo-react",
+          "affected_versions": [
+            "=4.24.5"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/apollo-wind",
+          "affected_versions": [
+            "=2.16.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/auth",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/case-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/cli",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/codedagent-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/codedagents-tool",
+          "affected_versions": [
+            "=0.1.12"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/codedapp-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/common",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/context-grounding-tool",
+          "affected_versions": [
+            "=0.1.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/data-fabric-tool",
+          "affected_versions": [
+            "=1.0.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/docsai-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/filesystem",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/flow-tool",
+          "affected_versions": [
+            "=1.0.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/functions-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/gov-tool",
+          "affected_versions": [
+            "=0.3.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/identity-tool",
+          "affected_versions": [
+            "=0.1.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/insights-sdk",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/insights-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/integrationservice-sdk",
+          "affected_versions": [
+            "=1.0.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/integrationservice-tool",
+          "affected_versions": [
+            "=1.0.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/llmgw-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/maestro-sdk",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/maestro-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/orchestrator-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-apiworkflow",
+          "affected_versions": [
+            "=0.0.19"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-bpmn",
+          "affected_versions": [
+            "=0.0.9"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-case",
+          "affected_versions": [
+            "=0.0.9"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-connector",
+          "affected_versions": [
+            "=0.0.19"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-flow",
+          "affected_versions": [
+            "=0.0.19"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-functions",
+          "affected_versions": [
+            "=0.1.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-webapp",
+          "affected_versions": [
+            "=1.0.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-workflowcompiler",
+          "affected_versions": [
+            "=0.0.16"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/packager-tool-workflowcompiler-browser",
+          "affected_versions": [
+            "=0.0.34"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/platform-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/project-packager",
+          "affected_versions": [
+            "=1.1.16"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/resource-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/resourcecatalog-tool",
+          "affected_versions": [
+            "=0.1.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/resources-tool",
+          "affected_versions": [
+            "=0.1.11"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/robot",
+          "affected_versions": [
+            "=1.3.4"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/rpa-legacy-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/rpa-tool",
+          "affected_versions": [
+            "=0.9.5"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/solution-packager",
+          "affected_versions": [
+            "=0.0.35"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/solution-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/solutionpackager-sdk",
+          "affected_versions": [
+            "=1.0.11"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/solutionpackager-tool-core",
+          "affected_versions": [
+            "=0.0.34"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/tasks-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/telemetry",
+          "affected_versions": [
+            "=0.0.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/test-manager-tool",
+          "affected_versions": [
+            "=1.0.2"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/tool-workflowcompiler",
+          "affected_versions": [
+            "=0.0.12"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/traces-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/ui-widgets-multi-file-upload",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/uipath-python-bridge",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/vertical-solutions-tool",
+          "affected_versions": [
+            "=1.0.1"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/vss",
+          "affected_versions": [
+            "=0.1.6"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "@uipath/widget.sdk",
+          "affected_versions": [
+            "=1.2.3"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "agentwork-cli",
+          "affected_versions": [
+            "=0.1.4",
+            "=0.1.5"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "cmux-agent-mcp",
+          "affected_versions": [
+            "=0.1.3",
+            "=0.1.4",
+            "=0.1.5",
+            "=0.1.6",
+            "=0.1.7",
+            "=0.1.8"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "cross-stitch",
+          "affected_versions": [
+            "=1.1.3",
+            "=1.1.4",
+            "=1.1.5",
+            "=1.1.6",
+            "=1.1.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "git-branch-selector",
+          "affected_versions": [
+            "=1.3.3",
+            "=1.3.4",
+            "=1.3.5",
+            "=1.3.6",
+            "=1.3.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "git-git-git",
+          "affected_versions": [
+            "=1.0.8",
+            "=1.0.9",
+            "=1.0.10",
+            "=1.0.11",
+            "=1.0.12"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "intercom-client",
+          "affected_versions": [
+            "=7.0.4"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "mbt",
+          "affected_versions": [
+            "=1.2.48"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "ml-toolkit-ts",
+          "affected_versions": [
+            "=1.0.4",
+            "=1.0.5"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "nextmove-mcp",
+          "affected_versions": [
+            "=0.1.3",
+            "=0.1.4",
+            "=0.1.5",
+            "=0.1.6",
+            "=0.1.7"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "safe-action",
+          "affected_versions": [
+            "=0.8.3",
+            "=0.8.4"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "ts-dna",
+          "affected_versions": [
+            "=3.0.1",
+            "=3.0.2",
+            "=3.0.3",
+            "=3.0.4",
+            "=3.0.5"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        },
+        {
+          "package_name": "wot-api",
+          "affected_versions": [
+            "=0.8.1",
+            "=0.8.2",
+            "=0.8.3",
+            "=0.8.4"
+          ],
+          "lockfile_ecosystems": [
+            "npm",
+            "pnpm",
+            "yarn",
+            "bun"
+          ]
+        }
+      ],
+      "dropper_packages": [
+        {
+          "package_name": "@tanstack/setup",
+          "notes": "Fictitious package name resolved from github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c. Its prepare lifecycle hook ran tanstack_runner.js and then exited non-zero so npm would discard the optional dependency after execution."
+        }
+      ],
+      "host_indicators": [
+        {
+          "type": "file",
+          "file_name": "router_init.js",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "hashes": [
+            {
+              "algorithm": "sha256",
+              "value": "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c"
+            },
+            {
+              "algorithm": "sha1",
+              "value": "12ed9a3c1f73617aefdb740480695c04405d7b4b"
+            },
+            {
+              "algorithm": "md5",
+              "value": "833fd59ebe66a4449982c6d18db656b4"
+            },
+            {
+              "algorithm": "sha256",
+              "value": "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
+            },
+            {
+              "algorithm": "sha1",
+              "value": "e7d582b98ca80690883175470e96f703ef6dc497"
+            },
+            {
+              "algorithm": "md5",
+              "value": "b82e54923f7e440664d2d75bd31588ca"
+            }
+          ],
+          "confidence": "high",
+          "notes": "Obfuscated credential-stealing payload added to malicious TanStack package tarballs."
+        },
+        {
+          "type": "file",
+          "path": ".claude",
+          "file_name": "router_runtime.js",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "hashes": [
+            {
+              "algorithm": "sha256",
+              "value": "ab4fcadaec49c03278063dd269ea5eef82d24f2124a8e15d7b90f2fa8601266c"
+            },
+            {
+              "algorithm": "sha1",
+              "value": "12ed9a3c1f73617aefdb740480695c04405d7b4b"
+            },
+            {
+              "algorithm": "md5",
+              "value": "833fd59ebe66a4449982c6d18db656b4"
+            }
+          ],
+          "confidence": "high",
+          "notes": "Persistence copy written into Claude Code hooks configuration."
+        },
+        {
+          "type": "file",
+          "file_name": "tanstack_runner.js",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "hashes": [
+            {
+              "algorithm": "sha256",
+              "value": "2ec78d556d696e208927cc503d48e4b5eb56b31abc2870c2ed2e98d6be27fc96"
+            },
+            {
+              "algorithm": "sha1",
+              "value": "e7d582b98ca80690883175470e96f703ef6dc497"
+            },
+            {
+              "algorithm": "md5",
+              "value": "b82e54923f7e440664d2d75bd31588ca"
+            }
+          ],
+          "confidence": "high",
+          "notes": "Second-stage payload in the malicious @tanstack/setup GitHub dependency."
+        },
+        {
+          "type": "file",
+          "file_name": "execution.js",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "medium",
+          "notes": "Mini Shai-Hulud JavaScript payload filename reported by Socket for non-TanStack campaign waves."
+        },
+        {
+          "type": "network",
+          "value": "filev2.getsession.org",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "high",
+          "notes": "Session/Oxen file upload endpoint used for credential exfiltration."
+        },
+        {
+          "type": "network",
+          "value": "seed1.getsession.org",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "high",
+          "notes": "Session/Oxen service node seed infrastructure referenced by the payload."
+        },
+        {
+          "type": "network",
+          "value": "seed2.getsession.org",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "high",
+          "notes": "Session/Oxen service node seed infrastructure referenced by the payload."
+        },
+        {
+          "type": "network",
+          "value": "seed3.getsession.org",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "high",
+          "notes": "Session/Oxen service node seed infrastructure referenced by the payload."
+        },
+        {
+          "type": "network",
+          "value": "litter.catbox.moe/h8nc9u.js",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "high",
+          "notes": "Second-stage payload URL listed in GHSA-g7cv-rxg3-hmpx."
+        },
+        {
+          "type": "network",
+          "value": "litter.catbox.moe/7rrc6l.mjs",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "high",
+          "notes": "Second-stage payload URL listed in GHSA-g7cv-rxg3-hmpx."
+        },
+        {
+          "type": "network",
+          "value": "git-tanstack.com/transformers.pyz",
+          "oses": [
+            "linux",
+            "macos",
+            "windows"
+          ],
+          "confidence": "medium",
+          "notes": "Payload URL reported by Socket for the PyPI guardrails-ai campaign wave; retained as campaign context even though this npm rule cannot match PyPI packages."
+        }
+      ],
+      "remediation": {
+        "summary": "Remove every affected npm package version, rebuild dependency state from clean caches, and treat any developer host or CI runner that installed an affected artifact as compromised.",
+        "steps": [
+          "Upgrade affected npm dependencies to versions confirmed clean by the upstream maintainer or pin to known-good versions published before the relevant compromise window.",
+          "Delete node_modules and package manager lockfiles, clear package manager caches, then reinstall from clean registries.",
+          "Audit lockfiles and package manifests for affected versions and for optionalDependencies entries pointing to github:tanstack/router#79ac49eedf774dd4b0cfa308722bc463cfe5885c.",
+          "Audit .claude/ and .vscode/ directories for router_runtime.js, setup.mjs, execution.js, unexpected hooks, and unexpected tasks.",
+          "Rotate credentials accessible to any environment that installed an affected version, including npm tokens, GitHub tokens, OIDC trusts, cloud credentials, Vault tokens, Kubernetes service account tokens, SSH keys, and AI-tool credentials.",
+          "Review CI, npm publishing, cloud, GitHub, Vault, and Kubernetes audit logs for activity after package installation or publication windows listed by Socket.",
+          "For the PyPI and Composer artifacts in the CSV, use ecosystem-specific scanners or package manager tooling until gouvernante supports those ecosystems.",
+          "Re-run gouvernante to verify no affected package versions or host indicators remain."
+        ]
+      },
+      "metadata": {
+        "published_at": "2026-04-29T09:55:25Z",
+        "last_updated_at": "2026-05-12T03:05:38Z"
+      }
+    }
+  ]
+}
