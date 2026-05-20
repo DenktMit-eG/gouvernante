@@ -23,6 +23,13 @@ import (
 // Rule JSON compresses extremely well, so this is generous.
 const maxResponseBytes = 5 * 1024 * 1024
 
+// Content types accepted as a ZIP archive response.
+const (
+	contentTypeZip            = "application/zip"
+	contentTypeOctetStream    = "application/octet-stream"
+	contentTypeXZipCompressed = "application/x-zip-compressed"
+)
+
 // zipMagic is the local file header signature for ZIP archives.
 var zipMagic = []byte{0x50, 0x4B, 0x03, 0x04}
 
@@ -173,9 +180,9 @@ func validateContentType(ct string) error {
 
 	// Accept ZIP and generic binary types.
 	for _, allowed := range []string{
-		"application/zip",
-		"application/octet-stream",
-		"application/x-zip-compressed",
+		contentTypeZip,
+		contentTypeOctetStream,
+		contentTypeXZipCompressed,
 	} {
 		if strings.HasPrefix(ct, allowed) {
 			return nil

@@ -54,6 +54,17 @@ const (
 // schema-validated but not yet checked at runtime.
 const IndicatorTypeFile = "file"
 
+// osMacOS is the schema's OS name for Darwin (Apple) systems.
+const osMacOS = "macos"
+
+// Hash algorithm identifiers accepted in rule host_indicators.
+const (
+	hashMD5    = "md5"
+	hashSHA1   = "sha1"
+	hashSHA256 = "sha256"
+	hashSHA512 = "sha512"
+)
+
 // HostCheck records the result of checking a single host indicator.
 type HostCheck struct {
 	// Path is the filesystem path that was checked.
@@ -230,7 +241,7 @@ func buildIndicatorPath(hi *rules.HostIndicator) string {
 // mapOSName converts Go's runtime.GOOS to the schema's OS name.
 func mapOSName(goos string) string {
 	if goos == "darwin" {
-		return "macos"
+		return osMacOS
 	}
 
 	return goos
@@ -379,13 +390,13 @@ func computeFileHashes(path string, ruleHashes []rules.FileHash) (map[string]str
 // Supported algorithms: md5, sha1, sha256, sha512.
 func newHashFunc(algorithm string) (hash.Hash, bool) {
 	switch algorithm {
-	case "md5":
+	case hashMD5:
 		return md5.New(), true //nolint:gosec // matching known-bad file hashes, not security use
-	case "sha1":
+	case hashSHA1:
 		return sha1.New(), true //nolint:gosec // matching known-bad file hashes, not security use
-	case "sha256":
+	case hashSHA256:
 		return sha256.New(), true
-	case "sha512":
+	case hashSHA512:
 		return sha512.New(), true
 	default:
 		return nil, false
@@ -397,13 +408,13 @@ func FormatReport(result *Result) string {
 	var b strings.Builder
 
 	if result.Heuristic {
-		fmt.Fprintf(&b, "=== Heuristic Scan Report ===\n\n")
-		fmt.Fprintf(&b, "Findings: %d\n\n", len(result.Findings))
+		b.WriteString("=== Heuristic Scan Report ===\n\n")
+		writef(&b, "Findings: %d\n\n", len(result.Findings))
 	} else {
-		fmt.Fprintf(&b, "=== Supply Chain Scan Report ===\n\n")
-		fmt.Fprintf(&b, "Files scanned: %d\n", len(result.LockfilesUsed))
-		fmt.Fprintf(&b, "Total packages analyzed: %d\n", result.PackagesTotal)
-		fmt.Fprintf(&b, "Findings: %d\n\n", len(result.Findings))
+		b.WriteString("=== Supply Chain Scan Report ===\n\n")
+		writef(&b, "Files scanned: %d\n", len(result.LockfilesUsed))
+		writef(&b, "Total packages analyzed: %d\n", result.PackagesTotal)
+		writef(&b, "Findings: %d\n\n", len(result.Findings))
 	}
 
 	if len(result.Findings) == 0 {
@@ -428,9 +439,9 @@ func FormatReport(result *Result) string {
 	}
 
 	if result.Heuristic {
-		fmt.Fprintf(&b, "Heuristic scan complete: %d findings.\n", len(result.Findings))
+		writef(&b, "Heuristic scan complete: %d findings.\n", len(result.Findings))
 	} else {
-		fmt.Fprintf(&b, "Scan complete: %d findings in %d lockfiles.\n", len(result.Findings), len(result.LockfilesUsed))
+		writef(&b, "Scan complete: %d findings in %d lockfiles.\n", len(result.Findings), len(result.LockfilesUsed))
 	}
 
 	return b.String()
@@ -445,11 +456,11 @@ func formatHostChecks(b *strings.Builder, checks []HostCheck) {
 
 		switch c.Status {
 		case StatusFound:
-			fmt.Fprintf(b, "  [FOUND]   %s  (%s)\n", c.Path, c.RuleID)
+			writef(b, "  [FOUND]   %s  (%s)\n", c.Path, c.RuleID)
 		case StatusClean:
-			fmt.Fprintf(b, "  [CLEAN]   %s  (%s)\n", c.Path, c.RuleID)
+			writef(b, "  [CLEAN]   %s  (%s)\n", c.Path, c.RuleID)
 		case StatusSkipped:
-			fmt.Fprintf(b, "  [SKIP]    %s — %s  (%s)\n", c.Path, c.Reason, c.RuleID)
+			writef(b, "  [SKIP]    %s — %s  (%s)\n", c.Path, c.Reason, c.RuleID)
 		}
 	}
 
@@ -487,9 +498,9 @@ func formatNodeModulesChecks(b *strings.Builder, checks []NodeModulesCheck) {
 
 		switch c.Status {
 		case StatusFound:
-			fmt.Fprintf(b, "  [FOUND]   %s@%s in %s\n", c.Package, c.Version, c.Dir)
+			writef(b, "  [FOUND]   %s@%s in %s\n", c.Package, c.Version, c.Dir)
 		case StatusClean:
-			fmt.Fprintf(b, "  [CLEAN]   %s@%s in %s\n", c.Package, c.Version, c.Dir)
+			writef(b, "  [CLEAN]   %s@%s in %s\n", c.Package, c.Version, c.Dir)
 		}
 		// not_installed is omitted — too many entries, no value in the report.
 	}
@@ -500,53 +511,60 @@ func formatNodeModulesChecks(b *strings.Builder, checks []NodeModulesCheck) {
 // formatFinding writes a single numbered finding to b, adapting the output
 // format based on the finding type (package, installed_package, cached_package, host_indicator).
 func formatFinding(b *strings.Builder, num int, f *Finding) {
-	fmt.Fprintf(b, "--- Finding %d ---\n", num)
-	fmt.Fprintf(b, "  Rule:     %s\n", f.RuleID)
-	fmt.Fprintf(b, "  Title:    %s\n", f.RuleTitle)
-	fmt.Fprintf(b, "  Severity: %s\n", f.Severity)
+	writef(b, "--- Finding %d ---\n", num)
+	writef(b, "  Rule:     %s\n", f.RuleID)
+	writef(b, "  Title:    %s\n", f.RuleTitle)
+	writef(b, "  Severity: %s\n", f.Severity)
 
 	switch f.Type {
 	case TypePackage:
-		fmt.Fprintf(b, "  Type:     %s\n", f.Type)
-		fmt.Fprintf(b, "  Package:  %s@%s\n", f.Package, f.Version)
-		fmt.Fprintf(b, "  Lockfile: %s\n", f.Lockfile)
+		writef(b, "  Type:     %s\n", f.Type)
+		writef(b, "  Package:  %s@%s\n", f.Package, f.Version)
+		writef(b, "  Lockfile: %s\n", f.Lockfile)
 
 		if f.Description != "" {
-			fmt.Fprintf(b, "  Note:     %s\n", f.Description)
+			writef(b, "  Note:     %s\n", f.Description)
 		}
 	case TypeInstalledPackage:
 		b.WriteString("  Type:     installed package\n")
-		fmt.Fprintf(b, "  Package:  %s@%s\n", f.Package, f.Version)
-		fmt.Fprintf(b, "  Path:     %s\n", f.Path)
+		writef(b, "  Package:  %s@%s\n", f.Package, f.Version)
+		writef(b, "  Path:     %s\n", f.Path)
 
 		if f.Description != "" {
-			fmt.Fprintf(b, "  Source:   %s\n", f.Description)
+			writef(b, "  Source:   %s\n", f.Description)
 		}
 	case TypeCachedPackage:
 		b.WriteString("  Type:     cached package\n")
-		fmt.Fprintf(b, "  Package:  %s@%s\n", f.Package, f.Version)
-		fmt.Fprintf(b, "  Cache:    %s\n", f.Path)
+		writef(b, "  Package:  %s@%s\n", f.Package, f.Version)
+		writef(b, "  Cache:    %s\n", f.Path)
 
 		if f.Description != "" {
-			fmt.Fprintf(b, "  Source:   %s\n", f.Description)
+			writef(b, "  Source:   %s\n", f.Description)
 		}
 	case TypeHostIndicator:
 		b.WriteString("  Type:     host indicator\n")
 
 		if f.Description != "" {
-			fmt.Fprintf(b, "  Detail:   %s\n", f.Description)
+			writef(b, "  Detail:   %s\n", f.Description)
 		}
 
-		fmt.Fprintf(b, "  Path:     %s\n", f.Path)
+		writef(b, "  Path:     %s\n", f.Path)
 	case TypeHeuristic:
 		b.WriteString("  Type:     heuristic\n")
-		fmt.Fprintf(b, "  Package:  %s\n", f.Package)
-		fmt.Fprintf(b, "  Path:     %s\n", f.Path)
+		writef(b, "  Package:  %s\n", f.Package)
+		writef(b, "  Path:     %s\n", f.Path)
 
 		if f.Description != "" {
-			fmt.Fprintf(b, "  Match:    %s\n", f.Description)
+			writef(b, "  Match:    %s\n", f.Description)
 		}
 	}
 
 	b.WriteString("\n")
+}
+
+// writef is a wrapper around fmt.Fprintf that discards the error.
+// strings.Builder never returns an error from Write, so the discard is safe;
+// the wrapper exists so call sites don't need to silence linters individually.
+func writef(b *strings.Builder, format string, args ...any) {
+	_, _ = fmt.Fprintf(b, format, args...)
 }

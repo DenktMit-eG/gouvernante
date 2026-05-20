@@ -8,8 +8,13 @@ import (
 	"path/filepath"
 )
 
-// lockfileFormats maps known lockfile names to their parsers.
-const packageJSONName = "package.json"
+// Known lockfile filenames recognized by this package.
+const (
+	packageJSONName = "package.json"
+	pnpmLockName    = "pnpm-lock.yaml"
+	packageLockName = "package-lock.json"
+	yarnLockName    = "yarn.lock"
+)
 
 // lockfileFormats lists recognized lockfile names and their parsers.
 // The ecosystem map in pkg/rules/rules.go also includes bun entries
@@ -18,9 +23,9 @@ var lockfileFormats = []struct {
 	name   string
 	parser func(string) ([]PackageEntry, error)
 }{
-	{"pnpm-lock.yaml", ParsePnpmLock},
-	{"package-lock.json", ParsePackageLockJSON},
-	{"yarn.lock", ParseYarnLock},
+	{pnpmLockName, ParsePnpmLock},
+	{packageLockName, ParsePackageLockJSON},
+	{yarnLockName, ParseYarnLock},
 	{packageJSONName, ParsePackageJSON},
 }
 
@@ -176,11 +181,11 @@ func ParseFile(path string) (*Result, error) {
 	var parser func(string) ([]PackageEntry, error)
 
 	switch base {
-	case "pnpm-lock.yaml":
+	case pnpmLockName:
 		parser = ParsePnpmLock
-	case "package-lock.json":
+	case packageLockName:
 		parser = ParsePackageLockJSON
-	case "yarn.lock":
+	case yarnLockName:
 		parser = ParseYarnLock
 	case packageJSONName:
 		parser = ParsePackageJSON

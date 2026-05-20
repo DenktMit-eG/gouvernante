@@ -173,7 +173,7 @@ func checkLifecycleScripts(pkgDir, pkgName string) []scanner.Finding {
 
 		if lifecycleExecPattern.MatchString(script) && !benignPostinstallPattern.MatchString(script) {
 			findings = append(findings, scanner.Finding{
-				RuleID:      "HEUR-POSTINSTALL-EXEC",
+				RuleID:      ruleIDPostinstallExec,
 				RuleTitle:   "Suspicious lifecycle script",
 				Severity:    severityHigh,
 				Type:        scanner.TypeHeuristic,
@@ -253,7 +253,7 @@ func appendScannable(files []string, dir string) []string {
 // isScannable reports whether the file extension is one we should scan.
 func isScannable(ext string) bool {
 	switch ext {
-	case ".js", ".cjs", ".mjs", ".sh":
+	case extJS, extCJS, extMJS, extSH:
 		return true
 	default:
 		return false
@@ -300,7 +300,7 @@ func scanFile(path, pkgName string) []scanner.Finding {
 
 	if checkEnvHarvest(content) {
 		findings = append(findings, scanner.Finding{
-			RuleID:    "HEUR-ENV-HARVEST",
+			RuleID:    ruleIDEnvHarvest,
 			RuleTitle: "Environment variable credential harvesting",
 			Severity:  severityHigh,
 			Type:      scanner.TypeHeuristic,
@@ -311,7 +311,7 @@ func scanFile(path, pkgName string) []scanner.Finding {
 
 	if checkHexExec(content) {
 		findings = append(findings, scanner.Finding{
-			RuleID:    "HEUR-HEX-EXEC",
+			RuleID:    ruleIDHexExec,
 			RuleTitle: "Hex-encoded payload with execution",
 			Severity:  severityHigh,
 			Type:      scanner.TypeHeuristic,

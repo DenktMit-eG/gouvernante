@@ -10,19 +10,19 @@ import (
 // Allowed enum values, mirroring the JSON Schema definitions.
 var (
 	validKinds = map[string]bool{
-		"compromised-release": true,
-		"malicious-package":   true,
-		"vulnerability":       true,
-		"dropper":             true,
-		"suspicious-artifact": true,
+		kindCompromisedRelease: true,
+		kindMaliciousPackage:   true,
+		kindVulnerability:      true,
+		kindDropper:            true,
+		kindSuspiciousArtifact: true,
 	}
 
 	validSeverities = map[string]bool{
-		"low": true, "medium": true, "high": true, "critical": true,
+		severityLow: true, severityMedium: true, severityHigh: true, severityCritical: true,
 	}
 
 	validEcosystems = map[string]bool{
-		"npm": true,
+		ecosystemNpm: true,
 	}
 
 	validAliasTypes = map[string]bool{
@@ -36,24 +36,24 @@ var (
 	}
 
 	validIndicatorTypes = map[string]bool{
-		"file": true, "process": true, "registry": true,
-		"network": true, "environment": true,
+		indicatorFile: true, indicatorProcess: true, indicatorRegistry: true,
+		indicatorNetwork: true, indicatorEnvironment: true,
 	}
 
 	validOSes = map[string]bool{
-		"linux": true, "macos": true, "windows": true,
+		osLinux: true, osMacOS: true, osWindows: true,
 	}
 
 	validConfidenceLevels = map[string]bool{
-		"low": true, "medium": true, "high": true,
+		severityLow: true, severityMedium: true, severityHigh: true,
 	}
 
 	validLockfileEcosystems = map[string]bool{
-		"npm": true, "pnpm": true, "yarn": true, "bun": true,
+		ecosystemNpm: true, ecosystemPnpm: true, ecosystemYarn: true, ecosystemBun: true,
 	}
 
 	validHashAlgorithms = map[string]int{
-		"md5": 32, "sha1": 40, "sha256": 64, "sha512": 128,
+		hashMD5: 32, hashSHA1: 40, hashSHA256: 64, hashSHA512: 128,
 	}
 
 	hexPattern           = regexp.MustCompile(`^[A-Fa-f0-9]+$`)
@@ -196,12 +196,12 @@ func (hi *HostIndicator) validate(ve *ValidationError, path string) {
 	}
 
 	// allOf condition 1: if type=file, then path or file_name is required.
-	if hi.Type == "file" && hi.Path == "" && hi.FileName == "" {
+	if hi.Type == indicatorFile && hi.Path == "" && hi.FileName == "" {
 		ve.add("%s: file indicator must have at least one of path or file_name", path)
 	}
 
 	// allOf condition 2: if hashes present, type must be file.
-	if len(hi.Hashes) > 0 && hi.Type != "file" {
+	if len(hi.Hashes) > 0 && hi.Type != indicatorFile {
 		ve.add("%s: hashes are only allowed on file indicators, got type=%q", path, hi.Type)
 	}
 

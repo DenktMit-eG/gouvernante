@@ -17,6 +17,21 @@ const maxFilesPerPackage = 50
 // severityHigh is the severity assigned to all heuristic findings.
 const severityHigh = "high"
 
+// File extension constants for scannable source files.
+const (
+	extJS  = ".js"
+	extCJS = ".cjs"
+	extMJS = ".mjs"
+	extSH  = ".sh"
+)
+
+// Rule ID constants for heuristic findings emitted from this package.
+const (
+	ruleIDPostinstallExec = "HEUR-POSTINSTALL-EXEC"
+	ruleIDEnvHarvest      = "HEUR-ENV-HARVEST"
+	ruleIDHexExec         = "HEUR-HEX-EXEC"
+)
+
 // scannableSubdirs lists subdirectories scanned one level deep inside each package.
 var scannableSubdirs = []string{"lib", "src", "bin", "dist"}
 
@@ -69,10 +84,10 @@ var hexLiteralPattern = regexp.MustCompile(`[0-9a-f]{100,}`)
 var execNearHexPattern = regexp.MustCompile(`(?:eval|Function|exec)\s*\(`)
 
 // jsExtensions are the JavaScript file extensions scanned by most patterns.
-var jsExtensions = []string{".js", ".cjs", ".mjs"}
+var jsExtensions = []string{extJS, extCJS, extMJS}
 
 // jsAndShellExtensions includes shell scripts alongside JavaScript files.
-var jsAndShellExtensions = []string{".js", ".cjs", ".mjs", ".sh"}
+var jsAndShellExtensions = []string{extJS, extCJS, extMJS, extSH}
 
 // Patterns is the list of all heuristic patterns applied during scanning.
 var Patterns = []Pattern{

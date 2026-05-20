@@ -25,6 +25,18 @@ jobs:
       - name: Verify vendor
         run: make vendor-check
 
+      - name: Install tools
+        run: make setup
+
+      - name: Format check
+        run: make fmt-check
+
+      - name: Lint
+        run: make lint
+
+      - name: Test
+        run: make test
+
       - name: Build binaries
         run: make build
 

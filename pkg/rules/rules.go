@@ -477,12 +477,12 @@ func tightenUpper(iv *interval, b *bound) {
 // Bun entries are included so that lockfile_ecosystems filtering works correctly
 // once a bun parser is added; until then, bun lockfiles are not detected.
 var lockfileEcosystem = map[string]string{
-	"package-lock.json": "npm",
-	"pnpm-lock.yaml":    "pnpm",
-	"yarn.lock":         "yarn",
-	"bun.lockb":         "bun",
-	"bun.lock":          "bun",
-	"package.json":      "npm",
+	"package-lock.json": ecosystemNpm,
+	"pnpm-lock.yaml":    ecosystemPnpm,
+	"yarn.lock":         ecosystemYarn,
+	"bun.lockb":         ecosystemBun,
+	"bun.lock":          ecosystemBun,
+	"package.json":      ecosystemNpm,
 }
 
 // AppliesToLockfile reports whether this VersionSet should be checked

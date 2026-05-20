@@ -13,8 +13,8 @@ tool-check = $(if $(shell command -v $(1) 2>/dev/null || test -x $(GOBIN)/$(1) &
 MISSING_TOOLS := $(call tool-check,gofumpt) $(call tool-check,goimports) $(call tool-check,golangci-lint) $(call tool-check,staticcheck)
 MISSING_TOOLS := $(strip $(MISSING_TOOLS))
 
-# Resolve tool paths (prefer PATH, fall back to GOPATH/bin)
-resolve = $(shell command -v $(1) 2>/dev/null || echo $(GOBIN)/$(1))
+# Resolve tool paths (prefer GOPATH/bin so `make setup` controls the version, fall back to PATH)
+resolve = $(shell test -x $(GOBIN)/$(1) && echo $(GOBIN)/$(1) || command -v $(1) 2>/dev/null || echo $(GOBIN)/$(1))
 GOFUMPT       := $(call resolve,gofumpt)
 GOIMPORTS     := $(call resolve,goimports)
 GOLANGCI_LINT := $(call resolve,golangci-lint)
