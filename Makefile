@@ -43,7 +43,7 @@ endef
 
 # --- Default target ---
 
-all: ensure-tools vendor-check fmt lint cover build licenses test-integration
+all: ensure-tools vendor-check fmt-check lint cover build licenses test-integration
 	$(call PASS,All checks passed.)
 
 # --- Tool management ---

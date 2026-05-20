@@ -678,7 +678,8 @@ func pnpmStorePaths(goos string) []string {
 			dirs = append(dirs, filepath.Join(localAppData, "pnpm"), filepath.Join(localAppData, "pnpm-store"))
 		}
 	default:
-		dirs = append(dirs,
+		dirs = append(
+			dirs,
 			filepath.Join(home, ".local", "share", "pnpm"),
 			filepath.Join(home, ".cache", "pnpm"),
 		)
